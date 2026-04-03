@@ -140,7 +140,36 @@ app.get('/api/admin/chat/sessions', adminAuth, async (req, res) => {
 });
 
 // ==========================================
-// 3. 信箱驗證 API
+// 3. 帳號註冊與登入 API
+// ==========================================
+app.post('/api/auth/register', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: '請填寫所有欄位' });
+    if (password.length < 6) return res.status(400).json({ error: '密碼至少需要6個字元' });
+    try {
+        const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+        if (existing.length > 0) return res.status(400).json({ error: '此信箱已被註冊' });
+        const passwordHash = await bcrypt.hash(password, 10);
+        const userId = uuidv4();
+        await pool.query('INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)', [userId, email, passwordHash, 'customer']);
+        res.json({ success: true, message: '註冊成功' });
+    } catch (err) { res.status(500).json({ error: '系統錯誤' }); }
+});
+
+app.post('/api/auth/login-user', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: '請填寫帳號與密碼' });
+    try {
+        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        if (!users[0] || !(await bcrypt.compare(password, users[0].password_hash))) {
+            return res.status(401).json({ error: '帳號或密碼錯誤' });
+        }
+        res.json({ success: true, email: users[0].email });
+    } catch (err) { res.status(500).json({ error: '系統異常' }); }
+});
+
+// ==========================================
+// 4. 信箱驗證 API (舊系統保留相容)
 // ==========================================
 app.post('/api/auth/send-code', async (req, res) => {
     const { email } = req.body;
@@ -171,7 +200,39 @@ app.post('/api/auth/verify-code', async (req, res) => {
 });
 
 // ==========================================
-// 4. 前台商品與訂單 API
+// 4. 前台會員 API
+// ==========================================
+app.get('/api/user/orders', async (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ error: '請提供信箱' });
+    try {
+        const [rows] = await pool.query(
+            `SELECT o.id as order_id, o.total_price, o.status, o.created_at
+             FROM orders o JOIN users u ON o.user_id = u.id
+             WHERE u.email = ? ORDER BY o.created_at DESC`,
+            [email]
+        );
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: '獲取失敗' }); }
+});
+
+app.put('/api/user/password', async (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+    if (!email || !currentPassword || !newPassword) return res.status(400).json({ error: '請填寫所有欄位' });
+    if (newPassword.length < 6) return res.status(400).json({ error: '新密碼至少需要6個字元' });
+    try {
+        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        if (!users[0] || !(await bcrypt.compare(currentPassword, users[0].password_hash))) {
+            return res.status(401).json({ error: '目前密碼錯誤' });
+        }
+        const newHash = await bcrypt.hash(newPassword, 10);
+        await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [newHash, email]);
+        res.json({ success: true, message: '密碼已更新' });
+    } catch (err) { res.status(500).json({ error: '系統錯誤' }); }
+});
+
+// ==========================================
+// 5. 前台商品與訂單 API
 // ==========================================
 app.get('/api/announcement', async (req, res) => {
     try {
