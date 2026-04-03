@@ -20,6 +20,7 @@ RUN apt-get update \
 WORKDIR /var/www/html
 COPY . /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html/runtime /var/www/html/public/uploads /var/www/html/public/zy
+RUN mkdir -p /var/www/html/runtime /var/www/html/public/uploads /var/www/html/public/zy \
+    && chown -R www-data:www-data /var/www/html/runtime /var/www/html/public/uploads /var/www/html/public/zy
 
 EXPOSE 80
