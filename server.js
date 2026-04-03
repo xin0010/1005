@@ -1,5 +1,5 @@
-/**
- * HACK小舖 - 企業級後端核心 API (Vercel 雲端特化版)
+﻿/**
+ * AXG 凱欣商店 - 企業級後端核心 API (Vercel 雲端特化版)
  */
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -45,8 +45,9 @@ const app = express();
 
 app.use(cors({
     origin: [
-        'https://gemini-one-chi.vercel.app',
-        'http://localhost:3306'
+        'https://axgshop888.com.tw',
+        'https://www.axgshop888.com.tw',
+        'http://localhost:3000'
     ],
     credentials: true
 }));
@@ -68,9 +69,9 @@ const transporter = nodemailer.createTransport({
 // ==========================================
 const pool = mysql.createPool({
     host: '34.81.99.227',
-    user: 'hackmap',
+    user: 'axgshop200',
     password: 'axg-02210825A',
-    database: 'hackmap',
+    database: 'axf',
     port: 3306,
     waitForConnections: true,
     connectionLimit: 10,
@@ -83,7 +84,7 @@ pool.getConnection()
         
         try {
             await conn.query(`CREATE TABLE IF NOT EXISTS settings (id INT AUTO_INCREMENT PRIMARY KEY, setting_key VARCHAR(50) UNIQUE, setting_value TEXT)`);
-            await conn.query(`INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('announcement', '歡迎來到 HACK小舖！系統目前正常運作中。')`);
+            await conn.query(`INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('announcement', '歡迎來到 凱欣商城！系統目前正常運作中。')`);
             await conn.query(`CREATE TABLE IF NOT EXISTS email_codes (email VARCHAR(255) PRIMARY KEY, code VARCHAR(10), expires_at DATETIME)`);
             await conn.query(`CREATE TABLE IF NOT EXISTS chat_messages (id INT AUTO_INCREMENT PRIMARY KEY, session_id VARCHAR(100) NOT NULL, user_email VARCHAR(255), sender VARCHAR(20) NOT NULL, message TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
             
@@ -102,7 +103,6 @@ pool.getConnection()
 
             try { await conn.query(`ALTER TABLE products ADD COLUMN helper_status VARCHAR(20) DEFAULT 'normal'`); } catch (e) {}
             try { await conn.query(`ALTER TABLE products ADD COLUMN description TEXT DEFAULT NULL`); } catch (e) {}
-            try { await conn.query(`ALTER TABLE products ADD COLUMN cost DECIMAL(10, 2) DEFAULT 0`); } catch (e) {}
 
             console.log('✅ 系統資料庫結構檢查完畢！');
         } catch (err) {
@@ -150,10 +150,10 @@ app.post('/api/auth/send-code', async (req, res) => {
     try {
         await pool.query('INSERT INTO email_codes (email, code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE code = ?, expires_at = ?', [email, code, expiresAt, code, expiresAt]);
         await transporter.sendMail({
-            from: '"HACK小舖" <yang20080221@gmail.com>', // 已更新為 HACK小舖
+            from: '"凱欣商城" <yang20080221@gmail.com>',
             to: email,
-            subject: 'HACK小舖 - 您的專屬驗證碼',
-            text: `您的驗證碼為：${code}\n請在 10 分鐘內返回 https://gemini-one-chi.vercel.app 完成綁定。`
+            subject: '凱欣商城 - 您的專屬驗證碼',
+            text: `您的驗證碼為：${code}\n請在 10 分鐘內返回 https://axgshop888.com.tw 完成綁定。`
         });
         res.json({ success: true, message: '驗證碼已發送' });
     } catch (err) { res.status(500).json({ error: '寄件失敗' }); }
@@ -213,7 +213,7 @@ app.post('/api/orders/checkout', async (req, res) => {
         const now = new Date();
         const timeString = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
         const randomNum = Math.floor(1000 + Math.random() * 9000); 
-        const orderId = `HACK${timeString}${randomNum}`; 
+        const orderId = `AXG${timeString}${randomNum}`; 
         const virtualAccount = "808" + Math.floor(10000000000 + Math.random() * 90000000000); 
         
         await conn.query('INSERT INTO orders (id, user_id, total_price, status, virtual_account) VALUES (?, ?, ?, ?, ?)', [orderId, userId, totalPrice, 'pending', virtualAccount]);
@@ -291,17 +291,17 @@ app.get('/api/admin/products', adminAuth, async (req, res) => {
 });
 
 app.post('/api/products', adminAuth, async (req, res) => {
-    const { category, name, price, stock, status, helper_status, description, cost } = req.body;
+    const { category, name, price, stock, status, helper_status, description } = req.body;
     try {
-        const [result] = await pool.execute(`INSERT INTO products (category, name, price, stock, status, helper_status, description, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [category, name, price, stock || 0, status || 'active', helper_status || 'normal', description || '', cost || 0]);
+        const [result] = await pool.execute(`INSERT INTO products (category, name, price, stock, status, helper_status, description) VALUES (?, ?, ?, ?, ?, ?, ?)`, [category, name, price, stock || 0, status || 'active', helper_status || 'normal', description || '']);
         res.status(201).json({ id: result.insertId });
     } catch (err) { res.status(500).json({ error: '新增失敗' }); }
 });
 
 app.put('/api/products/:id', adminAuth, async (req, res) => {
-    const { category, name, price, stock, status, helper_status, description, cost } = req.body;
+    const { category, name, price, stock, status, helper_status, description } = req.body;
     try {
-        await pool.execute(`UPDATE products SET category = ?, name = ?, price = ?, stock = ?, status = ?, helper_status = ?, description = ?, cost = ? WHERE id = ?`, [category, name, price, stock, status, helper_status || 'normal', description || '', cost || 0, req.params.id]);
+        await pool.execute(`UPDATE products SET category = ?, name = ?, price = ?, stock = ?, status = ?, helper_status = ?, description = ? WHERE id = ?`, [category, name, price, stock, status, helper_status || 'normal', description || '', req.params.id]);
         res.json({ message: '更新成功' });
     } catch (err) { res.status(500).json({ error: '更新失敗' }); }
 });
@@ -317,16 +317,15 @@ app.delete('/api/products/:id/permanent', adminAuth, async (req, res) => {
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
-        await conn.execute(`DELETE FROM product_keys WHERE product_id = ?`, [req.params.id]);
-        await conn.execute(`DELETE FROM products WHERE id = ?`, [req.params.id]);
+        await conn.execute('DELETE FROM product_keys WHERE product_id = ?', [req.params.id]);
+        await conn.execute('DELETE FROM order_items WHERE product_id = ?', [req.params.id]);
+        await conn.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
         await conn.commit();
         res.json({ message: '商品已永久刪除' });
     } catch (err) {
         await conn.rollback();
         res.status(500).json({ error: '刪除失敗' });
-    } finally {
-        conn.release();
-    }
+    } finally { conn.release(); }
 });
 
 // ==========================================
