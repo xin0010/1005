@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HACK小舖 | HACK_COMMAND_CENTER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { background-color: #050505; color: #d1d5db; font-family: monospace; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #0891b2; }
+        .scanline {
+            background-color: #050505;
+            background-image: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(8, 145, 178, 0.05) 50%, rgba(8, 145, 178, 0.05));
+            background-size: 100% 4px;
+        }
+        select.status-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='currentColor' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+            background-repeat: no-repeat;
+            background-position-x: 95%;
+            background-position-y: 50%;
+            padding-right: 1.5rem;
+        }
+    </style>
+</head>
+<body class="selection:bg-cyan-900 selection:text-cyan-300 scanline min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function AdminApp() {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [adminUser, setAdminUser] = useState(null);
+            const [activeTab, setActiveTab] = useState('dashboard');
+            
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [loginError, setLoginError] = useState('');
+            const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+            const [orders, setOrders] = useState([]);
+            const [products, setProducts] = useState([]);
+            const [announcementText, setAnnouncementText] = useState('');
+            const [isSavingAnnounce, setIsSavingAnnounce] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
+            const [adminToken, setAdminToken] = useState('');
+
+            // 建立帶入左右 Admin Token 的 fetch 工具
+            const authFetch = (url, options = {}) => {
+                const token = adminToken || '';
+                return fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Token': token,
+                        ...(options.headers || {})
+                    }
+                });
+            };
+            
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [currentProduct, setCurrentProduct] = useState({ category: '', name: '', price: '', cost: '', stock: '', status: 'active', helper_status: 'normal', description: '' });
+
+            const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
+            const [keyModalProduct, setKeyModalProduct] = useState(null);
+            const [productKeys, setProductKeys] = useState([]);
+            const [newKeysText, setNewKeysText] = useState('');
+            const [isKeysLoading, setIsKeysLoading] = useState(false);
+
+            // 💡 全局客服狀態與音效
+            const [chatSessions, setChatSessions] = useState([]);
+            const [selectedSession, setSelectedSession] = useState(null);
+            const [adminChatMessages, setAdminChatMessages] = useState([]);
+            const [adminChatInput, setAdminChatInput] = useState('');
+            const adminChatEndRef = useRef(null);
+            const [hasUnreadSupport, setHasUnreadSupport] = useState(false);
+
+            // 💡 使用 Ref 確保在計時器中能抓到最新狀態
+            const activeTabRef = useRef(activeTab);
+            const selectedSessionRef = useRef(selectedSession);
+            const isFirstLoadRef = useRef(true);
+            const prevLatestActivity = useRef(0);
+
+            useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+            useEffect(() => { selectedSessionRef.current = selectedSession; }, [selectedSession]);
+
+            // 💡 純前端合成的賽博龐克風格「雙聲雷達滴滴音」
+            const playNotificationSound = () => {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    const playBeep = (startTime) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(1046.5, startTime); // C6 頻率
+                        osc.frequency.exponentialRampToValueAtTime(523.25, startTime + 0.1);
+                        gain.gain.setValueAtTime(0.1, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.1);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(startTime);
+                        osc.stop(startTime + 0.1);
+                    };
+                    // 連續發出兩聲短促的滴滴聲
+                    playBeep(ctx.currentTime);
+                    playBeep(ctx.currentTime + 0.15);
+                } catch (e) {
+                    console.error("Audio error", e);
+                }
+            };
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setIsLoggingIn(true);
+                setLoginError('');
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        if (data.user.role !== 'admin') setLoginError('權限不足：此帳號非系統管理員');
+                        else {
+                            setAdminToken(data.token);
+                            setAdminUser(data.user);
+                            setIsLoggedIn(true);
+                            fetchOrders(data.token); 
+                        }
+                    } else setLoginError(data.error || '登入失敗');
+                } catch (err) { setLoginError('無法連線到伺服器'); } 
+                finally { setIsLoggingIn(false); }
+            };
+
+            const fetchOrders = async (token) => {
+                setIsLoading(true);
+                try {
+                    const res = await fetch('/api/orders', { headers: { 'X-Admin-Token': token || adminToken } });
+                    if (res.ok) setOrders(await res.json());
+                } catch (err) {} finally { setIsLoading(false); }
+            };
+
+            const handleUpdateOrderStatus = async (orderId, newStatus) => {
+                try {
+                    const res = await authFetch(`/api/orders/${orderId}/status`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    if (res.ok) fetchOrders(); 
+                    else alert('❌ 更新訂單狀態失敗');
+                } catch (err) { alert('❌ 發生系統錯誤'); }
+            };
+
+            const fetchProducts = async () => {
+                setIsLoading(true);
+                try {
+                    const res = await authFetch('/api/admin/products');
+                    if (res.ok) setProducts(await res.json());
+                } catch (err) {} finally { setIsLoading(false); }
+            };
+
+            const fetchProductKeys = async (productId) => {
+                setIsKeysLoading(true);
+                try {
+                    const res = await authFetch(`/api/admin/products/${productId}/keys`);
+                    if (res.ok) setProductKeys(await res.json());
+                } catch (err) {} finally { setIsKeysLoading(false); }
+            };
+
+            const openKeyModal = (product) => {
+                setKeyModalProduct(product);
+                setNewKeysText('');
+                fetchProductKeys(product.id);
+                setIsKeyModalOpen(true);
+            };
+
+            const handleImportKeys = async () => {
+                const keysArray = newKeysText.split('\n').map(k => k.trim()).filter(k => k);
+                if (!keysArray.length) return alert('請輸入至少一組卡密');
+                
+                try {
+                    const res = await authFetch(`/api/admin/products/${keyModalProduct.id}/keys`, {
+                        method: 'POST',
+                        body: JSON.stringify({ keys: keysArray })
+                    });
+                    if (res.ok) {
+                        alert(`✅ 成功匯入 ${keysArray.length} 組卡密！`);
+                        setNewKeysText('');
+                        fetchProductKeys(keyModalProduct.id);
+                        fetchProducts(); 
+                    } else alert('❌ 匯入失敗');
+                } catch (err) { alert('❌ 系統錯誤'); }
+            };
+
+            const handleDeleteKey = async (keyId) => {
+                if (!confirm('確定要刪除這組卡密嗎？')) return;
+                try {
+                    const res = await authFetch(`/api/admin/keys/${keyId}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        fetchProductKeys(keyModalProduct.id);
+                        fetchProducts(); 
+                    }
+                } catch (err) {}
+            };
+
+            const fetchAnnouncement = async () => {
+                try {
+                    const res = await fetch('/api/announcement');
+                    if (res.ok) setAnnouncementText((await res.json()).text);
+                } catch (err) {}
+            };
+
+            // 💡 統合的全局輪詢機制 (每 3 秒檢查一次客服)
+            useEffect(() => {
+                let interval;
+                if (isLoggedIn) {
+                    const tick = async () => {
+                        // 1. 檢查對話列表是否有新活動
+                        try {
+                            const res = await authFetch('/api/admin/chat/sessions');
+                            if (res.ok) {
+                                const data = await res.json();
+                                setChatSessions(data);
+                                if (data.length > 0) {
+                                    const latestTime = new Date(data[0].last_activity).getTime();
+                                    
+                                    // 若不是初次載入，且最新活動時間大於上次紀錄的時間 => 代表有新訊息！
+                                    if (!isFirstLoadRef.current && latestTime > prevLatestActivity.current) {
+                                        playNotificationSound(); // 播放滴滴音效
+                                        if (activeTabRef.current !== 'support') {
+                                            setHasUnreadSupport(true); // 亮起紅點
+                                        }
+                                    }
+                                    prevLatestActivity.current = Math.max(prevLatestActivity.current, latestTime);
+                                }
+                                isFirstLoadRef.current = false;
+                            }
+                        } catch (e) {}
+
+                        // 2. 若當前處於客服中心且選中了某個訪客，同步抓取對話紀錄
+                        if (activeTabRef.current === 'support' && selectedSessionRef.current) {
+                            try {
+                                const res = await fetch(`/api/chat/messages/${selectedSessionRef.current}`);
+                                if (res.ok) setAdminChatMessages(await res.json());
+                            } catch (e) {}
+                        }
+                    };
+                    tick();
+                    interval = setInterval(tick, 3000);
+                }
+                return () => clearInterval(interval);
+            }, [isLoggedIn]);
+
+            useEffect(() => {
+                if (isLoggedIn) {
+                    if (activeTab === 'orders' || activeTab === 'dashboard') fetchOrders();
+                    if (activeTab === 'products') fetchProducts();
+                    if (activeTab === 'settings') fetchAnnouncement();
+                }
+            }, [activeTab, isLoggedIn]);
+
+            useEffect(() => {
+                if (adminChatEndRef.current) adminChatEndRef.current.scrollIntoView({ behavior: "smooth" });
+            }, [adminChatMessages]);
+
+            const handleAdminSendMessage = async (e) => {
+                e.preventDefault();
+                if (!adminChatInput.trim() || !selectedSession) return;
+                const msg = adminChatInput.trim();
+                setAdminChatInput('');
+                setAdminChatMessages(prev => [...prev, { sender: 'admin', message: msg, created_at: new Date().toISOString() }]);
+                try {
+                    await authFetch('/api/chat/send', {
+                        method: 'POST',
+                        body: JSON.stringify({ session_id: selectedSession, sender: 'admin', message: msg })
+                    });
+                    // 立即更新對話
+                    const res = await authFetch(`/api/chat/messages/${selectedSession}`);
+                    if (res.ok) setAdminChatMessages(await res.json());
+                } catch (err) { alert('發送失敗'); }
+            };
+
+            const handleSaveAnnouncement = async () => {
+                setIsSavingAnnounce(true);
+                try {
+                    const res = await authFetch('/api/announcement', {
+                        method: 'POST',
+                        body: JSON.stringify({ text: announcementText })
+                    });
+                    if (res.ok) alert('公告已成功更新！');
+                } catch (err) { alert('發生錯誤'); } 
+                finally { setIsSavingAnnounce(false); }
+            };
+
+            const handleDeleteOrder = async (orderId) => {
+                if (!confirm(`⚠️ 警告：確定要永久刪除訂單「${orderId}」嗎？`)) return;
+                try {
+                    const res = await authFetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+                    if (res.ok) fetchOrders(); 
+                } catch (err) { alert('❌ 發生錯誤。'); }
+            };
+
+            const handleSaveProduct = async (e) => {
+                e.preventDefault();
+                const isEdit = !!currentProduct.id;
+                const url = isEdit ? `/api/products/${currentProduct.id}` : '/api/products';
+                try {
+                    const res = await authFetch(url, {
+                        method: isEdit ? 'PUT' : 'POST',
+                        body: JSON.stringify(currentProduct)
+                    });
+                    if (res.ok) { setIsModalOpen(false); fetchProducts(); }
+                } catch (err) { alert('儲存發生系統錯誤'); }
+            };
+
+            const handleDeleteProduct = async (id) => {
+                if (!confirm('確定要將此商品下架嗎？')) return;
+                try {
+                    const res = await authFetch(`/api/products/${id}`, { method: 'DELETE' });
+                    if (res.ok) fetchProducts();
+                } catch (err) {}
+            };
+
+            const handlePermanentDeleteProduct = async (id, name) => {
+                if (!confirm(`⚠️ 警告：確定要永久刪除商品「${name}」嗎？\n此操作將同時刪除所有卡密，且無法復原！`)) return;
+                try {
+                    const res = await authFetch(`/api/products/${id}/permanent`, { method: 'DELETE' });
+                    if (res.ok) fetchProducts();
+                    else alert('❌ 刪除失敗');
+                } catch (err) { alert('❌ 發生系統錯誤'); }
+            };
+
+            const formatDate = (dateString) => new Date(dateString).toLocaleString('zh-TW', { hour12: false });
+
+            const openModal = (product = null) => {
+                if (product) {
+                    setCurrentProduct({ ...product, helper_status: product.helper_status || 'normal', description: product.description || '', cost: product.cost || '' });
+                } else {
+                    setCurrentProduct({ category: 'PUBG', name: '', price: '', cost: '', stock: 99, status: 'active', helper_status: 'normal', description: '' });
+                }
+                setIsModalOpen(true);
+            };
+
+            if (!isLoggedIn) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+                        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"><source src="003c4e16-d0b0-420b-a58d-aa0880e10f5b.mp4" type="video/mp4" /></video>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none z-0"><i className="fas fa-shield-alt text-[30rem]"></i></div>
+                        <div className="w-full max-w-md bg-[#0a0a0a]/80 backdrop-blur-md border border-cyan-500/30 p-8 relative z-10 shadow-[0_0_40px_rgba(8,145,178,0.2)]">
+                            <div className="text-center mb-8">
+                                <div className="inline-block bg-cyan-700 text-black font-bold px-4 py-1 mb-4 transform -skew-x-12 tracking-widest">HACK_COMMAND_CENTER</div>
+                                <h2 className="text-2xl text-white tracking-widest font-black">系統後台登入</h2>
+                            </div>
+                            {loginError && (<div className="bg-red-950/80 border border-red-500 text-red-400 text-sm p-3 mb-6 text-center backdrop-blur-sm"><i className="fas fa-exclamation-triangle mr-2"></i> {loginError}</div>)}
+                            <form onSubmit={handleLogin} className="space-y-6">
+                                <div><label className="block text-xs text-cyan-600 tracking-widest mb-2">ADMIN_EMAIL</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-[#111]/80 border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500" placeholder="admin@yenshop.com" /></div>
+                                    <div><label className="block text-xs text-cyan-600 tracking-widest mb-2">ACCESS_KEY (PASSWORD)</label><input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#111]/80 border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500" placeholder="••••••••" /></div>
+                                <button type="submit" disabled={isLoggingIn} className="w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 text-cyan-300 hover:text-black py-4 font-bold tracking-widest transition-colors disabled:opacity-50">{isLoggingIn ? <i className="fas fa-spinner fa-spin"></i> : 'VERIFY & ENTER'}</button>
+                            </form>
+                        </div>
+                    </div>
+                );
+            }
+
+            const stats = (() => {
+                let totalRevenue = 0, totalOrders = orders.length, todayRevenue = 0;
+                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+                orders.forEach(o => {
+                    const p = parseFloat(o.total_price) || 0;
+                    if (o.status === 'paid' || o.status === 'completed') {
+                        totalRevenue += p;
+                        if (new Date(o.created_at) >= todayStart) todayRevenue += p;
+                    }
+                });
+                return { totalRevenue, totalOrders, todayRevenue };
+            })();
+
+            return (
+                <div className="min-h-screen flex flex-col relative">
+                    <video autoPlay loop muted playsInline className="fixed inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"><source src="003c4e16-d0b0-420b-a58d-aa0880e10f5b.mp4" type="video/mp4" /></video>
+                    
+                    <div className="relative z-10 flex flex-col min-h-screen">
+                        <header className="bg-black/90 backdrop-blur-md border-b border-cyan-900/50 sticky top-0 z-40">
+                            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <div className="bg-red-600 text-white font-bold px-2 py-1 transform -skew-x-12 tracking-wider text-xs">ROOT</div>
+                                    <h1 className="text-xl font-bold text-cyan-500 tracking-widest">HACK_COMMAND_CENTER</h1>
+                                </div>
+                                <div className="flex items-center space-x-6 text-sm">
+                                    <span className="text-gray-400"><i className="fas fa-user-shield mr-2"></i> {adminUser.email}</span>
+                                    <button onClick={() => { setIsLoggedIn(false); setAdminUser(null); }} className="text-red-500 hover:text-red-400 transition-colors border border-red-900/50 px-3 py-1 bg-red-950/20"><i className="fas fa-sign-out-alt mr-2"></i> LOGOUT</button>
+                                </div>
+                            </div>
+                        </header>
+
+                        <main className="flex-grow container mx-auto px-4 py-8">
+                            <div className="flex space-x-4 mb-8 border-b border-gray-800 pb-4 overflow-x-auto whitespace-nowrap">
+                                <button onClick={() => setActiveTab('dashboard')} className={`px-6 py-2 font-bold tracking-widest transition-colors border-b-2 ${activeTab === 'dashboard' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-500 hover:text-cyan-600'}`}>儀表板</button>
+                                <button onClick={() => setActiveTab('orders')} className={`px-6 py-2 font-bold tracking-widest transition-colors border-b-2 ${activeTab === 'orders' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-500 hover:text-cyan-600'}`}>訂單管理</button>
+                                <button onClick={() => setActiveTab('products')} className={`px-6 py-2 font-bold tracking-widest transition-colors border-b-2 ${activeTab === 'products' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-500 hover:text-cyan-600'}`}>商品管理庫</button>
+                                <button onClick={() => setActiveTab('settings')} className={`px-6 py-2 font-bold tracking-widest transition-colors border-b-2 ${activeTab === 'settings' ? 'border-cyan-500 text-cyan-400' : 'border-transparent text-gray-500 hover:text-cyan-600'}`}>系統公告</button>
+                                
+                                {/* 💡 客服中心按鈕：加入會呼吸的未讀紅點 */}
+                                <button 
+                                    onClick={() => { setActiveTab('support'); setHasUnreadSupport(false); }} 
+                                    className={`relative px-6 py-2 font-bold tracking-widest transition-colors border-b-2 ${activeTab === 'support' ? 'border-red-500 text-red-400' : 'border-transparent text-gray-500 hover:text-red-600'}`}
+                                >
+                                    <i className="fas fa-headset mr-2"></i> 客服中心
+                                    {hasUnreadSupport && <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>}
+                                </button>
+                            </div>
+
+                            {activeTab === 'dashboard' && (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl p-6 relative overflow-hidden group">
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="text-xs text-blue-500 font-bold tracking-widest"><i className="fas fa-money-bill-wave mr-2"></i>總營收 (已結算)</div>
+                                                <i className="fas fa-database text-gray-700 text-2xl group-hover:text-blue-900/50 transition-colors"></i>
+                                            </div>
+                                            <div className="text-4xl font-black text-white tracking-wider"><span className="text-lg text-gray-500 mr-1">$</span>{stats.totalRevenue.toLocaleString()}</div>
+                                        </div>
+                                        <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl p-6 relative overflow-hidden group">
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="text-xs text-cyan-500 font-bold tracking-widest"><i className="fas fa-shopping-cart mr-2"></i>總訂單數</div>
+                                                <i className="fas fa-receipt text-gray-700 text-2xl group-hover:text-cyan-900/50 transition-colors"></i>
+                                            </div>
+                                            <div className="text-4xl font-black text-white tracking-wider">{stats.totalOrders.toLocaleString()}</div>
+                                        </div>
+                                        <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl p-6 relative overflow-hidden group">
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="text-xs text-yellow-500 font-bold tracking-widest"><i className="fas fa-chart-line mr-2"></i>今日營收</div>
+                                                <i className="fas fa-bolt text-gray-700 text-2xl group-hover:text-yellow-900/50 transition-colors"></i>
+                                            </div>
+                                            <div className="text-4xl font-black text-white tracking-wider"><span className="text-lg text-gray-500 mr-1">$</span>{stats.todayRevenue.toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'orders' && (
+                                <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl">
+                                    <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-black"><h3 className="text-lg font-bold text-white tracking-widest"><i className="fas fa-file-invoice-dollar text-cyan-500 mr-2"></i> RECENT_ORDERS</h3></div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-sm">
+                                            <thead className="text-xs text-gray-500 bg-[#111] uppercase tracking-wider">
+                                                <tr><th className="px-6 py-4">ID</th><th className="px-6 py-4">信箱</th><th className="px-6 py-4">金額</th><th className="px-6 py-4">狀態變更</th><th className="px-6 py-4">時間</th><th className="px-6 py-4 text-right">操作</th></tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-800">
+                                                {orders.map((order) => (
+                                                    <tr key={order.order_id} className="hover:bg-[#151515] transition-colors group">
+                                                        <td className="px-6 py-4 text-xs font-mono text-cyan-400 select-all">{order.order_id}</td>
+                                                        <td className="px-6 py-4 text-gray-300">{order.email}</td>
+                                                        <td className="px-6 py-4 font-bold text-white">NT$ {parseFloat(order.total_price)}</td>
+                                                        <td className="px-6 py-4">
+                                                            <select value={order.status} onChange={(e) => handleUpdateOrderStatus(order.order_id, e.target.value)} className={`status-select px-2 py-1.5 text-xs border outline-none font-bold cursor-pointer transition-colors shadow-sm ${order.status === 'pending' ? 'bg-yellow-900/30 text-yellow-500 border-yellow-700/50' : order.status === 'paid' ? 'bg-green-900/30 text-green-500 border-green-700/50' : order.status === 'completed' ? 'bg-cyan-900/30 text-cyan-500 border-cyan-700/50' : 'bg-red-900/30 text-gray-400 border-red-700/50'}`}>
+                                                                <option value="pending" className="bg-[#111] text-yellow-500 font-bold">🟡 等待付款</option>
+                                                                <option value="paid" className="bg-[#111] text-green-500 font-bold">🟢 已付款</option>
+                                                                <option value="completed" className="bg-[#111] text-cyan-500 font-bold">🔵 已完成</option>
+                                                                <option value="cancelled" className="bg-[#111] text-gray-400 font-bold">⚪ 已取消</option>
+                                                            </select>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-gray-500 text-xs">{formatDate(order.created_at)}</td>
+                                                        <td className="px-6 py-4 text-right"><button onClick={() => handleDeleteOrder(order.order_id)} className="text-gray-500 hover:text-red-500 transition-colors opacity-50 group-hover:opacity-100"><i className="fas fa-trash-alt"></i></button></td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'products' && (
+                                <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl">
+                                    <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-black">
+                                        <h3 className="text-lg font-bold text-white tracking-widest"><i className="fas fa-boxes text-cyan-500 mr-2"></i> INVENTORY_DATABASE</h3>
+                                        <button onClick={() => openModal()} className="bg-cyan-600 hover:bg-cyan-500 text-black px-4 py-2 text-sm font-bold tracking-widest"><i className="fas fa-plus mr-1"></i> 新增商品</button>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-sm">
+                                            <thead className="text-xs text-gray-500 bg-[#111] uppercase tracking-wider">
+                                                <tr><th className="px-6 py-4">ID</th><th className="px-6 py-4">狀態</th><th className="px-6 py-4">名稱</th><th className="px-6 py-4">售價</th><th className="px-6 py-4">成本</th><th className="px-6 py-4">收入</th><th className="px-6 py-4">庫存</th><th className="px-6 py-4 text-right">操作</th></tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-800">
+                                                {products.map((p) => (
+                                                    <tr key={p.id} className="hover:bg-[#151515] transition-colors">
+                                                        <td className="px-6 py-4 text-gray-500 font-mono">#{p.id}</td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex space-x-1 bg-black/60 border border-gray-800 p-1 w-max rounded-sm">
+                                                                <i className={`fas fa-check text-[10px] px-1.5 py-0.5 rounded-sm ${p.helper_status === 'normal' || !p.helper_status ? 'bg-green-900/60 text-green-400' : 'text-gray-700'}`}></i>
+                                                                <i className={`fas fa-tools text-[10px] px-1.5 py-0.5 rounded-sm ${p.helper_status === 'maintenance' ? 'bg-yellow-900/60 text-yellow-400' : 'text-gray-700'}`}></i>
+                                                                <i className={`fas fa-skull text-[10px] px-1.5 py-0.5 rounded-sm ${p.helper_status === 'danger' ? 'bg-red-900/60 text-red-400' : 'text-gray-700'}`}></i>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-white"><span className="text-cyan-600 text-xs mr-2">[{p.category}]</span>{p.name}</td>
+                                                        <td className="px-6 py-4 text-cyan-400 font-bold">NT$ {parseFloat(p.price)}</td>
+                                                        <td className="px-6 py-4 text-yellow-500 font-bold">NT$ {parseFloat(p.cost || 0)}</td>
+                                                        <td className="px-6 py-4 text-green-400 font-bold">NT$ {(parseFloat(p.price) - parseFloat(p.cost || 0)).toFixed(2)}</td>
+                                                        <td className="px-6 py-4 text-gray-300">{p.stock}</td>
+                                                        <td className="px-6 py-4 text-right space-x-3">
+                                                            <button onClick={() => openKeyModal(p)} title="卡密庫存管理" className="text-cyan-600 hover:text-cyan-400 mr-2 bg-cyan-900/30 px-2 py-1 rounded border border-cyan-800"><i className="fas fa-key"></i> 卡密</button>
+                                                            <button onClick={() => openModal(p)} title="編輯商品" className="text-gray-400 hover:text-cyan-400"><i className="fas fa-edit"></i></button>
+                                                            {p.status === 'active' && <button onClick={() => handleDeleteProduct(p.id)} title="下架商品" className="text-gray-400 hover:text-yellow-500 ml-2"><i className="fas fa-eye-slash"></i></button>}
+                                                            <button onClick={() => handlePermanentDeleteProduct(p.id, p.name)} title="永久刪除" className="text-gray-500 hover:text-red-500 ml-2 border border-transparent hover:border-red-900 px-1.5 py-0.5 rounded transition-colors"><i className="fas fa-trash-alt"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'settings' && (
+                                <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl max-w-3xl mx-auto p-8">
+                                    <label className="block text-xs text-cyan-600 mb-2 tracking-widest">目前跑馬燈內容 (MARQUEE TEXT)</label>
+                                    <textarea value={announcementText} onChange={(e) => setAnnouncementText(e.target.value)} rows="4" className="w-full bg-[#111] border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500 resize-none mb-6"></textarea>
+                                    <button onClick={handleSaveAnnouncement} disabled={isSavingAnnounce} className="w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 text-cyan-300 hover:text-black py-4 font-bold tracking-widest">發送廣播 (UPDATE BROADCAST)</button>
+                                </div>
+                            )}
+
+                            {activeTab === 'support' && (
+                                <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl flex h-[600px]">
+                                    <div className="w-1/3 border-r border-gray-800 flex flex-col">
+                                        <div className="p-4 border-b border-gray-800 bg-black"><h3 className="text-sm font-bold text-white tracking-widest"><i className="fas fa-users text-cyan-500 mr-2"></i> 活躍訪客</h3></div>
+                                        <div className="overflow-y-auto flex-grow">
+                                            {chatSessions.map(session => (
+                                                <div key={session.session_id} onClick={() => setSelectedSession(session.session_id)} className={`p-4 border-b border-gray-800 cursor-pointer transition-colors ${selectedSession === session.session_id ? 'bg-cyan-900/30 border-l-4 border-cyan-500' : 'hover:bg-[#111] border-l-4 border-transparent'}`}>
+                                                    <div className="text-xs text-cyan-400 font-bold mb-1 truncate">{session.user_email || 'Guest_User'}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="w-2/3 flex flex-col bg-black/50">
+                                        {selectedSession ? (
+                                            <>
+                                                <div className="p-4 border-b border-gray-800 bg-black"><h3 className="text-sm font-bold text-white tracking-widest"><i className="fas fa-terminal text-red-500 mr-2"></i> SESSION: {selectedSession.substring(0, 8)}...</h3></div>
+                                                <div className="flex-grow overflow-y-auto p-6 space-y-4">
+                                                    {adminChatMessages.map((msg, idx) => (
+                                                        <div key={idx} className={`p-3 max-w-[80%] shadow-lg relative ${msg.sender === 'admin' ? 'bg-red-900/30 border border-red-700/50 self-end ml-auto text-right' : 'bg-cyan-900/20 border border-cyan-900/50 self-start text-left'}`}>
+                                                            <p className={`text-[10px] mb-1 font-bold tracking-widest ${msg.sender === 'admin' ? 'text-red-500' : 'text-cyan-500'}`}>{msg.sender === 'admin' ? 'ADMIN (YOU)' : 'USER'}</p>
+                                                            <p className="text-gray-200 text-xs leading-relaxed">{msg.message}</p>
+                                                        </div>
+                                                    ))}
+                                                    <div ref={adminChatEndRef} />
+                                                </div>
+                                                <form onSubmit={handleAdminSendMessage} className="p-4 bg-black border-t border-gray-800 flex items-center">
+                                                    <input type="text" value={adminChatInput} onChange={e => setAdminChatInput(e.target.value)} placeholder="回覆訪客..." className="flex-grow bg-[#111] border border-gray-800 text-xs px-4 py-3 text-white focus:outline-none focus:border-red-500" />
+                                                    <button type="submit" className="ml-2 bg-red-900 border border-red-700 text-red-300 hover:text-black hover:bg-red-500 px-6 py-3 font-bold"><i className="fas fa-paper-plane"></i></button>
+                                                </form>
+                                            </>
+                                        ) : (<div className="flex-grow flex items-center justify-center text-gray-600 text-sm tracking-widest"><i className="fas fa-satellite-dish mr-2 animate-pulse"></i> 等待訪客連線...</div>)}
+                                    </div>
+                                </div>
+                            )}
+                        </main>
+
+                        {/* 新增/編輯商品 Modal */}
+                        {isModalOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+                                <div className="w-full max-w-lg bg-[#0a0a0a] border border-cyan-500/50 p-6 relative z-10 shadow-[0_0_30px_rgba(8,145,178,0.2)] my-8">
+                                    <h2 className="text-xl font-bold text-white tracking-widest mb-4 border-b border-gray-800 pb-3">{currentProduct.id ? '編輯數位資產 (EDIT_ASSET)' : '新增數位資產 (NEW_ASSET)'}</h2>
+                                    <form onSubmit={handleSaveProduct} className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs text-cyan-600 mb-1 tracking-widest">輔助狀態燈號 (CHEAT_STATUS)</label>
+                                            <div className="flex space-x-2">
+                                                <button type="button" onClick={() => setCurrentProduct({...currentProduct, helper_status: 'normal'})} className={`flex-1 py-1.5 flex justify-center items-center border text-xs font-bold ${currentProduct.helper_status === 'normal' || !currentProduct.helper_status ? 'bg-green-900/40 border-green-500 text-green-400' : 'bg-[#111] border-gray-700 text-gray-600'}`}><i className="fas fa-check mr-2"></i> 正常</button>
+                                                <button type="button" onClick={() => setCurrentProduct({...currentProduct, helper_status: 'maintenance'})} className={`flex-1 py-1.5 flex justify-center items-center border text-xs font-bold ${currentProduct.helper_status === 'maintenance' ? 'bg-yellow-900/40 border-yellow-500 text-yellow-400' : 'bg-[#111] border-gray-700 text-gray-600'}`}><i className="fas fa-tools mr-2"></i> 維護</button>
+                                                <button type="button" onClick={() => setCurrentProduct({...currentProduct, helper_status: 'danger'})} className={`flex-1 py-1.5 flex justify-center items-center border text-xs font-bold ${currentProduct.helper_status === 'danger' ? 'bg-red-900/40 border-red-500 text-red-400' : 'bg-[#111] border-gray-700 text-gray-600'}`}><i className="fas fa-skull mr-2"></i> 拉閘</button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">分類</label><input type="text" required value={currentProduct.category} onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-cyan-500 outline-none" /></div>
+                                            <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">狀態</label><select value={currentProduct.status} onChange={e => setCurrentProduct({...currentProduct, status: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-cyan-500 outline-none"><option value="active">上架</option><option value="inactive">下架</option></select></div>
+                                        </div>
+                                        <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">商品名稱</label><input type="text" required value={currentProduct.name} onChange={e => setCurrentProduct({...currentProduct, name: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-cyan-500 outline-none" /></div>
+                                        <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">商品詳情</label><textarea rows="3" value={currentProduct.description} onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-2 focus:border-cyan-500 outline-none resize-y"></textarea></div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">售價 (PRICE)</label><input type="number" step="0.01" required value={currentProduct.price} onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-cyan-500 outline-none" /></div>
+                                            <div><label className="block text-xs text-yellow-600 mb-1 tracking-widest">成本 (COST)</label><input type="number" step="0.01" value={currentProduct.cost} onChange={e => setCurrentProduct({...currentProduct, cost: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-yellow-500 outline-none" placeholder="0" /></div>
+                                        </div>
+                                        {currentProduct.price && currentProduct.cost && <div className="text-xs text-green-400 font-bold tracking-widest text-right">預估收入: NT$ {(parseFloat(currentProduct.price || 0) - parseFloat(currentProduct.cost || 0)).toFixed(2)}</div>}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">庫存 (STOCK)</label><input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-cyan-500 outline-none" /></div>
+                                        </div>
+                                        <div className="flex justify-end space-x-4 pt-3 mt-4 border-t border-gray-800">
+                                            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-400 hover:text-white">CANCEL</button>
+                                            <button type="submit" className="bg-cyan-600 hover:bg-cyan-500 text-black px-6 py-2 font-bold tracking-widest">{currentProduct.id ? 'UPDATE_ASSET' : 'CREATE_ASSET'}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 卡密管理金庫 Modal */}
+                        {isKeyModalOpen && keyModalProduct && (
+                            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsKeyModalOpen(false)}></div>
+                                <div className="w-full max-w-4xl bg-[#0a0a0a] border border-cyan-500/50 p-6 relative z-10 shadow-[0_0_40px_rgba(8,145,178,0.2)] flex flex-col md:flex-row h-[80vh]">
+                                    
+                                    <button onClick={() => setIsKeyModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white md:hidden z-20"><i className="fas fa-times text-xl"></i></button>
+                                    
+                                    <div className="w-full md:w-1/3 flex flex-col border-b md:border-b-0 md:border-r border-gray-800 pb-6 md:pb-0 md:pr-6">
+                                        <h2 className="text-xl font-bold text-white tracking-widest mb-1">卡密金庫</h2>
+                                        <div className="text-xs text-cyan-600 font-bold mb-4 tracking-wider">[{keyModalProduct.category}] {keyModalProduct.name}</div>
+                                        
+                                        <label className="block text-xs text-gray-400 mb-2 tracking-widest">批量匯入 (一行一組卡密)</label>
+                                        <textarea 
+                                            value={newKeysText} 
+                                            onChange={(e) => setNewKeysText(e.target.value)}
+                                            className="flex-grow w-full bg-[#111] border border-gray-700 text-cyan-400 font-mono text-sm px-4 py-3 focus:outline-none focus:border-cyan-500 resize-none" 
+                                            placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY&#10;ZZZZ-ZZZZ-ZZZZ"
+                                        ></textarea>
+                                        <button onClick={handleImportKeys} className="mt-4 w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 text-cyan-300 hover:text-black py-3 font-bold tracking-widest transition-colors flex items-center justify-center">
+                                            <i className="fas fa-download mr-2"></i> 開始匯入 (IMPORT)
+                                        </button>
+                                        <p className="text-[10px] text-gray-500 mt-2 text-center">此為手動發貨金庫，庫存數量請於商品編輯處設定</p>
+                                    </div>
+
+                                    <div className="w-full md:w-2/3 flex flex-col pt-6 md:pt-0 md:pl-6 relative">
+                                        <button onClick={() => setIsKeyModalOpen(false)} className="absolute top-0 right-0 text-gray-500 hover:text-white hidden md:block"><i className="fas fa-times text-xl"></i></button>
+                                        
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-sm font-bold text-gray-300 tracking-widest">目前庫存卡密清單</h3>
+                                            <span className="bg-cyan-900/30 text-cyan-500 border border-cyan-700/50 px-3 py-1 text-xs font-bold">
+                                                總計: {productKeys.length} | 未使用: {productKeys.filter(k => !k.is_used).length}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex-grow overflow-y-auto border border-gray-800 bg-[#111]">
+                                            {isKeysLoading ? (
+                                                <div className="flex justify-center items-center h-full text-cyan-500 animate-pulse"><i className="fas fa-spinner fa-spin mr-2"></i>載入中...</div>
+                                            ) : productKeys.length === 0 ? (
+                                                <div className="flex justify-center items-center h-full text-gray-600 text-xs">目前無任何卡密庫存</div>
+                                            ) : (
+                                                <table className="w-full text-left text-xs">
+                                                    <thead className="bg-[#151515] text-gray-500 sticky top-0">
+                                                        <tr>
+                                                            <th className="p-3 font-medium">卡密 (KEY_CODE)</th>
+                                                            <th className="p-3 font-medium text-center">狀態</th>
+                                                            <th className="p-3 font-medium text-right">操作</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-800/50">
+                                                        {productKeys.map(k => (
+                                                            <tr key={k.id} className="hover:bg-black/40">
+                                                                <td className={`p-3 font-mono ${k.is_used ? 'text-gray-600 line-through' : 'text-cyan-300 select-all'}`}>{k.key_code}</td>
+                                                                <td className="p-3 text-center">
+                                                                    {k.is_used 
+                                                                        ? <span className="bg-red-900/30 text-red-500 px-2 py-0.5 rounded-sm">已售出</span> 
+                                                                        : <span className="bg-green-900/30 text-green-500 px-2 py-0.5 rounded-sm">未使用</span>}
+                                                                </td>
+                                                                <td className="p-3 text-right">
+                                                                    {!k.is_used && (
+                                                                        <button onClick={() => handleDeleteKey(k.id)} className="text-gray-500 hover:text-red-500" title="刪除此卡密">
+                                                                            <i className="fas fa-trash-alt"></i>
+                                                                        </button>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AdminApp />);
+    </script>
+</body>
+</html>
