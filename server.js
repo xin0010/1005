@@ -207,7 +207,7 @@ app.get('/api/user/orders', async (req, res) => {
     if (!email) return res.status(400).json({ error: '請提供信箱' });
     try {
         const [rows] = await pool.query(
-            `SELECT o.id as order_id, o.total_price, o.status, o.created_at
+            `SELECT o.id as order_id, o.total_price, o.status, o.virtual_account, o.created_at
              FROM orders o JOIN users u ON o.user_id = u.id
              WHERE u.email = ? ORDER BY o.created_at DESC`,
             [email]
@@ -275,7 +275,7 @@ app.post('/api/orders/checkout', async (req, res) => {
         const timeString = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
         const randomNum = Math.floor(1000 + Math.random() * 9000); 
         const orderId = `AXG${timeString}${randomNum}`; 
-        const virtualAccount = "808" + Math.floor(10000000000 + Math.random() * 90000000000); 
+        const virtualAccount = "00812680112040"; 
         
         await conn.query('INSERT INTO orders (id, user_id, total_price, status, virtual_account) VALUES (?, ?, ?, ?, ?)', [orderId, userId, totalPrice, 'pending', virtualAccount]);
 

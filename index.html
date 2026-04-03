@@ -693,6 +693,7 @@
                                                                     <th className="px-5 py-3">訂單編號</th>
                                                                     <th className="px-5 py-3">日期</th>
                                                                     <th className="px-5 py-3">狀態</th>
+                                                                    <th className="px-5 py-3">繳費帳號</th>
                                                                     <th className="px-5 py-3 text-right">金額</th>
                                                                 </tr>
                                                             </thead>
@@ -705,6 +706,15 @@
                                                                             <td className="px-5 py-4 font-mono text-cyan-400 text-xs select-all break-all">{order.order_id}</td>
                                                                             <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">{new Date(order.created_at).toLocaleDateString('zh-TW')}</td>
                                                                             <td className={`px-5 py-4 font-bold text-xs ${color}`}>{label}</td>
+                                                                            <td className="px-5 py-4">
+                                                                                {order.status === 'pending' && order.virtual_account ? (
+                                                                                    <div>
+                                                                                        <p className="text-[10px] text-gray-500 mb-1">700 (中華郵政)</p>
+                                                                                        <span className="font-mono text-cyan-300 text-xs select-all tracking-wider">{order.virtual_account}</span>
+                                                                                        <button onClick={() => copyToClipboard(order.virtual_account)} className="ml-2 text-gray-500 hover:text-cyan-400 transition-colors" title="複製帳號"><i className="fas fa-copy text-xs"></i></button>
+                                                                                    </div>
+                                                                                ) : <span className="text-gray-600 text-xs">—</span>}
+                                                                            </td>
                                                                             <td className="px-5 py-4 text-right font-bold text-white">NT$ {parseFloat(order.total_price)}</td>
                                                                         </tr>
                                                                     );
