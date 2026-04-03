@@ -84,7 +84,7 @@ pool.getConnection()
         
         try {
             await conn.query(`CREATE TABLE IF NOT EXISTS settings (id INT AUTO_INCREMENT PRIMARY KEY, setting_key VARCHAR(50) UNIQUE, setting_value TEXT)`);
-            await conn.query(`INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('announcement', '歡迎來到 凱欣商城！系統目前正常運作中。')`);
+            await conn.query(`INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('announcement', '歡迎來到 YEN！系統目前正常運作中。')`);
             await conn.query(`CREATE TABLE IF NOT EXISTS email_codes (email VARCHAR(255) PRIMARY KEY, code VARCHAR(10), expires_at DATETIME)`);
             await conn.query(`CREATE TABLE IF NOT EXISTS chat_messages (id INT AUTO_INCREMENT PRIMARY KEY, session_id VARCHAR(100) NOT NULL, user_email VARCHAR(255), sender VARCHAR(20) NOT NULL, message TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
             
@@ -150,9 +150,9 @@ app.post('/api/auth/send-code', async (req, res) => {
     try {
         await pool.query('INSERT INTO email_codes (email, code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE code = ?, expires_at = ?', [email, code, expiresAt, code, expiresAt]);
         await transporter.sendMail({
-            from: '"凱欣商城" <yang20080221@gmail.com>',
+            from: '"YEN" <yang20080221@gmail.com>',
             to: email,
-            subject: '凱欣商城 - 您的專屬驗證碼',
+            subject: 'YEN - 您的專屬驗證碼',
             text: `您的驗證碼為：${code}\n請在 10 分鐘內返回 https://axgshop888.com.tw 完成綁定。`
         });
         res.json({ success: true, message: '驗證碼已發送' });
