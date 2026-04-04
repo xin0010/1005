@@ -7,14 +7,18 @@ const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
+function shouldUseMySqlSsl() {
+    return String(process.env.MYSQL_SSL || '').toLowerCase() === 'true';
+}
+
 // GCP 資料庫連線設定 (沿用你原本的設定)
 const dbConfig = {
     host: process.env.MYSQLHOST || '127.0.0.1',
     user: process.env.MYSQLUSER || 'root',
-    password: process.env.MYSQLPASSWORD || 'Xin970416',
+    password: process.env.MYSQLPASSWORD !== undefined ? process.env.MYSQLPASSWORD : '',
     database: process.env.MYSQLDATABASE || 'axgshop888',
     port: parseInt(process.env.MYSQLPORT || '3306'),
-    ssl: process.env.MYSQLHOST ? { rejectUnauthorized: false } : undefined
+    ssl: shouldUseMySqlSsl() ? { rejectUnauthorized: false } : undefined
 };
 
 // 初始商品清單
@@ -27,7 +31,7 @@ const initialProducts = [
 ];
 
 async function setupDatabase() {
-    console.log('⏳ 正在連線至 GCP Cloud SQL...');
+    console.log('⏳ 正在連線至 MySQL...');
     let connection;
 
     try {
