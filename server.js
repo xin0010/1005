@@ -1,5 +1,5 @@
-﻿/**
- * AXG 凱欣商店 - 企業級後端核心 API (Vercel 雲端特化版)
+/**
+ * HACK小舖 - 企業級後端核心 API (Vercel 雲端特化版)
  */
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -45,13 +45,13 @@ const app = express();
 
 app.use(cors({
     origin: [
-        'https://axgshop888.com.tw',
-        'https://www.axgshop888.com.tw',
+        'https://gemini-one-chi.vercel.app',
         'http://localhost:3000'
     ],
     credentials: true
 }));
 app.use(express.json());
+app.use(express.static(__dirname));
 
 // ==========================================
 // 💡 設定 Google 寄信機器人 (Nodemailer)
@@ -68,50 +68,57 @@ const transporter = nodemailer.createTransport({
 // 1. 資料庫連線池設定
 // ==========================================
 const pool = mysql.createPool({
-    host: '34.81.99.227',
-    user: 'axgshop200',
-    password: 'axg-02210825A',
-    database: 'axf',
-    port: 3306,
+    host: process.env.MYSQLHOST || '127.0.0.1',
+    user: process.env.MYSQLUSER || 'root',
+    password: process.env.MYSQLPASSWORD || 'Xin970416',
+    database: process.env.MYSQLDATABASE || 'axgshop888',
+    port: parseInt(process.env.MYSQLPORT || '3306'),
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    connectTimeout: 10000,
+    ssl: process.env.MYSQLHOST ? { rejectUnauthorized: false } : undefined
 });
 
-pool.getConnection()
-    .then(async conn => {
-        console.log('✅ 資料庫連線池建立成功 (Vercel 雲端特化版)！');
-        
-        try {
-            await conn.query(`CREATE TABLE IF NOT EXISTS settings (id INT AUTO_INCREMENT PRIMARY KEY, setting_key VARCHAR(50) UNIQUE, setting_value TEXT)`);
-            await conn.query(`INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('announcement', '歡迎來到 YEN！系統目前正常運作中。')`);
-            await conn.query(`CREATE TABLE IF NOT EXISTS email_codes (email VARCHAR(255) PRIMARY KEY, code VARCHAR(10), expires_at DATETIME)`);
-            await conn.query(`CREATE TABLE IF NOT EXISTS chat_messages (id INT AUTO_INCREMENT PRIMARY KEY, session_id VARCHAR(100) NOT NULL, user_email VARCHAR(255), sender VARCHAR(20) NOT NULL, message TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-            
-            // 💡 核心新增：建立「卡密金庫」資料表
-            await conn.query(`
-                CREATE TABLE IF NOT EXISTS product_keys (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    product_id INT NOT NULL,
-                    key_code VARCHAR(255) NOT NULL,
-                    is_used BOOLEAN DEFAULT false,
-                    order_id VARCHAR(50) DEFAULT NULL,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE KEY unique_key_per_product (product_id, key_code)
-                )
-            `);
-
-            try { await conn.query(`ALTER TABLE products ADD COLUMN helper_status VARCHAR(20) DEFAULT 'normal'`); } catch (e) {}
-            try { await conn.query(`ALTER TABLE products ADD COLUMN description TEXT DEFAULT NULL`); } catch (e) {}
-
-            console.log('✅ 系統資料庫結構檢查完畢！');
-        } catch (err) {
-            console.error('⚠️ 資料庫初始化過程發生異常:', err.message);
-        }
+let dbInitialized = false;
+async function ensureDbInit() {
+    if (dbInitialized) return;
+    const conn = await pool.getConnection();
+    try {
+        await conn.query(`CREATE TABLE IF NOT EXISTS settings (id INT AUTO_INCREMENT PRIMARY KEY, setting_key VARCHAR(50) UNIQUE, setting_value TEXT)`);
+        await conn.query(`INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('announcement', '歡迎來到 HACK小舖！系統目前正常運作中。')`);
+        await conn.query(`CREATE TABLE IF NOT EXISTS email_codes (email VARCHAR(255) PRIMARY KEY, code VARCHAR(10), expires_at DATETIME)`);
+        await conn.query(`CREATE TABLE IF NOT EXISTS chat_messages (id INT AUTO_INCREMENT PRIMARY KEY, session_id VARCHAR(100) NOT NULL, user_email VARCHAR(255), sender VARCHAR(20) NOT NULL, message TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
+        await conn.query(`
+            CREATE TABLE IF NOT EXISTS product_keys (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                product_id INT NOT NULL,
+                key_code VARCHAR(255) NOT NULL,
+                is_used BOOLEAN DEFAULT false,
+                order_id VARCHAR(50) DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_key_per_product (product_id, key_code)
+            )
+        `);
+        try { await conn.query(`ALTER TABLE products ADD COLUMN helper_status VARCHAR(20) DEFAULT 'normal'`); } catch (e) {}
+        try { await conn.query(`ALTER TABLE products ADD COLUMN description TEXT DEFAULT NULL`); } catch (e) {}
+        try { await conn.query(`ALTER TABLE products ADD COLUMN cost DECIMAL(10, 2) DEFAULT 0`); } catch (e) {}
+        dbInitialized = true;
+    } finally {
         conn.release();
-    })
-    .catch(err => console.error('❌ 資料庫連線失敗：', err.message));
+    }
+}
 
+// 每個請求都先確保 DB 初始化完成
+app.use(async (req, res, next) => {
+    try {
+        await ensureDbInit();
+        next();
+    } catch (err) {
+        console.error('DB init error:', err.message);
+        res.status(500).json({ error: '資料庫連線失敗，請稍後再試' });
+    }
+});
 
 // ==========================================
 // 2. 客服對話 API
@@ -140,36 +147,7 @@ app.get('/api/admin/chat/sessions', adminAuth, async (req, res) => {
 });
 
 // ==========================================
-// 3. 帳號註冊與登入 API
-// ==========================================
-app.post('/api/auth/register', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: '請填寫所有欄位' });
-    if (password.length < 6) return res.status(400).json({ error: '密碼至少需要6個字元' });
-    try {
-        const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-        if (existing.length > 0) return res.status(400).json({ error: '此信箱已被註冊' });
-        const passwordHash = await bcrypt.hash(password, 10);
-        const userId = uuidv4();
-        await pool.query('INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)', [userId, email, passwordHash, 'customer']);
-        res.json({ success: true, message: '註冊成功' });
-    } catch (err) { res.status(500).json({ error: '系統錯誤' }); }
-});
-
-app.post('/api/auth/login-user', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: '請填寫帳號與密碼' });
-    try {
-        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (!users[0] || !(await bcrypt.compare(password, users[0].password_hash))) {
-            return res.status(401).json({ error: '帳號或密碼錯誤' });
-        }
-        res.json({ success: true, email: users[0].email });
-    } catch (err) { res.status(500).json({ error: '系統異常' }); }
-});
-
-// ==========================================
-// 4. 信箱驗證 API (舊系統保留相容)
+// 3. 信箱驗證 API
 // ==========================================
 app.post('/api/auth/send-code', async (req, res) => {
     const { email } = req.body;
@@ -179,13 +157,46 @@ app.post('/api/auth/send-code', async (req, res) => {
     try {
         await pool.query('INSERT INTO email_codes (email, code, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE code = ?, expires_at = ?', [email, code, expiresAt, code, expiresAt]);
         await transporter.sendMail({
-            from: '"YEN" <yang20080221@gmail.com>',
+            from: '"HACK小舖" <yang20080221@gmail.com>',
             to: email,
-            subject: 'YEN - 您的專屬驗證碼',
-            text: `您的驗證碼為：${code}\n請在 10 分鐘內返回 https://axgshop888.com.tw 完成綁定。`
+            subject: 'HACK小舖 - 您的專屬驗證碼',
+            text: `您的驗證碼為：${code}\n請在 10 分鐘內返回 https://gemini-one-chi.vercel.app 完成註冊。`
         });
         res.json({ success: true, message: '驗證碼已發送' });
     } catch (err) { res.status(500).json({ error: '寄件失敗' }); }
+});
+
+// 會員註冊 (信箱 + 密碼 + 驗證碼)
+app.post('/api/auth/member/register', async (req, res) => {
+    const { email, password, code } = req.body;
+    if (!email || !password || !code) return res.status(400).json({ error: '請填寫所有欄位' });
+    if (password.length < 6) return res.status(400).json({ error: '密碼至少需要 6 個字元' });
+    try {
+        const [rows] = await pool.query('SELECT * FROM email_codes WHERE email = ? AND code = ? AND expires_at > NOW()', [email, code]);
+        if (rows.length === 0) return res.status(400).json({ error: '驗證碼錯誤或已過期' });
+        await pool.query('DELETE FROM email_codes WHERE email = ?', [email]);
+        const passwordHash = await bcrypt.hash(password, 10);
+        const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+        if (existing.length > 0) {
+            await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [passwordHash, email]);
+        } else {
+            await pool.query('INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)', [uuidv4(), email, passwordHash, 'customer']);
+        }
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: '註冊失敗' }); }
+});
+
+// 會員登入 (信箱 + 密碼)
+app.post('/api/auth/member/login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: '請填寫信箱與密碼' });
+    try {
+        const [users] = await pool.query('SELECT * FROM users WHERE email = ? AND role = ?', [email, 'customer']);
+        if (users.length === 0) return res.status(401).json({ error: '此信箱尚未註冊' });
+        const valid = await bcrypt.compare(password, users[0].password_hash);
+        if (!valid) return res.status(401).json({ error: '密碼錯誤' });
+        res.json({ success: true, email: users[0].email });
+    } catch (err) { res.status(500).json({ error: '登入失敗' }); }
 });
 
 app.post('/api/auth/verify-code', async (req, res) => {
@@ -200,39 +211,7 @@ app.post('/api/auth/verify-code', async (req, res) => {
 });
 
 // ==========================================
-// 4. 前台會員 API
-// ==========================================
-app.get('/api/user/orders', async (req, res) => {
-    const { email } = req.query;
-    if (!email) return res.status(400).json({ error: '請提供信箱' });
-    try {
-        const [rows] = await pool.query(
-            `SELECT o.id as order_id, o.total_price, o.status, o.virtual_account, o.created_at
-             FROM orders o JOIN users u ON o.user_id = u.id
-             WHERE u.email = ? ORDER BY o.created_at DESC`,
-            [email]
-        );
-        res.json(rows);
-    } catch (err) { res.status(500).json({ error: '獲取失敗' }); }
-});
-
-app.put('/api/user/password', async (req, res) => {
-    const { email, currentPassword, newPassword } = req.body;
-    if (!email || !currentPassword || !newPassword) return res.status(400).json({ error: '請填寫所有欄位' });
-    if (newPassword.length < 6) return res.status(400).json({ error: '新密碼至少需要6個字元' });
-    try {
-        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (!users[0] || !(await bcrypt.compare(currentPassword, users[0].password_hash))) {
-            return res.status(401).json({ error: '目前密碼錯誤' });
-        }
-        const newHash = await bcrypt.hash(newPassword, 10);
-        await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [newHash, email]);
-        res.json({ success: true, message: '密碼已更新' });
-    } catch (err) { res.status(500).json({ error: '系統錯誤' }); }
-});
-
-// ==========================================
-// 5. 前台商品與訂單 API
+// 4. 前台商品與訂單 API
 // ==========================================
 app.get('/api/announcement', async (req, res) => {
     try {
@@ -274,8 +253,8 @@ app.post('/api/orders/checkout', async (req, res) => {
         const now = new Date();
         const timeString = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
         const randomNum = Math.floor(1000 + Math.random() * 9000); 
-        const orderId = `AXG${timeString}${randomNum}`; 
-        const virtualAccount = "00812680112040"; 
+        const orderId = `HACK${timeString}${randomNum}`; 
+        const virtualAccount = "808" + Math.floor(10000000000 + Math.random() * 90000000000); 
         
         await conn.query('INSERT INTO orders (id, user_id, total_price, status, virtual_account) VALUES (?, ?, ?, ?, ?)', [orderId, userId, totalPrice, 'pending', virtualAccount]);
 
@@ -296,7 +275,26 @@ app.post('/api/orders/checkout', async (req, res) => {
 });
 
 // ==========================================
-// 5. 後台 API (包含卡密管理)
+// 5. 會員前台 API
+// ==========================================
+app.get('/api/member/orders', async (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ error: '請提供信箱' });
+    try {
+        const [users] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+        if (users.length === 0) return res.json([]);
+        const [orders] = await pool.query(
+            `SELECT o.id, o.total_price, o.status, o.virtual_account, o.created_at, COUNT(oi.id) as item_count
+             FROM orders o LEFT JOIN order_items oi ON o.id = oi.order_id
+             WHERE o.user_id = ? GROUP BY o.id ORDER BY o.created_at DESC`,
+            [users[0].id]
+        );
+        res.json(orders);
+    } catch (err) { res.status(500).json({ error: '查詢失敗' }); }
+});
+
+// ==========================================
+// 6. 後台 API (包含卡密管理)
 // ==========================================
 app.post('/api/announcement', adminAuth, async (req, res) => {
     try {
@@ -352,17 +350,17 @@ app.get('/api/admin/products', adminAuth, async (req, res) => {
 });
 
 app.post('/api/products', adminAuth, async (req, res) => {
-    const { category, name, price, stock, status, helper_status, description } = req.body;
+    const { category, name, price, stock, status, helper_status, description, cost } = req.body;
     try {
-        const [result] = await pool.execute(`INSERT INTO products (category, name, price, stock, status, helper_status, description) VALUES (?, ?, ?, ?, ?, ?, ?)`, [category, name, price, stock || 0, status || 'active', helper_status || 'normal', description || '']);
+        const [result] = await pool.execute(`INSERT INTO products (category, name, price, stock, status, helper_status, description, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [category, name, price, stock || 0, status || 'active', helper_status || 'normal', description || '', cost || 0]);
         res.status(201).json({ id: result.insertId });
     } catch (err) { res.status(500).json({ error: '新增失敗' }); }
 });
 
 app.put('/api/products/:id', adminAuth, async (req, res) => {
-    const { category, name, price, stock, status, helper_status, description } = req.body;
+    const { category, name, price, stock, status, helper_status, description, cost } = req.body;
     try {
-        await pool.execute(`UPDATE products SET category = ?, name = ?, price = ?, stock = ?, status = ?, helper_status = ?, description = ? WHERE id = ?`, [category, name, price, stock, status, helper_status || 'normal', description || '', req.params.id]);
+        await pool.execute(`UPDATE products SET category = ?, name = ?, price = ?, stock = ?, status = ?, helper_status = ?, description = ?, cost = ? WHERE id = ?`, [category, name, price, stock, status, helper_status || 'normal', description || '', cost || 0, req.params.id]);
         res.json({ message: '更新成功' });
     } catch (err) { res.status(500).json({ error: '更新失敗' }); }
 });
@@ -378,15 +376,16 @@ app.delete('/api/products/:id/permanent', adminAuth, async (req, res) => {
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
-        await conn.execute('DELETE FROM product_keys WHERE product_id = ?', [req.params.id]);
-        await conn.execute('DELETE FROM order_items WHERE product_id = ?', [req.params.id]);
-        await conn.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
+        await conn.execute(`DELETE FROM product_keys WHERE product_id = ?`, [req.params.id]);
+        await conn.execute(`DELETE FROM products WHERE id = ?`, [req.params.id]);
         await conn.commit();
         res.json({ message: '商品已永久刪除' });
     } catch (err) {
         await conn.rollback();
         res.status(500).json({ error: '刪除失敗' });
-    } finally { conn.release(); }
+    } finally {
+        conn.release();
+    }
 });
 
 // ==========================================
