@@ -61,6 +61,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static(__dirname));
 
+app.get('/health', (req, res) => {
+    res.json({ ok: true });
+});
+
 // ==========================================
 // 💡 設定 Google 寄信機器人 (Nodemailer)
 // ==========================================
@@ -518,9 +522,10 @@ app.delete('/api/admin/keys/:id', adminAuth, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
-        console.log(`🚀 API 伺服器已啟動於：http://localhost:${PORT}`);
+    app.listen(PORT, HOST, () => {
+        console.log(`🚀 API 伺服器已啟動於：http://${HOST}:${PORT}`);
     });
 }
 module.exports = app;
