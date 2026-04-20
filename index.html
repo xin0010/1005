@@ -55,7 +55,13 @@
             const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: '', title: 'SYSTEM_NOTICE' });
 
             const [isSupportOpen, setIsSupportOpen] = useState(false);
-            const [chatSessionId] = useState(() => localStorage.getItem('axg_chat_session') || generateSessionId());
+            const [chatSessionId] = useState(() => {
+                const existing = localStorage.getItem('axg_chat_session');
+                if (existing) return existing;
+                const newId = generateSessionId();
+                localStorage.setItem('axg_chat_session', newId);
+                return newId;
+            });
             const [chatMessages, setChatMessages] = useState([]);
             const [chatInput, setChatInput] = useState('');
             const chatEndRef = useRef(null);
@@ -129,8 +135,9 @@
 
             // 模擬綁定信箱
             const handleBindEmail = () => {
-                if (!userEmail || !verifyCode) return showAlert('請輸入郵箱與驗證碼', 'WARNING');
-                localStorage.setItem('axg_user_email', userEmail);
+                if (!userEmail || !userEmail.includes('@') || !userEmail.includes('.')) return showAlert('請輸入有效的電子信箱格式', 'WARNING');
+                if (!verifyCode || verifyCode.trim().length !== 6) return showAlert('請輸入正確的 6 位數驗證碼', 'WARNING');
+                localStorage.setItem('axg_user_email', userEmail.trim().toLowerCase());
                 setIsLoginOpen(false);
                 showAlert('信箱綁定成功！', 'SUCCESS');
             };
@@ -201,7 +208,7 @@
                     window.scrollTo(0, 0);
                 } catch (err) { 
                     console.error(err);
-                    showAlert(`❌ 結帳失敗: 寫入資料庫時發生錯誤。請確認 RLS 權限已開放寫入。`, 'ERROR'); 
+                    showAlert('❌ 結帳失敗：系統暫時無法處理您的訂單，請稍後再試或聯繫客服。', 'ERROR'); 
                 }
             };
 
