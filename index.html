@@ -21,10 +21,21 @@
             background-image: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(8, 145, 178, 0.05) 50%, rgba(8, 145, 178, 0.05));
             background-size: 100% 4px;
         }
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.3;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="selection:bg-cyan-900 selection:text-cyan-300 scanline">
-    <video autoplay loop muted playsinline style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.3;pointer-events:none;">
+    <video id="bg-video" autoplay loop muted playsinline preload="auto">
         <source src="75bc5929-4212-4446-8b52-c95b666e3e81.mp4" type="video/mp4" />
     </video>
     <div id="root"></div>
@@ -587,6 +598,19 @@
         }
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+    </script>
+    <script>
+        (function() {
+            var v = document.getElementById('bg-video');
+            if (v) {
+                v.play().catch(function() {
+                    document.addEventListener('click', function handler() {
+                        v.play();
+                        document.removeEventListener('click', handler);
+                    }, { once: true });
+                });
+            }
+        })();
     </script>
 </body>
 </html>
