@@ -227,28 +227,44 @@
             else showMessage('狀態更新失敗：' + error.message);
         };
 
+        // 💡 重大更新：改為呼叫 Node.js 後端 API 發信
         const handleDispatchKey = async () => {
             if (!dispatchEmail || !dispatchEmail.includes('@')) return showMessage('請輸入有效的客戶信箱');
             
             setIsKeysLoading(true);
             try {
-                // 1. 在資料庫中將卡密標記為已使用
-                const { error } = await supabase.from('product_keys').update({ is_used: true }).eq('id', dispatchingKey.id);
-                if (error) throw error;
+                // ⚠️ 部署到 GCP 後，請將這裡的網址改成 Cloud Run 的網址
+                const BACKEND_URL = 'http://localhost:8080'; 
                 
-                // 2. 建立郵件主旨與內容
-                const subject = encodeURIComponent(`【凱欣商城】數位資產發貨通知：${keyModalProduct.name}`);
-                const body = encodeURIComponent(`感謝您的購買！\n\n您購買的商品：${keyModalProduct.name}\n\n您的專屬卡密 / 授權碼如下：\n${dispatchingKey.key_code}\n\n請妥善保管您的卡密，如有任何操作問題請聯繫客服。\n\n-- 凱欣商城 系統發送`);
+                const response = await fetch(`${BACKEND_URL}/api/admin/dispatch-key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: dispatchEmail,
+                        productName: keyModalProduct.name,
+                        keyId: dispatchingKey.id,
+                        keyCode: dispatchingKey.key_code
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '發卡伺服器回應錯誤');
+                }
                 
-                // 3. 呼叫電腦的預設郵件軟體 (例如 Gmail 網頁版或 Outlook)
-                window.location.href = `mailto:${dispatchEmail}?subject=${subject}&body=${body}`;
-                
-                showMessage('✅ 已呼叫預設郵件軟體，並將該卡密標記為「已售出」！');
+                showMessage('✅ 郵件已成功由伺服器自動發送，且卡密已標記為「已售出」！');
                 setDispatchingKey(null);
                 setDispatchEmail('');
+                
+                // 發信成功後，重新整理卡密列表
                 fetchProductKeys(keyModalProduct.id);
+
             } catch (err) {
-                showMessage('發貨更新失敗：' + err.message);
+                showMessage('發貨作業失敗：' + err.message);
+                console.error(err);
             } finally {
                 setIsKeysLoading(false);
             }
