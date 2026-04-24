@@ -9,30 +9,14 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- 💡 引入 Supabase -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: transparent; color: #d1d5db; font-family: monospace; }
-        html { background-color: #050505; }
+        body { background-color: #050505; color: #d1d5db; font-family: monospace; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: #0891b2; }
-        .scanline {
-            background-color: transparent;
-            background-image: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(8, 145, 178, 0.05) 50%, rgba(8, 145, 178, 0.05));
-            background-size: 100% 4px;
-        }
-        #bg-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            opacity: 0.5;
-            pointer-events: none;
-        }
+        .scanline { background-image: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(8, 145, 178, 0.05) 50%, rgba(8, 145, 178, 0.05)); background-size: 100% 4px; }
+        #bg-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body class="selection:bg-cyan-900 selection:text-cyan-300 scanline min-h-screen">
@@ -40,10 +24,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useCallback, useMemo } = React;
 
-        // 💡 初始化 Supabase 客戶端 (請填入你的資料，和 index.html 一樣)
-        const SUPABASE_URL = 'https://lqybeuhjafemkhpgychl.supabase.co';
+    const SUPABASE_URL = 'https://lqybeuhjafemkhpgychl.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_gNjZFNCCtnXuW-KcLF0NXg__QUMHgfW'; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -64,16 +47,46 @@
             const [isLoading, setIsLoading] = useState(false);
             
             const [isModalOpen, setIsModalOpen] = useState(false);
+            const [isProductSaving, setIsProductSaving] = useState(false);
             const [currentProduct, setCurrentProduct] = useState({ category: '', name: '', price: '', stock: '', status: 'active', helper_status: 'normal', description: '' });
 
             const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
             const [keyModalProduct, setKeyModalProduct] = useState(null);
             const [productKeys, setProductKeys] = useState([]);
-            const [newKeysText, setNewKeysText] = useState('');
-            const [isKeysLoading, setIsKeysLoading] = useState(false);
+        const [newKeysText, setNewKeysText] = useState('');
+        const [isKeysLoading, setIsKeysLoading] = useState(false);
+        const [isKeysImporting, setIsKeysImporting] = useState(false);
 
-            // 檢查是否已經登入
-            useEffect(() => {
+        // 手動發卡狀態
+        const [dispatchingKey, setDispatchingKey] = useState(null);
+        const [dispatchEmail, setDispatchEmail] = useState('');
+
+        // 💡 優化：取代原生 alert 與 confirm 的自訂對話框系統
+        const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+
+            const showMessage = useCallback((message) => {
+                setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
+            }, []);
+
+            const showConfirm = useCallback((message, onConfirmCallback) => {
+            setDialog({ isOpen: true, type: 'confirm', message, onConfirm: onConfirmCallback });
+        }, []);
+
+        const copyToClipboard = useCallback((text) => {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => showMessage('✅ 已複製卡密到剪貼簿！'));
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "absolute"; textArea.style.left = "-999999px";
+                document.body.prepend(textArea); textArea.select();
+                try { document.execCommand('copy'); showMessage('✅ 已複製卡密到剪貼簿！'); } 
+                catch (err) { showMessage('複製失敗，請手動反白複製'); } 
+                finally { textArea.remove(); }
+            }
+        }, [showMessage]);
+
+        useEffect(() => {
                 supabase.auth.getSession().then(({ data: { session } }) => {
                     if (session) {
                         setAdminUser(session.user);
@@ -82,7 +95,6 @@
                 });
             }, []);
 
-            // 💡 使用 Supabase Auth 登入
             const handleLogin = async (e) => {
                 e.preventDefault();
                 setIsLoggingIn(true);
@@ -105,60 +117,74 @@
                 setAdminUser(null);
             };
 
-            // 讀取訂單
-            const fetchOrders = async () => {
+            const fetchOrders = useCallback(async () => {
                 setIsLoading(true);
                 const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
                 if (!error) setOrders(data || []);
-                else { console.error('讀取訂單失敗:', error.message); setOrders([]); }
+                else console.error('讀取訂單失敗:', error.message);
                 setIsLoading(false);
-            };
+            }, []);
 
             const handleUpdateOrderStatus = async (orderId, newStatus) => {
                 const { error } = await supabase.from('orders').update({ status: newStatus }).eq('order_id', orderId);
                 if (!error) fetchOrders();
-                else alert('更新失敗');
+                else showMessage('狀態更新失敗');
             };
 
-            const handleDeleteOrder = async (orderId) => {
-                if (!confirm(`⚠️ 警告：確定要永久刪除訂單「${orderId}」嗎？`)) return;
-                const { error } = await supabase.from('orders').delete().eq('order_id', orderId);
-                if (!error) { fetchOrders(); alert('✅ 訂單已刪除'); }
-                else alert('刪除失敗：' + error.message);
+            const handleDeleteOrder = (orderId) => {
+                showConfirm(`⚠️ 警告：確定要永久刪除訂單「${orderId}」嗎？`, async () => {
+                    const { error } = await supabase.from('orders').delete().eq('order_id', orderId);
+                    if (!error) { 
+                        fetchOrders(); 
+                        showMessage('✅ 訂單已刪除'); 
+                    } else showMessage('刪除失敗：' + error.message);
+                });
             };
 
-            // 讀取商品
-            const fetchProducts = async () => {
+            const fetchProducts = useCallback(async () => {
                 setIsLoading(true);
                 const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
                 if (!error) setProducts(data || []);
-                else { console.error('讀取商品失敗:', error.message); setProducts([]); }
+                else console.error('讀取商品失敗:', error.message);
                 setIsLoading(false);
-            };
+            }, []);
 
             const handleSaveProduct = async (e) => {
                 e.preventDefault();
-                const productData = { ...currentProduct };
-                if (!productData.id) delete productData.id; // 新增時讓資料庫自動產生 UUID
-                
-                const { error } = await supabase.from('products').upsert(productData);
-                if (!error) { setIsModalOpen(false); fetchProducts(); }
-                else alert('儲存失敗：' + error.message);
+                setIsProductSaving(true);
+                try {
+                    const productData = { ...currentProduct };
+                    if (!productData.id) delete productData.id; 
+                    
+                    const { error } = await supabase.from('products').upsert(productData);
+                    if (!error) { 
+                        setIsModalOpen(false); 
+                        fetchProducts(); 
+                        showMessage('✅ 數位資產儲存成功');
+                    } else throw error;
+                } catch (err) {
+                    showMessage('儲存失敗：' + err.message);
+                } finally {
+                    setIsProductSaving(false);
+                }
             };
 
-            const handlePermanentDeleteProduct = async (id, name) => {
-                if (!confirm(`⚠️ 永久刪除「${name}」？此操作將一並刪除該商品的所有卡密！`)) return;
-                const { error } = await supabase.from('products').delete().eq('id', id);
-                if (!error) { fetchProducts(); alert('商品已永久刪除'); }
+            const handlePermanentDeleteProduct = (id, name) => {
+                showConfirm(`⚠️ 永久刪除「${name}」？此操作將一並刪除該商品的所有卡密庫存！`, async () => {
+                    const { error } = await supabase.from('products').delete().eq('id', id);
+                    if (!error) { 
+                        fetchProducts(); 
+                        showMessage('✅ 商品已永久刪除'); 
+                    } else showMessage('刪除失敗：' + error.message);
+                });
             };
 
-            // 讀取與管理卡密
-            const fetchProductKeys = async (productId) => {
+            const fetchProductKeys = useCallback(async (productId) => {
                 setIsKeysLoading(true);
                 const { data, error } = await supabase.from('product_keys').select('*').eq('product_id', productId);
-                if (!error) setProductKeys(data);
+                if (!error) setProductKeys(data || []);
                 setIsKeysLoading(false);
-            };
+            }, []);
 
             const openKeyModal = (product) => {
                 setKeyModalProduct(product);
@@ -169,37 +195,75 @@
 
             const handleImportKeys = async () => {
                 const keysArray = newKeysText.split('\n').map(k => k.trim()).filter(k => k);
-                if (!keysArray.length) return alert('請輸入至少一組卡密');
+                if (!keysArray.length) return showMessage('請輸入至少一組卡密');
                 
-                const insertData = keysArray.map(key => ({
-                    product_id: keyModalProduct.id,
-                    key_code: key
-                }));
-
-                const { error } = await supabase.from('product_keys').insert(insertData);
-                if (!error) {
-                    alert(`✅ 成功匯入 ${keysArray.length} 組卡密！`);
-                    setNewKeysText('');
-                    fetchProductKeys(keyModalProduct.id);
-                } else alert('匯入失敗：卡密可能重複');
+                setIsKeysImporting(true);
+                try {
+                    const insertData = keysArray.map(key => ({ product_id: keyModalProduct.id, key_code: key }));
+                    const { error } = await supabase.from('product_keys').insert(insertData);
+                    
+                    if (!error) {
+                        showMessage(`✅ 成功匯入 ${keysArray.length} 組卡密！`);
+                        setNewKeysText('');
+                        fetchProductKeys(keyModalProduct.id);
+                    } else throw error;
+                } catch (err) {
+                    showMessage('匯入失敗：卡密可能重複');
+                } finally {
+                    setIsKeysImporting(false);
+                }
             };
 
-            const handleDeleteKey = async (keyId) => {
-                if (!confirm('確定要刪除這組卡密嗎？')) return;
+            const handleDeleteKey = (keyId) => {
+            showConfirm('確定要刪除這組卡密嗎？', async () => {
                 const { error } = await supabase.from('product_keys').delete().eq('id', keyId);
                 if (!error) fetchProductKeys(keyModalProduct.id);
-            };
+            });
+        };
 
-            // 系統公告
-            const fetchAnnouncement = async () => {
+        const handleToggleKeyStatus = async (key) => {
+            const { error } = await supabase.from('product_keys').update({ is_used: !key.is_used }).eq('id', key.id);
+            if (!error) fetchProductKeys(keyModalProduct.id);
+            else showMessage('狀態更新失敗：' + error.message);
+        };
+
+        const handleDispatchKey = async () => {
+            if (!dispatchEmail || !dispatchEmail.includes('@')) return showMessage('請輸入有效的客戶信箱');
+            
+            setIsKeysLoading(true);
+            try {
+                // 1. 在資料庫中將卡密標記為已使用
+                const { error } = await supabase.from('product_keys').update({ is_used: true }).eq('id', dispatchingKey.id);
+                if (error) throw error;
+                
+                // 2. 建立郵件主旨與內容
+                const subject = encodeURIComponent(`【凱欣商城】數位資產發貨通知：${keyModalProduct.name}`);
+                const body = encodeURIComponent(`感謝您的購買！\n\n您購買的商品：${keyModalProduct.name}\n\n您的專屬卡密 / 授權碼如下：\n${dispatchingKey.key_code}\n\n請妥善保管您的卡密，如有任何操作問題請聯繫客服。\n\n-- 凱欣商城 系統發送`);
+                
+                // 3. 呼叫電腦的預設郵件軟體 (例如 Gmail 網頁版或 Outlook)
+                window.location.href = `mailto:${dispatchEmail}?subject=${subject}&body=${body}`;
+                
+                showMessage('✅ 已呼叫預設郵件軟體，並將該卡密標記為「已售出」！');
+                setDispatchingKey(null);
+                setDispatchEmail('');
+                fetchProductKeys(keyModalProduct.id);
+            } catch (err) {
+                showMessage('發貨更新失敗：' + err.message);
+            } finally {
+                setIsKeysLoading(false);
+            }
+        };
+
+        const fetchAnnouncement = useCallback(async () => {
                 const { data, error } = await supabase.from('announcements').select('text').eq('id', 1).single();
                 if (!error && data) setAnnouncementText(data.text);
-            };
+            }, []);
 
             const handleSaveAnnouncement = async () => {
                 setIsSavingAnnounce(true);
                 const { error } = await supabase.from('announcements').upsert({ id: 1, text: announcementText });
-                if (!error) alert('公告已成功更新！');
+                if (!error) showMessage('✅ 系統跑馬燈已成功更新！');
+                else showMessage('更新失敗');
                 setIsSavingAnnounce(false);
             };
 
@@ -209,14 +273,28 @@
                     if (activeTab === 'products') fetchProducts();
                     if (activeTab === 'settings') fetchAnnouncement();
                 }
-            }, [activeTab, isLoggedIn]);
+            }, [activeTab, isLoggedIn, fetchOrders, fetchProducts, fetchAnnouncement]);
 
             const formatDate = (dateString) => new Date(dateString).toLocaleString('zh-TW', { hour12: false });
+            
             const openModal = (product = null) => {
                 if (product) setCurrentProduct({ ...product });
                 else setCurrentProduct({ category: 'PUBG', name: '', price: '', stock: 99, status: 'active', helper_status: 'normal', description: '' });
                 setIsModalOpen(true);
             };
+
+            const stats = useMemo(() => {
+                let totalRevenue = 0, totalOrders = orders.length, todayRevenue = 0;
+                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+                orders.forEach(o => {
+                    const p = parseFloat(o.total_price) || 0;
+                    if (o.status === 'paid' || o.status === 'completed') {
+                        totalRevenue += p;
+                        if (new Date(o.created_at) >= todayStart) todayRevenue += p;
+                    }
+                });
+                return { totalRevenue, totalOrders, todayRevenue };
+            }, [orders]);
 
             if (!isLoggedIn) {
                 return (
@@ -229,7 +307,7 @@
                             {loginError && (<div className="bg-red-950/80 border border-red-500 text-red-400 text-sm p-3 mb-6 text-center backdrop-blur-sm"><i className="fas fa-exclamation-triangle mr-2"></i> {loginError}</div>)}
                             <form onSubmit={handleLogin} className="space-y-6">
                                 <div><label className="block text-xs text-cyan-600 tracking-widest mb-2">ADMIN_EMAIL</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-[#111]/80 border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500" placeholder="admin@yenshop.com" /></div>
-                                    <div><label className="block text-xs text-cyan-600 tracking-widest mb-2">ACCESS_KEY (PASSWORD)</label><input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#111]/80 border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500" placeholder="••••••••" /></div>
+                                <div><label className="block text-xs text-cyan-600 tracking-widest mb-2">ACCESS_KEY (PASSWORD)</label><input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#111]/80 border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500" placeholder="••••••••" /></div>
                                 <button type="submit" disabled={isLoggingIn} className="w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 text-cyan-300 hover:text-black py-4 font-bold tracking-widest transition-colors disabled:opacity-50">{isLoggingIn ? <i className="fas fa-spinner fa-spin"></i> : 'VERIFY & ENTER'}</button>
                             </form>
                         </div>
@@ -237,21 +315,30 @@
                 );
             }
 
-            const stats = (() => {
-                let totalRevenue = 0, totalOrders = orders.length, todayRevenue = 0;
-                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-                orders.forEach(o => {
-                    const p = parseFloat(o.total_price) || 0;
-                    if (o.status === 'paid' || o.status === 'completed') {
-                        totalRevenue += p;
-                        if (new Date(o.created_at) >= todayStart) todayRevenue += p;
-                    }
-                });
-                return { totalRevenue, totalOrders, todayRevenue };
-            })();
-
             return (
-                <div className="min-h-screen flex flex-col relative">
+                <div className="min-h-screen flex flex-col relative pb-10">
+                    {/* 💡 全局對話框 (取代 Alert/Confirm) */}
+                    {dialog.isOpen && (
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => dialog.type === 'alert' && setDialog(prev => ({ ...prev, isOpen: false }))}></div>
+                            <div className="w-full max-w-sm bg-[#0a0a0a] border border-cyan-500/50 p-6 relative z-10 shadow-[0_0_40px_rgba(34,211,238,0.2)]">
+                                <h3 className="text-cyan-400 font-bold tracking-widest text-sm flex items-center border-b border-gray-800 pb-3 mb-4">
+                                    <i className={`fas ${dialog.type === 'confirm' ? 'fa-question-circle text-yellow-500' : 'fa-info-circle'} mr-2`}></i> SYSTEM_MESSAGE
+                               </h3>
+                                <p className="text-gray-200 text-sm leading-relaxed tracking-wider mb-6">{dialog.message}</p>
+                                <div className="flex justify-end space-x-3">
+                                    {dialog.type === 'confirm' && (
+                                        <button onClick={() => setDialog(prev => ({ ...prev, isOpen: false }))} className="px-4 py-2 text-xs text-gray-400 hover:text-white transition-colors">取消</button>
+                                    )}
+                                    <button onClick={() => {
+                                        if (dialog.type === 'confirm' && dialog.onConfirm) dialog.onConfirm();
+                                        setDialog(prev => ({ ...prev, isOpen: false }));
+                                    }} className="bg-cyan-900/60 hover:bg-cyan-700 text-cyan-300 px-6 py-2 text-xs font-bold tracking-widest transition-colors border border-cyan-800">確認 (CONFIRM)</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="relative z-10 flex flex-col min-h-screen">
                         <header className="bg-black/90 backdrop-blur-md border-b border-cyan-900/50 sticky top-0 z-40">
                             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -279,23 +366,17 @@
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl p-6 relative overflow-hidden group">
                                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="text-xs text-blue-500 font-bold tracking-widest"><i className="fas fa-money-bill-wave mr-2"></i>總營收 (已結算)</div>
-                                            </div>
+                                            <div className="flex justify-between items-start mb-4"><div className="text-xs text-blue-500 font-bold tracking-widest"><i className="fas fa-money-bill-wave mr-2"></i>總營收 (已結算)</div></div>
                                             <div className="text-4xl font-black text-white tracking-wider"><span className="text-lg text-gray-500 mr-1">$</span>{stats.totalRevenue.toLocaleString()}</div>
                                         </div>
                                         <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl p-6 relative overflow-hidden group">
                                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="text-xs text-cyan-500 font-bold tracking-widest"><i className="fas fa-shopping-cart mr-2"></i>總訂單數</div>
-                                            </div>
+                                            <div className="flex justify-between items-start mb-4"><div className="text-xs text-cyan-500 font-bold tracking-widest"><i className="fas fa-shopping-cart mr-2"></i>總訂單數</div></div>
                                             <div className="text-4xl font-black text-white tracking-wider">{stats.totalOrders.toLocaleString()}</div>
                                         </div>
                                         <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl p-6 relative overflow-hidden group">
                                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="text-xs text-yellow-500 font-bold tracking-widest"><i className="fas fa-chart-line mr-2"></i>今日營收</div>
-                                            </div>
+                                            <div className="flex justify-between items-start mb-4"><div className="text-xs text-yellow-500 font-bold tracking-widest"><i className="fas fa-chart-line mr-2"></i>今日營收</div></div>
                                             <div className="text-4xl font-black text-white tracking-wider"><span className="text-lg text-gray-500 mr-1">$</span>{stats.todayRevenue.toLocaleString()}</div>
                                         </div>
                                     </div>
@@ -375,7 +456,9 @@
                                 <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-800 shadow-xl max-w-3xl mx-auto p-8">
                                     <label className="block text-xs text-cyan-600 mb-2 tracking-widest">目前跑馬燈內容 (MARQUEE TEXT)</label>
                                     <textarea value={announcementText} onChange={(e) => setAnnouncementText(e.target.value)} rows="4" className="w-full bg-[#111] border border-gray-700 text-white px-4 py-3 focus:outline-none focus:border-cyan-500 resize-none mb-6"></textarea>
-                                    <button onClick={handleSaveAnnouncement} disabled={isSavingAnnounce} className="w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 text-cyan-300 hover:text-black py-4 font-bold tracking-widest">發送廣播 (UPDATE BROADCAST)</button>
+                                    <button onClick={handleSaveAnnouncement} disabled={isSavingAnnounce} className="w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-cyan-300 hover:text-black py-4 font-bold tracking-widest">
+                                        {isSavingAnnounce ? <><i className="fas fa-spinner fa-spin mr-2"></i> 發送中</> : '發送廣播 (UPDATE BROADCAST)'}
+                                    </button>
                                 </div>
                             )}
                         </main>
@@ -383,7 +466,7 @@
                         {/* 新增/編輯商品 Modal */}
                         {isModalOpen && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !isProductSaving && setIsModalOpen(false)}></div>
                                 <div className="w-full max-w-lg bg-[#0a0a0a] border border-cyan-500/50 p-6 relative z-10 shadow-[0_0_30px_rgba(8,145,178,0.2)] my-8">
                                     <h2 className="text-xl font-bold text-white tracking-widest mb-4 border-b border-gray-800 pb-3">{currentProduct.id ? '編輯數位資產 (EDIT_ASSET)' : '新增數位資產 (NEW_ASSET)'}</h2>
                                     <form onSubmit={handleSaveProduct} className="space-y-4">
@@ -406,8 +489,10 @@
                                             <div><label className="block text-xs text-cyan-600 mb-1 tracking-widest">庫存 (STOCK)</label><input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} className="w-full bg-[#111] border border-gray-700 text-white px-3 py-1.5 focus:border-cyan-500 outline-none" /></div>
                                         </div>
                                         <div className="flex justify-end space-x-4 pt-3 mt-4 border-t border-gray-800">
-                                            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-400 hover:text-white">CANCEL</button>
-                                            <button type="submit" className="bg-cyan-600 hover:bg-cyan-500 text-black px-6 py-2 font-bold tracking-widest">{currentProduct.id ? 'UPDATE_ASSET' : 'CREATE_ASSET'}</button>
+                                            <button type="button" onClick={() => setIsModalOpen(false)} disabled={isProductSaving} className="px-4 py-2 text-gray-400 hover:text-white disabled:opacity-50">CANCEL</button>
+                                            <button type="submit" disabled={isProductSaving} className="bg-cyan-600 hover:bg-cyan-500 text-black px-6 py-2 font-bold tracking-widest disabled:opacity-50">
+                                                {isProductSaving ? <i className="fas fa-spinner fa-spin"></i> : currentProduct.id ? 'UPDATE_ASSET' : 'CREATE_ASSET'}
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -417,10 +502,10 @@
                         {/* 卡密管理金庫 Modal */}
                         {isKeyModalOpen && keyModalProduct && (
                             <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsKeyModalOpen(false)}></div>
+                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !isKeysImporting && setIsKeyModalOpen(false)}></div>
                                 <div className="w-full max-w-4xl bg-[#0a0a0a] border border-cyan-500/50 p-6 relative z-10 shadow-[0_0_40px_rgba(8,145,178,0.2)] flex flex-col md:flex-row h-[80vh]">
                                     
-                                    <button onClick={() => setIsKeyModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white md:hidden z-20"><i className="fas fa-times text-xl"></i></button>
+                                    {!isKeysImporting && <button onClick={() => setIsKeyModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white md:hidden z-20"><i className="fas fa-times text-xl"></i></button>}
                                     
                                     <div className="w-full md:w-1/3 flex flex-col border-b md:border-b-0 md:border-r border-gray-800 pb-6 md:pb-0 md:pr-6">
                                         <h2 className="text-xl font-bold text-white tracking-widest mb-1">卡密金庫</h2>
@@ -432,15 +517,16 @@
                                             onChange={(e) => setNewKeysText(e.target.value)}
                                             className="flex-grow w-full bg-[#111] border border-gray-700 text-cyan-400 font-mono text-sm px-4 py-3 focus:outline-none focus:border-cyan-500 resize-none" 
                                             placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY&#10;ZZZZ-ZZZZ-ZZZZ"
+                                            disabled={isKeysImporting}
                                         ></textarea>
-                                        <button onClick={handleImportKeys} className="mt-4 w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 text-cyan-300 hover:text-black py-3 font-bold tracking-widest transition-colors flex items-center justify-center">
-                                            <i className="fas fa-download mr-2"></i> 開始匯入 (IMPORT)
+                                        <button onClick={handleImportKeys} disabled={isKeysImporting || !newKeysText.trim()} className="mt-4 w-full bg-cyan-900/60 border border-cyan-500 hover:bg-cyan-600 disabled:bg-gray-800 disabled:border-gray-700 disabled:text-gray-500 text-cyan-300 hover:text-black py-3 font-bold tracking-widest transition-colors flex items-center justify-center">
+                                            {isKeysImporting ? <><i className="fas fa-spinner fa-spin mr-2"></i> 匯入中...</> : <><i className="fas fa-download mr-2"></i> 開始匯入 (IMPORT)</>}
                                         </button>
                                         <p className="text-[10px] text-gray-500 mt-2 text-center">此為手動發貨金庫，庫存數量請於商品編輯處設定</p>
                                     </div>
 
                                     <div className="w-full md:w-2/3 flex flex-col pt-6 md:pt-0 md:pl-6 relative">
-                                        <button onClick={() => setIsKeyModalOpen(false)} className="absolute top-0 right-0 text-gray-500 hover:text-white hidden md:block"><i className="fas fa-times text-xl"></i></button>
+                                        {!isKeysImporting && <button onClick={() => setIsKeyModalOpen(false)} className="absolute top-0 right-0 text-gray-500 hover:text-white hidden md:block"><i className="fas fa-times text-xl"></i></button>}
                                         
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="text-sm font-bold text-gray-300 tracking-widest">目前庫存卡密清單</h3>
@@ -469,22 +555,53 @@
                                                                 <td className={`p-3 font-mono ${k.is_used ? 'text-gray-600 line-through' : 'text-cyan-300 select-all'}`}>{k.key_code}</td>
                                                                 <td className="p-3 text-center">
                                                                     {k.is_used 
-                                                                        ? <span className="bg-red-900/30 text-red-500 px-2 py-0.5 rounded-sm">已售出</span> 
-                                                                        : <span className="bg-green-900/30 text-green-500 px-2 py-0.5 rounded-sm">未使用</span>}
-                                                                </td>
-                                                                <td className="p-3 text-right">
-                                                                    {!k.is_used && (
-                                                                        <button onClick={() => handleDeleteKey(k.id)} className="text-gray-500 hover:text-red-500" title="刪除此卡密">
-                                                                            <i className="fas fa-trash-alt"></i>
-                                                                        </button>
-                                                                    )}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                                ? <span className="bg-red-900/30 text-red-500 px-2 py-0.5 rounded-sm">已售出</span> 
+                                                                : <span className="bg-green-900/30 text-green-500 px-2 py-0.5 rounded-sm">未使用</span>}
+                                                        </td>
+                                                        <td className="p-3 text-right">
+                                                            <button onClick={() => copyToClipboard(k.key_code)} className="text-gray-500 hover:text-white mr-3" title="複製卡密">
+                                                                <i className="fas fa-copy"></i>
+                                                            </button>
+                                                            <button onClick={() => handleToggleKeyStatus(k)} className="text-gray-500 hover:text-yellow-500 mr-3" title={k.is_used ? "復原為未使用" : "手動標記為已售出"}>
+                                                                <i className={`fas ${k.is_used ? 'fa-undo' : 'fa-check-circle'}`}></i>
+                                                            </button>
+                                                            {!k.is_used && (
+                                                                <button onClick={() => { setDispatchingKey(k); setDispatchEmail(''); }} className="text-cyan-600 hover:text-cyan-400 mr-3" title="手動發卡至信箱">
+                                                                    <i className="fas fa-envelope"></i>
+                                                                </button>
+                                                            )}
+                                                            <button onClick={() => handleDeleteKey(k.id)} className="text-gray-500 hover:text-red-500" title="刪除此卡密">
+                                                                <i className="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
                                                     </tbody>
                                                 </table>
                                             )}
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 手動發卡 Modal */}
+                        {dispatchingKey && (
+                            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setDispatchingKey(null)}></div>
+                                <div className="w-full max-w-sm bg-[#0a0a0a] border border-cyan-500/50 p-6 relative z-10 shadow-[0_0_40px_rgba(8,145,178,0.2)]">
+                                    <h3 className="text-cyan-400 font-bold tracking-widest text-sm mb-4 border-b border-gray-800 pb-3">
+                                        <i className="fas fa-paper-plane mr-2"></i> 手動發送卡密 (MANUAL_DISPATCH)
+                                    </h3>
+                                    <div className="mb-4 text-xs text-gray-400 bg-[#111] p-3 border border-gray-800">
+                                        <p className="mb-1 text-gray-500">商品：<span className="text-gray-300">{keyModalProduct?.name}</span></p>
+                                        <p className="text-gray-500">卡密：<span className="text-cyan-400 font-mono select-all">{dispatchingKey.key_code}</span></p>
+                                    </div>
+                                    <label className="block text-xs text-cyan-600 tracking-widest mb-2">接收客戶信箱</label>
+                                    <input type="email" value={dispatchEmail} onChange={e => setDispatchEmail(e.target.value)} placeholder="customer@example.com" className="w-full bg-[#111] border border-gray-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 mb-6 font-mono" />
+                                    <div className="flex justify-end space-x-3">
+                                        <button onClick={() => setDispatchingKey(null)} className="px-4 py-2 text-xs text-gray-400 hover:text-white transition-colors">取消 (CANCEL)</button>
+                                        <button onClick={handleDispatchKey} className="bg-cyan-900/60 hover:bg-cyan-700 text-cyan-300 px-4 py-2 text-xs font-bold tracking-widest border border-cyan-800 transition-colors">發送並標記售出 (SEND)</button>
                                     </div>
                                 </div>
                             </div>
@@ -495,22 +612,6 @@
         }
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<AdminApp />);
-    </script>
-    <script>
-        (function() {
-            var v = document.getElementById('bg-video');
-            if (!v) return;
-            var playVideo = function() {
-                v.play().catch(function(e) {
-                    console.warn('Video autoplay blocked:', e);
-                    document.addEventListener('click', function() { v.play(); }, { once: true });
-                });
-            };
-            v.addEventListener('loadeddata', function() { console.log('Video loaded OK'); });
-            v.addEventListener('error', function(e) { console.error('Video error:', v.error); });
-            if (v.readyState >= 2) playVideo();
-            else v.addEventListener('canplay', playVideo);
-        })();
     </script>
 </body>
 </html>
