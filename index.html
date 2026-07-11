@@ -352,7 +352,9 @@
                             /* 1. 首頁沉浸式影片佈局 - 調整為不透明的純色卡片元素 */
                             <div className="w-full h-full min-h-screen relative flex items-center justify-center hero-bg">
                                 <video 
+                                    id="heroVideo"
                                     poster="https://placehold.co/1600x900/0b1124/ffffff?text=AXGSHOP+Hero"
+                                    controls
                                     autoPlay 
                                     loop 
                                     muted 
@@ -361,7 +363,7 @@
                                     className="absolute inset-0 w-full h-full object-cover z-0"
                                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                 >
-                                    <source src="axgshop.mp4" type="video/mp4" />
+                                    <source src="134431.mp4 " type="video/mp4" />
                                     您的瀏覽器不支援內嵌影片。
                                 </video>
                                 {/* 移除毛玻璃與多餘透明度，改為高對比黑色底罩 */}
@@ -394,6 +396,18 @@
                                         >
                                             加入 Discord
                                         </a>
+                                        {/* 本地影片播放測試按鈕 */}
+                                        <button
+                                            onClick={() => {
+                                                const v = document.getElementById('heroVideo');
+                                                if (v) {
+                                                    if (v.paused) v.play(); else v.pause();
+                                                }
+                                            }}
+                                            className="px-6 py-3.5 rounded-xl border border-pink-500/40 text-pink-300 font-bold hover:bg-pink-600/10 transition-all"
+                                        >
+                                            播放測試
+                                        </button>
                                     </div>
                                 </div>
                             </div>
