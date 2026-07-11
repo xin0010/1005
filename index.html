@@ -24,6 +24,8 @@
         .gradient-text {
             background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
             -webkit-background-clip: text;
+            background-clip: text;
+        
             -webkit-text-fill-color: transparent;
         }
         .glow-purple {
@@ -32,6 +34,11 @@
         .glow-purple-hover:hover {
             box-shadow: 0 0 25px rgba(219, 39, 119, 0.6);
             border-color: #db2777;
+        }
+        .hero-bg {
+            background-image: url('https://placehold.co/1600x900/0b1124/ffffff?text=AXGSHOP+Hero');
+            background-size: cover;
+            background-position: center;
         }
     </style>
 </head>
@@ -343,9 +350,8 @@
                         {/* 內容分頁選取 */}
                         {activeTab === 'shop' ? (
                             /* 1. 首頁沉浸式影片佈局 - 調整為不透明的純色卡片元素 */
-                            <div className="w-full h-full min-h-screen relative flex items-center justify-center" style={{ backgroundImage: "url('https://placehold.co/1600x900/0b1124/ffffff?text=AXGSHOP+Hero')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                            <div className="w-full h-full min-h-screen relative flex items-center justify-center hero-bg">
                                 <video 
-                                    src="axgshop.mp4" 
                                     poster="https://placehold.co/1600x900/0b1124/ffffff?text=AXGSHOP+Hero"
                                     autoPlay 
                                     loop 
@@ -354,7 +360,10 @@
                                     preload="auto"
                                     className="absolute inset-0 w-full h-full object-cover z-0"
                                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                />
+                                >
+                                    <source src="axgshop.mp4" type="video/mp4" />
+                                    您的瀏覽器不支援內嵌影片。
+                                </video>
                                 {/* 移除毛玻璃與多餘透明度，改為高對比黑色底罩 */}
                                 <div className="absolute inset-0 bg-black/50 z-10"></div>
                                 
