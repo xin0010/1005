@@ -208,6 +208,27 @@
         </div>
     </header>
 
+    <!-- Marquee Announcement Banner -->
+    <div class="bg-cyan-950/60 border-b border-cyan-900/40 py-2 px-4 overflow-hidden relative z-40 font-mono text-xs backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex items-center">
+            <div class="flex items-center gap-2 text-cyan-400 font-bold whitespace-nowrap mr-4 bg-cyan-950/90 px-3 py-1 rounded-lg border border-cyan-500/30">
+                <i class="fa-solid fa-bullhorn text-cyan-400 animate-bounce" aria-hidden="true"></i>
+                <span>最新公告：</span>
+            </div>
+            <div class="overflow-hidden whitespace-nowrap w-full">
+                <div class="inline-block animate-[marquee_25s_linear_infinite] text-slate-300" role="marquee" aria-label="即時公告">
+                    🔥 歡迎來到AXG SHOP 亞洲遊戲輔助官網24小時自動發卡商城！各款特戰英豪、PUBG、Free Fire、傳說對決輔助皆已更新最新過檢防封版本！ ⚡ 付款後秒發金鑰，如有安裝或驅動疑問請立即加入官方 <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="text-cyan-400 underline">Discord 客群</a> 獲得 1 對 1 克服！
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes marquee {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(-100%); }
+            }
+        </style>
+    </div>
+
     <main class="flex-grow flex flex-col w-full">
 
         <!-- Home / Landing View -->
@@ -219,7 +240,7 @@
                 </div>
                 
                 <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-mono tracking-tight text-white mb-6 leading-tight">
-                    亞洲經銷商 <br class="hidden sm:block">
+                    亞洲輔助經銷商 <br class="hidden sm:block">
                     <span class="title-gradient">AXG SHOP</span>
                 </h1>
                 
