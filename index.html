@@ -1,670 +1,344 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXGSHOP 亞洲輔助經銷商</title>
-    <!-- Tailwind CSS CDN -->
+    <title>CyberStore - 頂級遊戲與數位商品商城</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React 18 -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Babel for JSX compilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0b0712; }
-        ::-webkit-scrollbar-thumb { background: #7e22ce; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #db2777; }
-        
-        /* 能量紫與灼粉流光漸層 */
-        .gradient-bg { 
-            background: linear-gradient(135deg, #6d28d9 0%, #db2777 100%); 
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#090d16',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            cyan: '#06b6d4',
+                            cyanHover: '#22d3ee',
+                            accent: '#38bdf8',
+                            muted: '#94a3b8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
         }
-        .gradient-text {
-            background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .title-bicolor {
+            position: relative;
+            display: inline-block;
+            background: linear-gradient(90deg, #06b6d4 0%, #38bdf8 100%);
             -webkit-background-clip: text;
-            background-clip: text;
-        
             -webkit-text-fill-color: transparent;
         }
-        .glow-purple {
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        .title-bicolor::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #06b6d4 30%, #38bdf8 100%);
+            border-radius: 2px;
         }
-        .glow-purple-hover:hover {
-            box-shadow: 0 0 25px rgba(219, 39, 119, 0.6);
-            border-color: #db2777;
+
+        .cyber-card {
+            background: linear-gradient(135deg, #0f172a 0%, #090d16 100%);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            clip-path: polygon(
+                0 0, 
+                calc(100% - 15px) 0, 100% 15px, 
+                100% 100%, 
+                15px 100%, 0 calc(100% - 15px)
+            );
         }
-        .hero-bg {
-            background-image: url('https://placehold.co/1600x900/0b1124/ffffff?text=AXGSHOP+Hero');
-            background-size: cover;
-            background-position: center;
+        .cyber-card:hover {
+            border-color: rgba(6, 182, 212, 0.8);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+            transform: translateY(-3px);
+        }
+
+        .cyber-button {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.1) 0%, rgba(56, 189, 248, 0.2) 100%);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            transition: all 0.2s ease;
+        }
+        .cyber-button:hover {
+            background: rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
         }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 font-sans selection:bg-purple-600 selection:text-white">
-    <div id="root"></div>
+<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black">
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-cyan-900/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                    <i class="fa-solid fa-terminal text-black text-lg"></i>
+                </div>
+                <span class="font-mono font-bold text-xl tracking-wider text-cyan-400">CYBER<span class="text-white">STORE</span></span>
+            </div>
+            
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300 font-mono">
+                <button onclick="switchTab('home')" id="nav-home" class="text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer">[首頁]</button>
+                <button onclick="switchTab('mobile-store')" id="nav-mobile" class="text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer">[手遊輔助商城]</button>
+            </nav>
 
-        // 模擬遊戲商品資料，完美呼應 image_e86d27.jpg 
-        const INITIAL_PRODUCTS = [
-            { 
-                id: 1, 
-                title: 'VALO特戰英豪', 
-                name: 'Valorant外掛/輔助 | 特戰英豪外掛/輔助 | 瓦羅蘭外掛/輔助 (7)', 
-                price: 290, 
-                stock: 7, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/1e1b4b/ec4899?text=VALORANT',
-                description: '【高穩定透視+記憶體自瞄】獨家防偵測過檢，適用全階段排位，頂級玩家首選。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 2, 
-                title: 'DF三角洲行動', 
-                name: 'DeltaForce外掛/輔助 | 三角洲行動外掛/輔助 (15)', 
-                price: 120, 
-                stock: 15, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/0f172a/3b82f6?text=DELTA+FORCE',
-                description: '【骨骼透視+雷達顯示】大戰場神級物資顯示，子彈追蹤，讓你在三角洲如虎添翼！',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 3, 
-                title: 'APEX英雄', 
-                name: 'APEX英雄外掛/輔助 (14)', 
-                price: 180, 
-                stock: 14, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/311042/a855f7?text=APEX+LEGENDS',
-                description: '【預判自瞄+強擊追蹤】完美相容Steam與EA平台，全功能穩定上大師，輕鬆一打三。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 4, 
-                title: 'ARC Raiders', 
-                name: 'ARC Raiders外掛/輔助 | 弧光掠奪者外掛/輔助 (6)', 
-                price: 350, 
-                stock: 6, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/022c22/10b981?text=ARC+Raiders',
-                description: '【全地圖自動掃描+物資定位】新遊首發獨家技術，安全系數最高，暢享掠奪快感。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 5, 
-                title: 'ROBLOX', 
-                name: 'ROBLOX外掛/輔助 | 機器磚塊外掛/輔助 (4)', 
-                price: 99, 
-                stock: 4, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/450a0a/ef4444?text=ROBLOX',
-                description: '【無限跳躍+全腳本執行器】完美支援熱門地圖腳本，安全防封，全網最強多功能工具。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 6, 
-                title: 'PUBG絕地求生', 
-                name: 'PUBG外掛/輔助 | 絕地求生外掛/輔助 (13)', 
-                price: 150, 
-                stock: 13, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/1c1917/f59e0b?text=PUBG',
-                description: '【獨家無後座力+物品過濾】大圖透視精準測距，綠色純潔防封，吃雞家常便飯！',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 7, 
-                title: 'RUST腐蝕', 
-                name: 'Rust外掛/輔助 | 腐蝕外掛/輔助 (11)', 
-                price: 450, 
-                stock: 11, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/180c0c/b91c1c?text=RUST',
-                description: '【自動壓槍+無後座+透視】完美辨別玩家及木箱防空，大特級自瞄，讓你成為荒野霸主。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 8, 
-                title: 'CS2絕對武力', 
-                name: 'CS2外掛/輔助 | 絕對武力外掛/輔助 (7)', 
-                price: 199, 
-                stock: 7, 
-                category: 'pc', 
-                img: 'https://placehold.co/400x400/02122c/1d4ed8?text=CS2',
-                description: '【內部演技自瞄+發光透視】相容完美平台及官匹，穩定低調，完美偽裝大師。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 9, 
-                title: '蘋果正版簽名', 
-                name: '[IOS蘋果專用] IOS正版企業簽名 | 免越獄安裝專用通道 (50)', 
-                price: 600, 
-                stock: 50, 
-                category: 'ios', 
-                img: 'https://placehold.co/400x400/1e1b4b/ec4899?text=iOS+CERT',
-                description: '【免越獄直裝簽名】提供頂級穩定證書，秒殺市面劣質簽名，掉簽包補，體驗流暢。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            },
-            { 
-                id: 10, 
-                title: '安卓熱門輔助', 
-                name: '[Android安卓專用] DeltaForce三角洲行動免Root多功能輔助 (20)', 
-                price: 120, 
-                stock: 20, 
-                category: 'android', 
-                img: 'https://placehold.co/400x400/0f172a/10b981?text=ANDROID',
-                description: '【免ROOT直裝版】頂級繪圖幀率不卡頓，全物資車輛人骨透視，高強度熱門主推。',
-                discordUrl: 'https://discord.gg/B6eNEhgJ4W',
-                guideUrl: '#'
-            }
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleCart()" class="relative p-2.5 rounded-lg bg-slate-800/80 border border-slate-700 hover:border-cyan-500 transition-all text-slate-300 hover:text-cyan-400" aria-label="購物車">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-cyan-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col w-full">
+        <section id="view-home" class="relative w-full min-h-[85vh] flex flex-col items-center justify-center overflow-hidden py-12">
+            <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover filter contrast-110 brightness-95 opacity-85 z-0">
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
+                您的瀏覽器不支援 HTML5 影片播放。
+            </video>
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-[#090d16] via-[#090d16]/50 to-[#090d16]/80 z-10 pointer-events-none"></div>
+            
+            <div class="relative z-20 max-w-5xl mx-auto px-4 text-center my-auto">
+                <div class="inline-block mb-4 font-mono text-xs text-cyan-400 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                    <i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-2 animate-pulse"></i> SYSTEM_CINEMATIC_REEL / 賽博朋克實境串流
+                </div>
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-mono tracking-tight text-white mb-6 drop-shadow-lg">
+                    <span class="title-bicolor">AXG SHOP亞洲輔助經銷商</span>
+                </h1>
+                <p class="text-slate-300 max-w-2xl mx-auto font-mono text-sm sm:text-base mb-10 leading-relaxed">
+                    <span class="highlighter-underline text-cyan-100">SECURE DIGITAL ASSETS & PRIVILEGE EXECUTION HUB</span>
+                </p>
+                <div class="mt-4">
+                    <button onclick="switchTab('mobile-store')" class="cyber-button inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cyan-400 font-mono text-sm font-bold transition-transform hover:scale-105 cursor-pointer">
+                        <span>進入手遊輔助商城</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-mobile-store" class="w-full bg-[#090d16] py-16 px-4 sm:px-6 lg:px-8 hidden">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide mb-2 font-mono">手遊輔助商城</h2>
+                    <p class="text-sm font-mono text-slate-400">首頁 / 手遊輔助商城</p>
+                </div>
+
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Cards will be populated dynamically -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-cyan-900/30 bg-[#090d16] py-6 text-center text-xs font-mono text-slate-500">
+        <p>&copy; 2026 CYBERSTORE DIGITAL COMMERCE. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    <!-- Cart Drawer -->
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#0f172a] border-l border-cyan-900/50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-5 border-b border-cyan-900/40 flex items-center justify-between">
+            <h3 class="font-mono font-bold text-lg text-white flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-cyan-400"></i> 購物車清單 (<span id="cart-count-header">0</span>)
+            </h3>
+            <button onclick="toggleCart()" class="text-slate-400 hover:text-cyan-400" aria-label="關閉購物車">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="flex-grow overflow-y-auto p-5 space-y-4">
+            <p class="text-slate-500 text-center font-mono text-sm py-10">購物車目前無商品</p>
+        </div>
+        <div class="p-5 border-t border-cyan-900/40 bg-[#090d16]">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-mono text-slate-400">總計金額</span>
+                <span id="cart-total" class="text-xl font-bold font-mono text-cyan-400">NT$ 0</span>
+            </div>
+            <button onclick="checkout()" class="cyber-button w-full py-3.5 rounded-lg font-mono text-sm font-bold text-cyan-400 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-bolt"></i>
+                <span>立即結帳 / CHECKOUT</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#0f172a] border border-cyan-500 text-cyan-400 px-5 py-3 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] font-mono text-sm flex items-center gap-3 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-msg">操作成功！</span>
+    </div>
+
+    <script>
+        let cart = [];
+
+        const products = [
+            { category: "[特戰英豪]", name: "永久", price: 6500, stock: 99 },
+            { category: "[特戰英豪]", name: "月卡", price: 1499, stock: 999 },
+            { category: "[特戰英豪]", name: "周卡", price: 600, stock: 999 },
+            { category: "[特戰英豪]", name: "天卡", price: 150, stock: 999 },
+            { category: "[代理批發]", name: "FREE-FIRE", price: 5500, stock: 100 },
+            { category: "[FREE-FIRE]", name: "iOS月卡", price: 1000, stock: 100 },
+            { category: "[代理批發]", name: "傳說對決", price: 5500, stock: 500 },
+            { category: "[電商網站]", name: "網站設計客製化", price: 20000, stock: 999 },
+            { category: "[iOS證書]", name: "保固40天證書", price: 200, stock: 997 },
+            { category: "[三角洲行動]", name: "安卓單雷-月卡", price: 1300, stock: 30 },
+            { category: "[傳說對決]", name: "ios月卡", price: 1370, stock: 50 },
+            { category: "[PUBG]", name: "IOS-月卡", price: 1035, stock: 999 }
         ];
 
-        function ShopApp() {
-            const [products, setProducts] = useState(INITIAL_PRODUCTS);
-            const [cart, setCart] = useState([]);
-            const [activeTab, setActiveTab] = useState('shop');
-            const [selectedProduct, setSelectedProduct] = useState(null);
-            const [showLoginModal, setShowLoginModal] = useState(false);
-            const [user, setUser] = useState(null);
-            const [toastMessage, setToastMessage] = useState(null);
-
-            // 自訂 Toast 訊息提示
-            const showToast = (message) => {
-                setToastMessage(message);
-                setTimeout(() => {
-                    setToastMessage(null);
-                }, 3000);
-            };
-
-            const addToCart = (product) => {
-                if (product.stock > 0) {
-                    setCart([...cart, { ...product, cartId: Date.now() }]);
-                    setProducts(products.map(p => p.id === product.id ? { ...p, stock: p.stock - 1 } : p));
-                    showToast(`🛒 已成功將 [${product.title}] 加入購物車！`);
-                } else {
-                    showToast(`⚠️ 抱歉，該商品已無庫存！`);
-                }
-            };
-
-            const removeFromCart = (cartId, productId) => {
-                setCart(cart.filter(item => item.cartId !== cartId));
-                setProducts(products.map(p => p.id === productId ? { ...p, stock: p.stock + 1 } : p));
-                showToast(`🗑️ 已從購物車移除該項目。`);
-            };
-
-            const handleCheckout = () => {
-                if (!user) {
-                    showToast(`🔑 請先登入會員再進行結帳！`);
-                    setShowLoginModal(true);
-                    return;
-                }
-                const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
-                showToast(`🎉 結帳成功！已扣除模擬金額：$${totalAmount}`);
-                setCart([]);
-            };
-
-            const handleLogin = (e) => {
-                e.preventDefault();
-                const username = e.target.username.value;
-                if(username.trim()) {
-                    setUser({ username });
-                    setShowLoginModal(false);
-                    showToast(`👋 歡迎回來，${username}！`);
-                }
-            };
-
-            const handleLogout = () => {
-                setUser(null);
-                showToast(`🚪 已成功登出會員帳號。`);
-            };
-
-            const filteredProducts = products.filter(p => p.category === activeTab);
-
-            return (
-                <div className="min-h-screen flex text-gray-100 bg-gray-950">
-                    
-                    {/* Toast 訊息元件 */}
-                    {toastMessage && (
-                        <div className="fixed top-5 right-5 z-50 bg-gray-900 border border-pink-500/50 text-pink-400 px-6 py-4 rounded-xl shadow-[0_0_20px_rgba(219,39,119,0.3)] flex items-center gap-3 animate-bounce">
-                            <span className="text-xl">✨</span>
-                            <span className="font-semibold">{toastMessage}</span>
-                        </div>
-                    )}
-
-                    {/* 左側導覽列 Sidebar */}
-                    <aside className="w-64 bg-gray-900 border-r border-purple-950/60 p-6 flex flex-col min-h-screen shrink-0 sticky top-0 h-screen z-20">
-                        {/* 品牌 Logo - image_e86ca2.png */}
-                        <div className="flex items-center gap-3 mb-10">
-                            <img 
-                                src="image_e86ca2.png" 
-                                alt="Logo" 
-                                className="w-12 h-12 rounded-lg border border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] bg-slate-950" 
-                                onError={(e) => { e.target.src = "https://placehold.co/50x50/2e1065/white?text=🐈"; }}
-                            />
-                            <div>
-                                <h1 className="text-lg font-bold text-white tracking-widest leading-tight">AXGSHOP</h1>
-                                <p className="text-[10px] text-purple-400 font-semibold tracking-wider">精選輔助代理</p>
-                                <p className="text-[8px] text-gray-400 tracking-wider">亞洲精選輔助代理</p>
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map((item, idx) => `
+                <div class="cyber-card p-5 flex flex-col justify-between h-52">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono text-cyan-400">${item.category}</span>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+                                <i class="fa-solid fa-shield text-emerald-400 text-[10px]"></i>
+                                <i class="fa-solid fa-code text-cyan-400 text-[10px]"></i>
+                                <i class="fa-solid fa-user-secret text-slate-400 text-[10px]"></i>
                             </div>
                         </div>
-
-                        {/* 導航選單 */}
-                        <nav className="flex-grow space-y-1.5 overflow-y-auto">
-                            <button 
-                                onClick={() => setActiveTab('shop')} 
-                                className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all font-medium ${activeTab === 'shop' ? 'gradient-bg text-white shadow-lg' : 'hover:bg-purple-900/20 text-gray-300'}`}
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                                首頁
-                            </button>
-
-                            <div className="text-xs font-bold text-purple-400/80 mt-6 mb-2 px-2 uppercase tracking-widest">商城分類</div>
-                            
-                            <button 
-                                onClick={() => setActiveTab('pc')} 
-                                className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all font-medium ${activeTab === 'pc' ? 'gradient-bg text-white shadow-lg' : 'hover:bg-purple-900/20 text-gray-300'}`}
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                PC 商城
-                            </button>
-                            
-                            <button 
-                                onClick={() => setActiveTab('ios')} 
-                                className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all font-medium ${activeTab === 'ios' ? 'gradient-bg text-white shadow-lg' : 'hover:bg-purple-900/20 text-gray-300'}`}
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                IOS 商城
-                            </button>
-                            
-                            <button 
-                                onClick={() => setActiveTab('android')} 
-                                className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all font-medium ${activeTab === 'android' ? 'gradient-bg text-white shadow-lg' : 'hover:bg-purple-900/20 text-gray-300'}`}
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                安卓商城
-                            </button>
-
-                            <div className="text-xs font-bold text-purple-400/80 mt-6 mb-2 px-2 uppercase tracking-widest">會員專區</div>
-                            
-                            <button 
-                                onClick={() => setActiveTab('cart')} 
-                                className={`flex items-center justify-between w-full p-3 rounded-xl transition-all font-medium ${activeTab === 'cart' ? 'gradient-bg text-white shadow-lg' : 'hover:bg-purple-900/20 text-gray-300'}`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                    我的購物車
-                                </div>
-                                <span className="bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-                                    {cart.length}
-                                </span>
-                            </button>
-                        </nav>
-
-                        {/* 會員資訊欄 */}
-                        <div className="pt-4 border-t border-purple-950/60 mt-auto">
-                            {user ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3 bg-purple-950/40 p-3 rounded-xl border border-purple-900/30">
-                                        <div className="w-8 h-8 rounded-full gradient-bg flex items-center justify-center font-bold text-white text-sm">
-                                            {user.username[0].toUpperCase()}
-                                        </div>
-                                        <div className="overflow-hidden">
-                                            <p className="text-xs text-purple-400">登入帳戶</p>
-                                            <p className="text-sm font-semibold truncate text-white">{user.username}</p>
-                                        </div>
-                                    </div>
-                                    <button 
-                                        onClick={handleLogout} 
-                                        className="w-full text-center py-2 text-xs border border-red-500/30 hover:border-red-500 hover:bg-red-950/30 rounded-xl transition-colors text-red-400"
-                                    >
-                                        登出帳號
-                                    </button>
-                                </div>
-                            ) : (
-                                <button 
-                                    onClick={() => setShowLoginModal(true)} 
-                                    className="w-full text-center py-3 rounded-xl gradient-bg hover:opacity-90 transition-all font-bold tracking-widest text-sm"
-                                >
-                                    🔑 會員登入
-                                </button>
-                            )}
+                        <h3 class="text-white text-base font-bold font-mono mb-1">${item.name}</h3>
+                        <a href="#" onclick="showDetails('${item.category} ${item.name}'); return false;" class="text-[11px] font-mono text-cyan-400/80 hover:text-cyan-300 flex items-center gap-1">
+                            <i class="fa-solid fa-folder-open text-[10px]"></i> 查看商品詳情
+                        </a>
+                    </div>
+                    <div>
+                        <div class="flex items-baseline justify-between mb-3">
+                            <span class="text-cyan-400 font-bold font-mono text-lg">NT$ ${item.price.toLocaleString()}</span>
+                            <span class="text-[11px] font-mono text-slate-400">Stock: ${item.stock}</span>
                         </div>
-                    </aside>
-
-                    {/* 右側主要內容區域 */}
-                    <main className="flex-grow min-h-screen relative overflow-x-hidden flex flex-col">
-                        
-                        {/* 內容分頁選取 */}
-                        {activeTab === 'shop' ? (
-                            /* 1. 首頁沉浸式影片佈局 - 調整為不透明的純色卡片元素 */
-                            <div className="w-full h-full min-h-screen relative flex items-center justify-center hero-bg">
-                                <video 
-                                    id="heroVideo"
-                                    poster="https://placehold.co/1600x900/0b1124/ffffff?text=AXGSHOP+Hero"
-                                    controls
-                                    autoPlay 
-                                    loop 
-                                    muted 
-                                    playsInline 
-                                    preload="auto"
-                                    className="absolute inset-0 w-full h-full object-cover z-0"
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                >
-                                    <source src="134.mp4 " type="video/mp4" />
-                                    您的瀏覽器不支援內嵌影片。
-                                </video>
-                                {/* 移除毛玻璃與多餘透明度，改為高對比黑色底罩 */}
-                                <div className="absolute inset-0 bg-black/50 z-10"></div>
-                                
-                                {/* 移除小視窗外殼，讓文字與按鈕直接呈現於背景之上 */}
-                                <div className="relative z-20 text-center p-8 md:p-12 max-w-2xl mx-auto flex flex-col items-center justify-center">
-                                    <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 bg-purple-950 border border-purple-500/50 rounded-full text-xs text-purple-300 font-bold uppercase tracking-widest">
-                                        🚀 亞洲最專業輔助代理平台
-                                    </div>
-                                    <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-wider">
-                                        <span className="text-white">探索</span>
-                                        <span className="gradient-text ml-2 drop-shadow-[0_0_15px_rgba(219,39,119,0.5)]">AXGSHOP</span>
-                                    </h2>
-                                    <p className="text-lg md:text-xl text-gray-300 max-w-md mx-auto mb-8 font-medium">
-                                        最新商品，即刻擁有
-                                    </p>
-                                    <div className="flex flex-wrap gap-4 justify-center">
-                                        <button 
-                                            onClick={() => setActiveTab('pc')} 
-                                            className="px-8 py-3.5 rounded-xl gradient-bg text-white font-bold tracking-wider hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(168,85,247,0.5)]"
-                                        >
-                                            進入商城
-                                        </button>
-                                        <a 
-                                            href="https://discord.gg/B6eNEhgJ4W" 
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-8 py-3.5 rounded-xl border border-purple-500/50 bg-purple-950 text-white font-bold tracking-wider hover:bg-purple-900 hover:scale-105 active:scale-95 transition-all"
-                                        >
-                                            加入 Discord
-                                        </a>
-                                        {/* 本地影片播放測試按鈕 */}
-                                        <button
-                                            onClick={() => {
-                                                const v = document.getElementById('heroVideo');
-                                                if (v) {
-                                                    if (v.paused) v.play(); else v.pause();
-                                                }
-                                            }}
-                                            className="px-6 py-3.5 rounded-xl border border-pink-500/40 text-pink-300 font-bold hover:bg-pink-600/10 transition-all"
-                                        >
-                                            播放測試
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : activeTab === 'cart' ? (
-                            /* 2. 購物車頁面佈局 */
-                            <div className="p-8 max-w-4xl mx-auto w-full mt-6">
-                                <h2 className="text-3xl font-bold mb-8 text-white flex items-center gap-3">
-                                    <span className="text-pink-500">🛒</span> 我的購物車
-                                </h2>
-
-                                {cart.length === 0 ? (
-                                    <div className="bg-gray-900 border border-purple-950/60 p-12 rounded-2xl text-center">
-                                        <div className="text-5xl mb-4">🏜️</div>
-                                        <p className="text-gray-400 text-lg mb-6">目前購物車是空的，快去商城逛逛吧！</p>
-                                        <button 
-                                            onClick={() => setActiveTab('pc')} 
-                                            className="px-6 py-3 rounded-xl gradient-bg font-bold text-white"
-                                        >
-                                            前往 PC 商城
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                        {/* 商品清單 */}
-                                        <div className="lg:col-span-2 space-y-4">
-                                            {cart.map((item) => (
-                                                <div key={item.cartId} className="bg-gray-900 border border-purple-950/60 p-4 rounded-xl flex items-center justify-between gap-4">
-                                                    <img src={item.img} alt={item.title} className="w-16 h-16 rounded-lg object-cover bg-gray-950 border border-purple-900/30 shrink-0" />
-                                                    <div className="flex-grow min-w-0">
-                                                        <span className="text-[10px] text-pink-400 font-bold tracking-widest block uppercase mb-1">{item.category} 商城</span>
-                                                        <h3 className="text-base font-bold text-white truncate">{item.title}</h3>
-                                                        <p className="text-xs text-gray-400 truncate">{item.name}</p>
-                                                    </div>
-                                                    <div className="text-right shrink-0">
-                                                        <p className="text-pink-500 font-bold text-lg">${item.price}</p>
-                                                        <button 
-                                                            onClick={() => removeFromCart(item.cartId, item.id)} 
-                                                            className="text-xs text-red-400 hover:text-red-300 hover:underline mt-1"
-                                                        >
-                                                            移除商品
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* 訂單摘要 */}
-                                        <div className="bg-gray-900 border border-purple-950/60 p-6 rounded-2xl h-fit">
-                                            <h3 className="text-xl font-bold mb-4 text-white pb-3 border-b border-purple-950/60">付款資訊</h3>
-                                            <div className="space-y-3 text-sm text-gray-300 mb-6">
-                                                <div className="flex justify-between">
-                                                    <span>商品總數</span>
-                                                    <span>{cart.length} 件</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span>折抵優惠碼</span>
-                                                    <span className="text-green-400">-$0</span>
-                                                </div>
-                                                <div className="flex justify-between border-t border-purple-950/60 pt-3 text-lg font-bold text-white">
-                                                    <span>總計</span>
-                                                    <span className="text-pink-500">${cart.reduce((sum, item) => sum + item.price, 0)}</span>
-                                                </div>
-                                            </div>
-                                            <button 
-                                                onClick={handleCheckout} 
-                                                className="w-full py-3.5 rounded-xl gradient-bg font-bold tracking-widest text-white shadow-lg shadow-pink-500/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                            >
-                                                確認付款結帳
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            /* 3. 各類商城分頁 (PC, iOS, Android) - 完美 1:1 正方形卡片展示 */
-                            <div className="p-8 w-full max-w-7xl mx-auto">
-                                <div className="mb-8">
-                                    <h2 className="text-3xl font-extrabold uppercase tracking-wider gradient-text mb-2">
-                                        {activeTab} 輔助代理商城
-                                    </h2>
-                                    <p className="text-gray-400 text-sm">首頁 / {activeTab === 'pc' ? '電腦端遊戲輔助' : activeTab === 'ios' ? '手機端蘋果專區' : '手機端安卓專區'}</p>
-                                </div>
-
-                                {filteredProducts.length === 0 ? (
-                                    <p className="text-gray-400 text-center py-20 text-lg">該分類目前尚無上架商品，敬請期待！</p>
-                                ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                        {filteredProducts.map(p => (
-                                            <div 
-                                                key={p.id} 
-                                                className="flex flex-col group cursor-pointer" 
-                                                onClick={() => setSelectedProduct(p)}
-                                            >
-                                                {/* 完美 1:1 正方形卡片容器 */}
-                                                <div className="w-full aspect-square relative rounded-xl overflow-hidden border-2 border-purple-900/50 group-hover:border-pink-500 transition-all duration-300 shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_25px_rgba(219,39,119,0.4)] bg-gray-950">
-                                                    {/* 商品圖片 */}
-                                                    <img 
-                                                        src={p.img} 
-                                                        alt={p.name} 
-                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                                                    />
-                                                    
-                                                    {/* 底部漸層遮罩 */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent"></div>
-                                                    
-                                                    {/* 底部短標題橫幅 */}
-                                                    <div className="absolute bottom-0 w-full p-4 text-center">
-                                                        <h3 className="text-white font-extrabold text-lg tracking-wider drop-shadow-md">{p.title}</h3>
-                                                    </div>
-                                                    
-                                                    {/* 懸停邊框發光 */}
-                                                    <div className="absolute inset-0 border border-transparent group-hover:border-pink-500/50 rounded-xl transition-colors duration-300"></div>
-                                                </div>
-                                                
-                                                {/* 卡片下方的詳細文字 (呼應 image_e86d27.jpg) */}
-                                                <div className="mt-3.5 px-1 flex-grow">
-                                                    <p className="text-gray-300 text-xs leading-relaxed group-hover:text-white transition-colors line-clamp-2 h-9 mb-1.5">
-                                                        {p.name}
-                                                    </p>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-pink-500 font-extrabold text-base">${p.price} 起</span>
-                                                        <span className="text-[10px] bg-purple-950 text-purple-300 px-2 py-0.5 rounded border border-purple-800/40 font-mono">
-                                                            庫存: {p.stock}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </main>
-
-                    {/* A. 商品詳細資訊彈跳視窗 (完美還原 image_e86565.jpg / image_e86523.jpg 質感) - 確保純色實體不透明 */}
-                    {selectedProduct && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85">
-                            <div className="bg-gray-900 border-2 border-purple-500 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.6)] max-w-xl w-full relative overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
-                                
-                                {/* 關閉按鈕 */}
-                                <button 
-                                    onClick={() => setSelectedProduct(null)}
-                                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-
-                                {/* 彈窗主體內容 */}
-                                <div className="p-6 md:p-8 overflow-y-auto space-y-6">
-                                    {/* 頂部 LOGO 與標題 */}
-                                    <div className="text-center space-y-1 pb-4 border-b border-purple-950">
-                                        <div className="text-xl font-black gradient-text tracking-widest flex items-center justify-center gap-2">
-                                            <span>⚔️</span> AXGSHOP 萊斯輔助商城
-                                        </div>
-                                        <h2 className="text-lg md:text-xl font-extrabold text-white mt-2 leading-relaxed">
-                                            {selectedProduct.title} 輔助詳情頁
-                                        </h2>
-                                    </div>
-
-                                    {/* 社群與教學超連結 (呈現如參考圖中的彩色按鈕) */}
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <a 
-                                            href={selectedProduct.discordUrl} 
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="py-3 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-center text-xs font-bold text-white transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            💬 【官方 DISCORD 群】
-                                        </a>
-                                        <a 
-                                            href={selectedProduct.guideUrl} 
-                                            className="py-3 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-center text-xs font-bold text-white transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            📘 【查看購買教學】
-                                        </a>
-                                    </div>
-
-                                    {/* 官方免責與操作公告 */}
-                                    <div className="bg-purple-950 border border-purple-500/30 p-4 rounded-xl space-y-2 text-xs leading-relaxed">
-                                        <div className="text-pink-500 font-extrabold flex items-center gap-1">
-                                            <span>📢</span> [重要公告]
-                                        </div>
-                                        <p className="text-gray-300">
-                                            因遊戲反作弊系統频繁更新，各類輔助在不同電腦上會因系統相容性產生不同的穩定度，請購買前務必【先行購買天卡+小號測試】。確認安全並滿意功能後，再行添購長時效卡密，安全至上！
-                                        </p>
-                                    </div>
-
-                                    {/* 商品完整詳細說明 */}
-                                    <div className="space-y-2">
-                                        <h4 className="text-sm font-extrabold text-white">輔助特點說明：</h4>
-                                        <p className="text-xs text-gray-400 leading-relaxed bg-gray-950 p-4 rounded-xl border border-purple-950/60">
-                                            {selectedProduct.description}
-                                        </p>
-                                    </div>
-
-                                    {/* 結帳資訊欄位 */}
-                                    <div className="flex items-center justify-between pt-4 border-t border-purple-950">
-                                        <div>
-                                            <p className="text-xs text-gray-400">目前商品庫存: {selectedProduct.stock} 件</p>
-                                            <p className="text-2xl font-black text-pink-500">${selectedProduct.price}</p>
-                                        </div>
-                                        <button 
-                                            onClick={() => {
-                                                addToCart(selectedProduct);
-                                                setSelectedProduct(null);
-                                            }}
-                                            disabled={selectedProduct.stock === 0}
-                                            className="px-6 py-3.5 rounded-xl gradient-bg font-bold tracking-widest text-white hover:opacity-95 active:scale-95 disabled:bg-gray-800 disabled:text-gray-500 disabled:pointer-events-none transition-all shadow-lg shadow-pink-500/20"
-                                        >
-                                            {selectedProduct.stock > 0 ? '🛒 加入購物車' : '❌ 已售罄'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* B. 會員登入彈跳視窗 - 純色實體不透明 */}
-                    {showLoginModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85">
-                            <div className="bg-gray-900 border-2 border-purple-500 p-8 rounded-2xl shadow-[0_0_35px_rgba(168,85,247,0.4)] max-w-sm w-full relative animate-in fade-in zoom-in duration-200">
-                                <div className="absolute top-4 right-4">
-                                    <button 
-                                        onClick={() => setShowLoginModal(false)}
-                                        className="text-gray-400 hover:text-white transition-colors"
-                                    >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                    </button>
-                                </div>
-                                <h3 className="text-2xl font-bold mb-6 text-white tracking-widest">🔑 會員登入</h3>
-                                <form onSubmit={handleLogin} className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">輸入會員名稱</label>
-                                        <input 
-                                            name="username" 
-                                            type="text" 
-                                            placeholder="請輸入帳號" 
-                                            required 
-                                            className="w-full bg-gray-950 border border-purple-900/60 rounded-xl p-3 text-white placeholder-gray-600 focus:outline-none focus:border-pink-500 transition-colors text-sm"
-                                        />
-                                    </div>
-                                    <button 
-                                        type="submit" 
-                                        className="w-full py-3 rounded-xl font-bold text-white gradient-bg hover:opacity-90 transition-all text-sm tracking-widest"
-                                    >
-                                        確認登入
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    )}
+                        <button onclick="addToCart('${item.category} ${item.name}', ${item.price})" class="cyber-button w-full py-2 rounded-lg font-mono text-xs font-bold text-cyan-400 flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-terminal text-[10px]"></i>
+                            <span>EXECUTE / ADD</span>
+                        </button>
+                    </div>
                 </div>
-            );
+            `).join('');
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ShopApp />);
+        function switchTab(tabId) {
+            const homeView = document.getElementById('view-home');
+            const mobileView = document.getElementById('view-mobile-store');
+            const navHome = document.getElementById('nav-home');
+            const navMobile = document.getElementById('nav-mobile');
+
+            if (tabId === 'home') {
+                homeView.classList.remove('hidden');
+                mobileView.classList.add('hidden');
+                navHome.className = "text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
+                navMobile.className = "text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
+            } else {
+                homeView.classList.add('hidden');
+                mobileView.classList.remove('hidden');
+                navMobile.className = "text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
+                navHome.className = "text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
+                renderProducts();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function addToCart(name, price) {
+            const existing = cart.find(item => item.name === name);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ name, price, qty: 1 });
+            }
+            updateCartUI();
+            showToast(`已將 [${name}] 加入購物車`);
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            document.getElementById('cart-badge').innerText = totalCount;
+            document.getElementById('cart-count-header').innerText = totalCount;
+            document.getElementById('cart-total').innerText = `NT$ ${totalPrice.toLocaleString()}`;
+
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-center font-mono text-sm py-10">購物車目前無商品</p>';
+                return;
+            }
+
+            container.innerHTML = cart.map((item, index) => `
+                <div class="flex items-center justify-between bg-[#090d16] p-3 rounded-xl border border-slate-800">
+                    <div>
+                        <h4 class="font-mono font-bold text-white text-sm">${item.name}</h4>
+                        <span class="text-xs font-mono text-cyan-400">NT$ ${item.price.toLocaleString()} x ${item.qty}</span>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-slate-500 hover:text-red-400 p-2 cursor-pointer" aria-label="移除商品">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+            showToast('已從購物車移除商品');
+        }
+
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        function showDetails(itemName) {
+            showToast(`正在讀取 [${itemName}] 詳細規格...`);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function checkout() {
+            if(cart.length === 0) {
+                showToast('購物車內尚無商品！');
+                return;
+            }
+            showToast('已觸發結帳程序！授權金鑰生成中...');
+            cart = [];
+            updateCartUI();
+            toggleCart();
+        }
+
+        window.onload = function() {
+            renderProducts();
+        }
     </script>
 </body>
 </html>
