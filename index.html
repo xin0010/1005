@@ -2,8 +2,11 @@
 <html lang="zh-TW" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberStore - 頂級遊戲與數位商品商城</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AXG SHOP — 亞洲經銷商 | 24小時自動發卡</title>
+    <meta name="description" content="AXG SHOP 亞洲經銷商，提供 24 小時自動發卡、即買即用、獨家底層防封驅動與 Discord 專人售後服務。">
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,12 +15,13 @@
                 extend: {
                     colors: {
                         cyber: {
-                            bg: '#090d16',
-                            card: '#0f172a',
-                            border: '#1e293b',
+                            dark: '#060913',
+                            card: '#0d1527',
+                            border: 'rgba(6, 182, 212, 0.25)',
                             cyan: '#06b6d4',
                             cyanHover: '#22d3ee',
                             accent: '#38bdf8',
+                            purple: '#a855f7',
                             muted: '#94a3b8'
                         }
                     },
@@ -29,295 +33,745 @@
             }
         }
     </script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    
+    <!-- Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --primary-glow: rgba(6, 182, 212, 0.35);
+            --accent-glow: rgba(56, 189, 248, 0.25);
+        }
+
+        *, ::before, ::after { box-sizing: border-box; }
+
         body {
-            background-color: #090d16;
+            background-color: #060913;
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             margin: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .title-bicolor {
-            position: relative;
-            display: inline-block;
-            background: linear-gradient(90deg, #06b6d4 0%, #38bdf8 100%);
+        /* Cyber Background Grid Grid Effect */
+        .cyber-bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        .title-gradient {
+            background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #818cf8 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .title-bicolor::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #06b6d4 30%, #38bdf8 100%);
-            border-radius: 2px;
-        }
 
         .cyber-card {
-            background: linear-gradient(135deg, #0f172a 0%, #090d16 100%);
-            border: 1px solid rgba(6, 182, 212, 0.25);
+            background: linear-gradient(135deg, rgba(13, 21, 39, 0.9) 0%, rgba(6, 9, 19, 0.95) 100%);
+            border: 1px solid rgba(6, 182, 212, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            clip-path: polygon(
-                0 0, 
-                calc(100% - 15px) 0, 100% 15px, 
-                100% 100%, 
-                15px 100%, 0 calc(100% - 15px)
-            );
+            backdrop-filter: blur(12px);
         }
         .cyber-card:hover {
-            border-color: rgba(6, 182, 212, 0.8);
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
-            transform: translateY(-3px);
+            border-color: rgba(6, 182, 212, 0.7);
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.25);
+            transform: translateY(-4px);
         }
 
         .cyber-button {
-            background: linear-gradient(90deg, rgba(6, 182, 212, 0.1) 0%, rgba(56, 189, 248, 0.2) 100%);
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.15) 0%, rgba(56, 189, 248, 0.25) 100%);
             border: 1px solid rgba(6, 182, 212, 0.4);
-            transition: all 0.2s ease;
+            color: #22d3ee;
+            transition: all 0.25s ease;
         }
         .cyber-button:hover {
             background: rgba(6, 182, 212, 0.3);
             border-color: #06b6d4;
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
         }
+
+        input, select, textarea {
+            background: #0f172a !important;
+            color: #fff !important;
+            border: 1px solid rgba(6, 182, 212, 0.3) !important;
+            border-radius: 10px !important;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #06b6d4 !important;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3) !important;
+            outline: none !important;
+        }
+
+        .t1st-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px; color: #cbd5e1; font-size: 13px; font-weight: 600;
+            padding: 6px 14px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .t1st-chip:hover { border-color: rgba(6, 182, 212, 0.6); color: #fff; }
+        .t1st-chip.is-on { border-color: #06b6d4; background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+        .t1st-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex: none; box-shadow: 0 0 8px #10b981; }
+        .t1st-chip.warn .t1st-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #060913; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black">
+<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black cyber-bg-grid">
 
-    <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-cyan-900/40">
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 bg-[#060913]/90 backdrop-blur-xl border-b border-cyan-900/40 shadow-2xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                    <i class="fa-solid fa-terminal text-black text-lg"></i>
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('home')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-bolt text-black text-xl"></i>
                 </div>
-                <span class="font-mono font-bold text-xl tracking-wider text-cyan-400">CYBER<span class="text-white">STORE</span></span>
+                <div>
+                    <span class="font-mono font-extrabold text-xl tracking-wider text-cyan-400">AXG<span class="text-white"> SHOP</span></span>
+                    <span class="block text-[9px] font-mono text-cyan-500/80 -mt-1 tracking-widest uppercase">Automated Execution</span>
+                </div>
             </div>
             
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300 font-mono">
-                <button onclick="switchTab('home')" id="nav-home" class="text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer">[首頁]</button>
-                <button onclick="switchTab('mobile-store')" id="nav-mobile" class="text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer">[手遊輔助商城]</button>
+            <!-- Desktop Nav Items -->
+            <nav class="hidden lg:flex items-center space-x-1 text-sm font-medium font-mono text-slate-300">
+                <button onclick="switchTab('home')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">首頁</button>
+                
+                <!-- Category Dropdown -->
+                <div class="relative group py-2">
+                    <button class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors inline-flex items-center gap-1.5 bg-transparent border-0 cursor-pointer">
+                        <span>輔助分類</span>
+                        <i class="fa-solid fa-chevron-down text-xs opacity-70 group-hover:rotate-180 transition-transform"></i>
+                    </button>
+                    <div class="absolute left-0 mt-1 w-60 bg-[#0d1527] border border-cyan-900/60 rounded-xl shadow-2xl py-2 hidden group-hover:block z-50 backdrop-blur-xl">
+                        <button onclick="switchTab('mobile-store'); filterProducts('valorant');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-crosshairs text-cyan-400 w-4"></i> VALORANT 特戰英豪
+                        </button>
+                        <button onclick="switchTab('mobile-store'); filterProducts('pubg');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-gun text-cyan-400 w-4"></i> PUBG 絕地求生
+                        </button>
+                        <button onclick="switchTab('mobile-store'); filterProducts('mobile');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-mobile-screen text-cyan-400 w-4"></i> 熱門手遊輔助 (FF/傳說)
+                        </button>
+                        <button onclick="switchTab('mobile-store'); filterProducts('account');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-key text-cyan-400 w-4"></i> 高級帳號與 P12 證書
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="switchTab('mobile-store')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">全部商城</button>
+                <button onclick="switchTab('orders')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">卡號查詢</button>
+                <button onclick="switchTab('downloads')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">下載專區</button>
+                <button onclick="switchTab('wallet')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">餘額儲值</button>
+                <button onclick="switchTab('trouble')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">疑難雜症</button>
+                <button onclick="switchTab('account')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">會員中心</button>
             </nav>
 
-            <div class="flex items-center space-x-4">
-                <button onclick="toggleCart()" class="relative p-2.5 rounded-lg bg-slate-800/80 border border-slate-700 hover:border-cyan-500 transition-all text-slate-300 hover:text-cyan-400" aria-label="購物車">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-cyan-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">0</span>
+            <!-- Header Action Icons -->
+            <div class="flex items-center space-x-3">
+                <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
+                    <i class="fa-brands fa-discord text-sm"></i>
+                    <span>Discord 客服</span>
+                </a>
+                
+                <button onclick="toggleCart()" class="relative p-2.5 rounded-xl bg-slate-900 border border-cyan-900/60 hover:border-cyan-400 transition-all text-slate-300 hover:text-cyan-400 cursor-pointer" aria-label="檢視購物車">
+                    <i class="fa-solid fa-cart-shopping text-base"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-cyan-400 text-black font-extrabold font-mono text-[10px] rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-cyan-400/50">0</span>
+                </button>
+                
+                <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:text-cyan-400 border border-slate-800 cursor-pointer">
+                    <i class="fa-solid fa-bars text-lg"></i>
                 </button>
             </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-[#0d1527] border-b border-cyan-900/50 px-5 py-4 space-y-3 font-mono text-sm max-h-[80vh] overflow-y-auto">
+            <button onclick="switchTab('home'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 首頁</button>
+            <button onclick="switchTab('mobile-store'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 輔助授權商城</button>
+            <button onclick="switchTab('orders'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 卡號與訂單查詢</button>
+            <button onclick="switchTab('downloads'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 下載專區</button>
+            <button onclick="switchTab('wallet'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 餘額儲值</button>
+            <button onclick="switchTab('trouble'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 疑難雜症 FAQ</button>
+            <button onclick="switchTab('account'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 會員中心 / 登入</button>
+            <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="block w-full text-left py-2 text-indigo-400 font-bold bg-transparent border-0 cursor-pointer no-underline">▶ 加入 Discord 售後群</a>
         </div>
     </header>
 
     <main class="flex-grow flex flex-col w-full">
-        <section id="view-home" class="relative w-full min-h-[85vh] flex flex-col items-center justify-center overflow-hidden py-12">
-            <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover filter contrast-110 brightness-95 opacity-85 z-0">
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
-                您的瀏覽器不支援 HTML5 影片播放。
-            </video>
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-[#090d16] via-[#090d16]/50 to-[#090d16]/80 z-10 pointer-events-none"></div>
-            
-            <div class="relative z-20 max-w-5xl mx-auto px-4 text-center my-auto">
-                <div class="inline-block mb-4 font-mono text-xs text-cyan-400 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/50 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                    <i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-2 animate-pulse"></i> SYSTEM_CINEMATIC_REEL / 賽博朋克實境串流
+
+        <!-- Home / Landing View -->
+        <section id="view-home" class="relative w-full min-h-[85vh] flex flex-col items-center justify-center py-16 px-4">
+            <div class="max-w-5xl mx-auto text-center z-10">
+                <div class="inline-flex items-center gap-2 mb-6 font-mono text-xs text-cyan-400 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>AXG SHOP 24H 自動發卡・獨家驅動防封技術</span>
                 </div>
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-mono tracking-tight text-white mb-6 drop-shadow-lg">
-                    <span class="title-bicolor">AXG SHOP亞洲輔助經銷商</span>
+                
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-mono tracking-tight text-white mb-6 leading-tight">
+                    亞洲經銷商 <br class="hidden sm:block">
+                    <span class="title-gradient">AXG SHOP</span>
                 </h1>
+                
                 <p class="text-slate-300 max-w-2xl mx-auto font-mono text-sm sm:text-base mb-10 leading-relaxed">
-                    <span class="highlighter-underline text-cyan-100">SECURE DIGITAL ASSETS & PRIVILEGE EXECUTION HUB</span>
+                    提供 PC 端與 iOS/Android 熱門遊戲頂級雲端授權與獨家驅動。全自動金鑰發放，秒速開通，搭配 Discord 1對1 專業技術團隊售後保障。
                 </p>
-                <div class="mt-4">
-                    <button onclick="switchTab('mobile-store')" class="cyber-button inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cyan-400 font-mono text-sm font-bold transition-transform hover:scale-105 cursor-pointer">
-                        <span>進入手遊輔助商城</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+
+                <div class="flex flex-wrap justify-center gap-4 mb-16">
+                    <button onclick="switchTab('mobile-store')" class="cyber-button inline-flex items-center gap-2.5 px-8 py-4 rounded-xl font-mono text-sm font-bold cursor-pointer border-0 shadow-lg">
+                        <i class="fa-solid fa-store"></i>
+                        <span>進入輔助商城</span>
+                    </button>
+                    <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="px-8 py-4 rounded-xl border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 hover:text-white hover:bg-indigo-900/60 font-mono text-sm font-bold transition-all inline-flex items-center gap-2.5 no-underline shadow-lg">
+                        <i class="fa-brands fa-discord text-lg"></i>
+                        <span>官方 Discord 社群</span>
+                    </a>
+                </div>
+
+                <!-- Feature Highlights -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left max-w-4xl mx-auto font-mono">
+                    <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <h3 class="text-white font-bold text-sm mb-1">24小時自動發卡</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">金鑰系統全天候自動運作，付款完成後即刻取得卡號免等待。</p>
+                    </div>
+
+                    <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h3 class="text-white font-bold text-sm mb-1">獨家底層驅動</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">採用最新反作弊避障機制，確保玩家帳號極致穩定安全。</p>
+                    </div>
+
+                    <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <h3 class="text-white font-bold text-sm mb-1">真人遠端售後</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">提供 Discord 一對一技術支援與軟體安裝教學，新手輕鬆上手。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Store View -->
+        <section id="view-mobile-store" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-8 font-mono">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide mb-3">AXG SHOP 授權商城</h2>
+                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">選擇您需要的遊戲輔助或數位商品，點擊商品卡片可預覽詳細功能與設定。支援全自動發卡。</p>
+                </div>
+
+                <!-- Game Status Monitor Widget -->
+                <div class="mb-10 bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-2xl font-mono">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-xs text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span>輔助運行即時狀態監控 (Real-time Status)</span>
+                        </div>
+                        <span class="text-[11px] text-slate-500">最後更新: 剛才</span>
+                    </div>
+
+                   <div class="flex flex-wrap gap-2.5 mb-3" id="status-chips-bar">
+    
+
+    <!-- PUBG 絕地求生 -->
+    <button class="t1st-chip border-0" data-game="PUBG 絕地求生" data-status="正常運營" data-plat="PC / 雲端防封" data-desc="PUBG 絕地求生透視自瞄輔助穩定運行中，即時雲端更新。">
+        <img src="PUBGM-700x700.png" alt="PUBG 絕地求生" class="w-5 h-5 rounded-full object-cover">
+        <span>PUBG 絕地求生</span>
+         <span class="t1st-dot"></span>
+        <span class="text-[10px] opacity-70">[PC]</span>
+    </button>
+
+    <!-- Free Fire (保留原點點，或您可以自行補上圖標) -->
+    <button class="t1st-chip border-0" data-game="Free Fire" data-status="正常運營" data-plat="iOS / Android" data-desc="Free Fire 雙端直裝版授權正常發行，免越獄/免Root輕鬆安裝。">
+        <img src="freefire_m.png" alt="Free Fire" class="w-5 h-5 rounded-full object-cover">
+        <span class="t1st-dot"></span>
+        <span>Free Fire</span>
+        <span class="text-[10px] opacity-70">[iOS/Android]</span>
+    </button>
+
+    <!-- 傳說對決 -->
+    <button class="t1st-chip border-0" data-game="傳說對決" data-status="正常運營" data-plat="iOS" data-desc="傳說對決 iOS 專用地圖全開透視掛，穩定通過各版本安全檢測。">
+        <img src="moba.png" alt="傳說對決" class="w-5 h-5 rounded-full object-cover">
+        <span>傳說對決</span>
+         <span class="t1st-dot"></span>
+        <span class="text-[10px] opacity-70">[iOS]</span>
+    </button>
+
+    <!-- 高級帳號與 P12 證書 -->
+
+                    <div class="mt-2 bg-slate-900/80 border-l-2 border-cyan-400 rounded-r-lg p-3 text-xs text-slate-300" id="status-detail-text">
+                        <b>特戰英豪</b> 狀態：<span class="text-emerald-400 font-bold">正常運營</span> (平台：PC / 獨家驅動) — 特戰英豪內部版本全功能正常運營，支援最新 Windows 10/11，獨家過檢驅動。
+                    </div>
+                </div>
+
+                <!-- Search & Filters Bar -->
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-8 font-mono">
+                    <!-- Filter Tabs -->
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto" id="filter-tabs">
+                        <button onclick="filterProducts('all', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer">全部商品</button>
+                        <button onclick="filterProducts('valorant', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">特戰英豪</button>
+                        <button onclick="filterProducts('pubg', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">絕地求生</button>
+                        <button onclick="filterProducts('mobile', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">熱門手遊</button>
+                        <button onclick="filterProducts('account', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">帳號與憑證</button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full md:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+                        <input type="text" id="store-search-input" onkeyup="searchProducts()" placeholder="搜尋關鍵字..." class="w-full pl-9 pr-4 py-2 text-xs">
+                    </div>
+                </div>
+
+                <!-- Product Grid Container -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            </div>
+        </section>
+
+        <!-- Orders View -->
+        <section id="view-orders" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">訂單與授權卡號查詢</h2>
+                    <p class="text-xs text-slate-400">輸入您的訂單號碼、購買時填寫的信箱或聯絡電話即可快速查詢授權金鑰。</p>
+                </div>
+
+                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl mb-8">
+                    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                        <input type="text" id="order-search-input" placeholder="請輸入訂單編號或購買信箱 (例如: AXG-8812...)" class="flex-1 px-4 py-3 text-sm">
+                        <button onclick="queryOrders()" class="cyber-button px-6 py-3 rounded-xl font-bold text-sm border-0 cursor-pointer flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>調閱紀錄</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="border-b border-cyan-900/60 text-cyan-400 uppercase">
+                                <tr>
+                                    <th class="pb-3 px-2">訂單編號</th>
+                                    <th class="pb-3 px-2">商品名稱</th>
+                                    <th class="pb-3 px-2">金額</th>
+                                    <th class="pb-3 px-2">授權卡號 / 狀態</th>
+                                    <th class="pb-3 px-2 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/80" id="orders-table-body">
+                                <tr>
+                                    <td class="py-4 px-2 font-bold text-white">#AXG-20261011</td>
+                                    <td class="py-4 px-2">【AXG獨家】特戰英豪 內部全功能驅動輔助 (30天)</td>
+                                    <td class="py-4 px-2 text-cyan-400 font-bold">NT$ 1,500</td>
+                                    <td class="py-4 px-2"><span class="bg-cyan-950 text-cyan-300 font-mono font-bold px-2.5 py-1 rounded border border-cyan-500/40">AXGVAL-998A-44BC-77XX</span></td>
+                                    <td class="py-4 px-2 text-right">
+                                        <button onclick="copyToClipboard('AXGVAL-998A-44BC-77XX')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-900 text-cyan-400 border border-slate-700 cursor-pointer">複製</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Downloads View -->
+        <section id="view-downloads" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">輔助與驅動程式下載專區</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-cyan-400 font-bold text-base">AXG 專用驅動主程式</h3>
+                                <span class="bg-emerald-950 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30">v4.8.2 最新版</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-6 leading-relaxed">支援 Windows 10/11 全版本系統，內建雲端防封注入與驅動自動加載保護機制。</p>
+                        </div>
+                        <button onclick="showToast('正在下載主程式壓縮檔 (AXG_Loader.zip)...')" class="cyber-button w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer border-0">
+                            <i class="fa-solid fa-download"></i>
+                            <span>安全高速下載 (Direct)</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-cyan-400 font-bold text-base">iOS / 安卓 雲端直裝管理器</h3>
+                                <span class="bg-emerald-950 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30">v2.1 免電腦</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-6 leading-relaxed">專為手遊輔助設計，支援 P12 證書自動簽名與雲端版本一鍵導入更新。</p>
+                        </div>
+                        <button onclick="showToast('正在跳轉至 iOS/Android 下載通道...')" class="cyber-button w-full py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer border-0">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                            <span>下載手遊直裝器</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wallet Topup View -->
+        <section id="view-wallet" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
+            <div class="max-w-md mx-auto">
+                <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">商城餘額儲值</h2>
+                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl space-y-5">
+                    <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800">
+                        <label class="block text-xs text-slate-400 mb-1">當前帳戶餘額：</label>
+                        <div class="text-3xl font-extrabold text-cyan-400">NT$ <span id="user-balance">0</span></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-2">儲值金額 (TWD)：</label>
+                        <input type="number" id="topup-amount" value="1000" min="100" class="w-full px-4 py-3 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-2">選擇支付方式：</label>
+                        <select class="w-full px-4 py-3 text-sm">
+                            <option>超商代碼代收 (全家 / 7-11 / 萊爾富)</option>
+                            <option>ATM 虛擬帳號轉帳</option>
+                            <option>USDT (TRC-20) 加密貨幣代收</option>
+                        </select>
+                    </div>
+                    <button onclick="processTopup()" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">
+                        產生繳費單據
                     </button>
                 </div>
             </div>
         </section>
 
-        <section id="view-mobile-store" class="w-full bg-[#090d16] py-16 px-4 sm:px-6 lg:px-8 hidden">
-            <div class="max-w-7xl mx-auto">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide mb-2 font-mono">手遊輔助商城</h2>
-                    <p class="text-sm font-mono text-slate-400">首頁 / 手遊輔助商城</p>
-                </div>
+        <!-- Troubleshooting View -->
+        <section id="view-trouble" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">疑難雜症與常見問題 (FAQ)</h2>
+                
+                <div class="space-y-4">
+                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
+                        <div class="font-bold text-cyan-400 mb-2">Q1: 下載輔助主程式後被 Windows Defender 攔截怎麼辦？</div>
+                        <p class="text-xs text-slate-300 leading-relaxed">因為本站輔助採用底層驅動保護與記憶體加殼技術，防毒軟體可能會有誤報。請先將主程式資料夾加入「Windows 安全性排除項目」或暫時關閉即時防護後即可正常執行。</p>
+                    </div>
 
-                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Cards will be populated dynamically -->
+                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
+                        <div class="font-bold text-cyan-400 mb-2">Q2: 付款完成後卡號要去哪裡領取？</div>
+                        <p class="text-xs text-slate-300 leading-relaxed">本站為 24 小時全自動發卡系統，付款成功後頁面會直接顯示您的專屬授權卡號，同時您也可以點擊導覽列的「卡號查詢」隨時調閱歷史紀錄。</p>
+                    </div>
+
+                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
+                        <div class="font-bold text-cyan-400 mb-2">Q3: 遇到技術問題或無法注入該如何處理？</div>
+                        <p class="text-xs text-slate-300 leading-relaxed">請直接點擊頁面右下角的 Discord 浮動圖示，加入我們的官方售後群組，開立工單將由技術人員一對一為您解決。</p>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <!-- Account / Login View -->
+        <section id="view-account" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
+            <div class="max-w-md mx-auto">
+                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl">
+                    <div class="flex border-b border-slate-800 mb-6">
+                        <button onclick="switchAuthTab('login')" id="auth-tab-login" class="flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer">會員登入</button>
+                        <button onclick="switchAuthTab('register')" id="auth-tab-reg" class="flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer">帳號註冊</button>
+                    </div>
+
+                    <form id="form-login" onsubmit="event.preventDefault(); showToast('登入成功！'); switchTab('mobile-store');">
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-slate-300 mb-1.5">會員帳號 / 電子郵件</label>
+                            <input type="text" required placeholder="請輸入帳號" class="w-full px-4 py-3 text-sm">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-xs font-bold text-slate-300 mb-1.5">密碼</label>
+                            <input type="password" required placeholder="請輸入密碼" class="w-full px-4 py-3 text-sm">
+                        </div>
+                        <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">登入系統</button>
+                    </form>
+
+                    <form id="form-register" class="hidden" onsubmit="event.preventDefault(); showToast('註冊成功！自動獲得新手權限'); switchTab('mobile-store');">
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
+                            <input type="email" required placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-xs font-bold text-slate-300 mb-1.5">設定密碼</label>
+                            <input type="password" required placeholder="至少 6 位字元" class="w-full px-4 py-3 text-sm">
+                        </div>
+                        <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">建立新帳號</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer class="border-t border-cyan-900/30 bg-[#090d16] py-6 text-center text-xs font-mono text-slate-500">
-        <p>&copy; 2026 CYBERSTORE DIGITAL COMMERCE. ALL RIGHTS RESERVED.</p>
-    </footer>
+    <!-- Product Detail Modal -->
+    <div id="product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductModal()"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="relative bg-[#0d1527] border border-cyan-500/50 rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl font-mono overflow-hidden">
+                <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 bg-transparent border-0 cursor-pointer text-lg"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <img id="modal-img" src="" alt="Product" class="w-full h-56 object-cover rounded-xl border border-slate-800">
+                    <div>
+                        <span id="modal-category" class="inline-block px-2.5 py-1 rounded bg-cyan-950 text-cyan-400 text-[10px] font-bold border border-cyan-500/40 mb-2">CATEGORY</span>
+                        <h3 id="modal-title" class="text-xl font-bold text-white mb-2 leading-tight">Product Title</h3>
+                        <div id="modal-price" class="text-2xl font-extrabold text-cyan-400 mb-4">NT$ 0</div>
+                        <p id="modal-desc" class="text-xs text-slate-300 leading-relaxed mb-6">Description goes here...</p>
+                        
+                        <div class="flex gap-3">
+                            <button id="modal-add-btn" class="cyber-button flex-1 py-3 rounded-xl font-bold text-xs border-0 cursor-pointer flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cart-plus"></i>
+                                <span>加入購物車</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Cart Drawer -->
-    <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[#0f172a] border-l border-cyan-900/50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
-        <div class="p-5 border-b border-cyan-900/40 flex items-center justify-between">
-            <h3 class="font-mono font-bold text-lg text-white flex items-center gap-2">
-                <i class="fa-solid fa-cart-shopping text-cyan-400"></i> 購物車清單 (<span id="cart-count-header">0</span>)
-            </h3>
-            <button onclick="toggleCart()" class="text-slate-400 hover:text-cyan-400" aria-label="關閉購物車">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-        <div id="cart-items" class="flex-grow overflow-y-auto p-5 space-y-4">
-            <p class="text-slate-500 text-center font-mono text-sm py-10">購物車目前無商品</p>
-        </div>
-        <div class="p-5 border-t border-cyan-900/40 bg-[#090d16]">
-            <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-mono text-slate-400">總計金額</span>
-                <span id="cart-total" class="text-xl font-bold font-mono text-cyan-400">NT$ 0</span>
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="toggleCart()"></div>
+        <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-[#0d1527] border-l border-cyan-900/60 p-6 flex flex-col justify-between shadow-2xl font-mono">
+                <div>
+                    <div class="flex items-center justify-between pb-4 border-b border-cyan-900/40">
+                        <h3 class="text-lg font-bold text-cyan-400 flex items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span>購物車與發卡明細</span>
+                        </h3>
+                        <button onclick="toggleCart()" class="text-slate-400 hover:text-white p-2 bg-transparent border-0 cursor-pointer"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    </div>
+                    <div id="cart-items-container" class="mt-6 space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="pt-4 border-t border-cyan-900/40">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-slate-300 text-sm">總計金額：</span>
+                        <span id="cart-total" class="text-cyan-400 font-bold text-2xl">NT$ 0</span>
+                    </div>
+                    <button onclick="checkout()" class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i>
+                        <span>確認結帳並自動發卡</span>
+                    </button>
+                </div>
             </div>
-            <button onclick="checkout()" class="cyber-button w-full py-3.5 rounded-lg font-mono text-sm font-bold text-cyan-400 flex items-center justify-center gap-2 cursor-pointer">
-                <i class="fa-solid fa-bolt"></i>
-                <span>立即結帳 / CHECKOUT</span>
-            </button>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#0f172a] border border-cyan-500 text-cyan-400 px-5 py-3 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] font-mono text-sm flex items-center gap-3 pointer-events-none">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-        <span id="toast-msg">操作成功！</span>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#0d1527] border border-cyan-400 text-white px-6 py-3.5 rounded-xl shadow-[0_0_25px_rgba(6,182,212,0.4)] flex items-center gap-3 font-mono text-xs">
+        <i class="fa-solid fa-circle-check text-cyan-400 text-base"></i>
+        <span id="toast-msg">Notification Message</span>
     </div>
 
-    <script>
-        let cart = [];
+    <!-- Floating Discord Widget -->
+    <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="fixed bottom-6 left-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 no-underline" title="Discord 真人客服">
+        <i class="fa-brands fa-discord text-xl"></i>
+    </a>
 
+    <!-- Footer -->
+    <footer class="bg-[#04060d] text-slate-400 py-12 border-t border-cyan-950 mt-auto font-mono text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-cyan-400 flex items-center justify-center text-black font-extrabold">AXG</div>
+                    <span class="font-bold text-white text-base">AXG SHOP</span>
+                </div>
+                <p class="text-slate-500 leading-relaxed">24 小時全自動發卡・頂級安全外掛與數位商品授權中心。</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">快速選單</h4>
+                <ul class="space-y-2 list-none p-0 m-0">
+                    <li><button onclick="switchTab('mobile-store')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">輔助商城</button></li>
+                    <li><button onclick="switchTab('orders')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">卡號查詢</button></li>
+                    <li><button onclick="switchTab('downloads')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">下載專區</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">技術支援</h4>
+                <ul class="space-y-2 list-none p-0 m-0">
+                    <li><a href="https://discord.gg/CahMc8zNjN" target="_blank" class="hover:text-cyan-400 text-slate-400 no-underline">Discord 官方客服</a></li>
+                    <li><button onclick="switchTab('trouble')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">常見問題與免責聲明</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">安全加密</h4>
+                <p class="text-slate-500 leading-relaxed">256-Bit SSL Encrypted Automated Gateway.<br>&copy; 2026 AXG SHOP. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Store Product Database
         const products = [
-            { category: "[特戰英豪]", name: "永久", price: 6500, stock: 99 },
-            { category: "[特戰英豪]", name: "月卡", price: 1499, stock: 999 },
-            { category: "[特戰英豪]", name: "周卡", price: 600, stock: 999 },
-            { category: "[特戰英豪]", name: "天卡", price: 150, stock: 999 },
-            { category: "[代理批發]", name: "FREE-FIRE", price: 5500, stock: 100 },
-            { category: "[FREE-FIRE]", name: "iOS月卡", price: 1000, stock: 100 },
-            { category: "[代理批發]", name: "傳說對決", price: 5500, stock: 500 },
-            { category: "[電商網站]", name: "網站設計客製化", price: 20000, stock: 999 },
-            { category: "[iOS證書]", name: "保固40天證書", price: 200, stock: 997 },
-            { category: "[三角洲行動]", name: "安卓單雷-月卡", price: 1300, stock: 30 },
-            { category: "[傳說對決]", name: "ios月卡", price: 1370, stock: 50 },
-            { category: "[PUBG]", name: "IOS-月卡", price: 1035, stock: 999 }
+            
+            { id: 1, name: 'PUBG 絕地求生 雲端記憶體輔助 (30天)', category: 'pubg', price: 1200, tag: '穩定防封', img: 'PUBGM-700x700.png', desc: '支援全屏透視、物品顯示、預判自瞄與無後座力，即時雲端更新過安全檢測。' },
+            { id: 2, name: 'Free Fire 雙端雲端直裝外掛 (30天)', category: 'mobile', price: 800, tag: '手遊首選', img: 'freefire.png', desc: 'iOS / Android 雙端支援，免越獄免Root，包含自動鎖頭、透視顯敵與人物加速。' },
+            { id: 3, name: '傳說對決 iOS 專用安全透視 (永久授權)', category: 'mobile', price: 1200, tag: '蘋果專用', img: 'moba.png', desc: '全地圖視野顯敵、技能冷卻顯示、野怪血量計算，穩定不封號。' },
+            { id: 4, name: '蘋果 P12 證書個人獨立簽名 (1年保固)', category: 'account', price: 650, tag: '獨立憑證', img: 'logo-700x700.png', desc: '個人獨享企業開發者證書，支援所有 IPA 直裝應用，提供一年內掉簽補簽服務。' }
         ];
 
-        function renderProducts() {
+        let cart = [];
+        let orderHistory = [
+            { id: '#AXG-20261011', name: '【AXG獨家】特戰英豪 內部全功能驅動輔助 (30天)', price: 1500, key: 'AXGVAL-998A-44BC-77XX' }
+        ];
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            const views = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'account'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.toggle('hidden', v !== tabId);
+            });
+
+            if (tabId === 'mobile-store') {
+                renderProducts();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render Product Cards
+        function renderProducts(items = products) {
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = products.map((item, idx) => `
-                <div class="cyber-card p-5 flex flex-col justify-between h-52">
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            items.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'cyber-card rounded-2xl p-4 flex flex-col justify-between';
+                card.innerHTML = `
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-mono text-cyan-400">${item.category}</span>
-                            <div class="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-                                <i class="fa-solid fa-shield text-emerald-400 text-[10px]"></i>
-                                <i class="fa-solid fa-code text-cyan-400 text-[10px]"></i>
-                                <i class="fa-solid fa-user-secret text-slate-400 text-[10px]"></i>
-                            </div>
+                        <div class="relative overflow-hidden rounded-xl mb-3.5 bg-slate-900 group cursor-pointer" onclick="openProductModal(${p.id})">
+                            <img src="${p.img}" alt="${p.name}" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <span class="absolute top-2.5 right-2.5 bg-cyan-950/90 border border-cyan-400 text-cyan-300 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md backdrop-blur-md">${p.tag}</span>
                         </div>
-                        <h3 class="text-white text-base font-bold font-mono mb-1">${item.name}</h3>
-                        <a href="#" onclick="showDetails('${item.category} ${item.name}'); return false;" class="text-[11px] font-mono text-cyan-400/80 hover:text-cyan-300 flex items-center gap-1">
-                            <i class="fa-solid fa-folder-open text-[10px]"></i> 查看商品詳情
-                        </a>
+                        <h3 class="text-white font-mono font-bold text-sm mb-2 line-clamp-2 hover:text-cyan-400 cursor-pointer transition-colors" onclick="openProductModal(${p.id})">${p.name}</h3>
+                        <div class="text-cyan-400 font-mono font-extrabold text-lg mb-4">NT$ ${p.price.toLocaleString()}</div>
                     </div>
-                    <div>
-                        <div class="flex items-baseline justify-between mb-3">
-                            <span class="text-cyan-400 font-bold font-mono text-lg">NT$ ${item.price.toLocaleString()}</span>
-                            <span class="text-[11px] font-mono text-slate-400">Stock: ${item.stock}</span>
-                        </div>
-                        <button onclick="addToCart('${item.category} ${item.name}', ${item.price})" class="cyber-button w-full py-2 rounded-lg font-mono text-xs font-bold text-cyan-400 flex items-center justify-center gap-1.5 cursor-pointer">
-                            <i class="fa-solid fa-terminal text-[10px]"></i>
-                            <span>EXECUTE / ADD</span>
+                    <div class="flex gap-2 font-mono">
+                        <button onclick="openProductModal(${p.id})" class="p-2.5 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 hover:border-cyan-400 text-xs cursor-pointer" title="查看詳情">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button onclick="addToCart(${p.id})" class="cyber-button flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer border-0">
+                            <i class="fa-solid fa-cart-plus"></i>
+                            <span>加入購物車</span>
                         </button>
                     </div>
-                </div>
-            `).join('');
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        function switchTab(tabId) {
-            const homeView = document.getElementById('view-home');
-            const mobileView = document.getElementById('view-mobile-store');
-            const navHome = document.getElementById('nav-home');
-            const navMobile = document.getElementById('nav-mobile');
-
-            if (tabId === 'home') {
-                homeView.classList.remove('hidden');
-                mobileView.classList.add('hidden');
-                navHome.className = "text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
-                navMobile.className = "text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
-            } else {
-                homeView.classList.add('hidden');
-                mobileView.classList.remove('hidden');
-                navMobile.className = "text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
-                navHome.className = "text-slate-300 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer";
-                renderProducts();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Filter Products by Category
+        function filterProducts(cat, btnEl) {
+            if (btnEl) {
+                document.querySelectorAll('.filter-tab-btn').forEach(btn => {
+                    btn.className = 'filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer';
+                });
+                btnEl.className = 'filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer';
             }
+
+            const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
+            renderProducts(filtered);
         }
 
-        function addToCart(name, price) {
-            const existing = cart.find(item => item.name === name);
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                cart.push({ name, price, qty: 1 });
-            }
+        // Search Products Input
+        function searchProducts() {
+            const query = document.getElementById('store-search-input').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
+            renderProducts(filtered);
+        }
+
+        // Modal Functions
+        function openProductModal(id) {
+            const p = products.find(prod => prod.id === id);
+            if (!p) return;
+
+            document.getElementById('modal-img').src = p.img;
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-category').innerText = p.category.toUpperCase();
+            document.getElementById('modal-price').innerText = `NT$ ${p.price.toLocaleString()}`;
+            document.getElementById('modal-desc').innerText = p.desc;
+            document.getElementById('modal-add-btn').onclick = function() {
+                addToCart(p.id);
+                closeProductModal();
+            };
+
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // Cart Actions
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            cart.push(product);
             updateCartUI();
-            showToast(`已將 [${name}] 加入購物車`);
+            showToast(`已成功將「${product.name}」加入購物車！`);
         }
 
         function updateCartUI() {
-            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
-            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            
-            document.getElementById('cart-badge').innerText = totalCount;
-            document.getElementById('cart-count-header').innerText = totalCount;
-            document.getElementById('cart-total').innerText = `NT$ ${totalPrice.toLocaleString()}`;
+            document.getElementById('cart-badge').innerText = cart.length;
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            if (!container || !totalEl) return;
 
-            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            let total = 0;
+
             if (cart.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-center font-mono text-sm py-10">購物車目前無商品</p>';
-                return;
+                container.innerHTML = '<p class="text-slate-500 text-center font-mono py-8 text-xs">購物車內尚無商品</p>';
+            } else {
+                cart.forEach((item, idx) => {
+                    total += item.price;
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-xs';
+                    div.innerHTML = `
+                        <div>
+                            <div class="text-white font-bold mb-1">${item.name}</div>
+                            <div class="text-cyan-400 font-bold">NT$ ${item.price.toLocaleString()}</div>
+                        </div>
+                        <button onclick="removeFromCart(${idx})" class="text-red-400 hover:text-red-300 p-2 bg-transparent border-0 cursor-pointer"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                    container.appendChild(div);
+                });
             }
-
-            container.innerHTML = cart.map((item, index) => `
-                <div class="flex items-center justify-between bg-[#090d16] p-3 rounded-xl border border-slate-800">
-                    <div>
-                        <h4 class="font-mono font-bold text-white text-sm">${item.name}</h4>
-                        <span class="text-xs font-mono text-cyan-400">NT$ ${item.price.toLocaleString()} x ${item.qty}</span>
-                    </div>
-                    <button onclick="removeFromCart(${index})" class="text-slate-500 hover:text-red-400 p-2 cursor-pointer" aria-label="移除商品">
-                        <i class="fa-solid fa-trash text-xs"></i>
-                    </button>
-                </div>
-            `).join('');
+            totalEl.innerText = `NT$ ${total.toLocaleString()}`;
         }
 
         function removeFromCart(index) {
             cart.splice(index, 1);
             updateCartUI();
-            showToast('已從購物車移除商品');
+            showToast('已移除商品');
         }
 
         function toggleCart() {
-            const drawer = document.getElementById('cart-drawer');
-            drawer.classList.toggle('translate-x-full');
+            document.getElementById('cart-drawer').classList.toggle('hidden');
         }
 
-        function showDetails(itemName) {
-            showToast(`正在讀取 [${itemName}] 詳細規格...`);
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
+            if (!toast) return;
             document.getElementById('toast-msg').innerText = msg;
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => {
@@ -325,20 +779,108 @@
             }, 3000);
         }
 
+        function copyToClipboard(text) {
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showToast('授權卡號已成功複製至剪貼簿！');
+        }
+
+        // Automated Checkout Simulation
         function checkout() {
-            if(cart.length === 0) {
+            if (cart.length === 0) {
                 showToast('購物車內尚無商品！');
                 return;
             }
-            showToast('已觸發結帳程序！授權金鑰生成中...');
+
+            cart.forEach(item => {
+                const randomOrder = '#AXG-' + Math.floor(10000000 + Math.random() * 90000000);
+                const randomKey = 'AXG-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-2026';
+                orderHistory.unshift({ id: randomOrder, name: item.name, price: item.price, key: randomKey });
+            });
+
+            renderOrderHistory();
             cart = [];
             updateCartUI();
             toggleCart();
+            showToast('結帳成功！授權卡號已自動發放並寫入查詢紀錄。');
+            switchTab('orders');
         }
 
-        window.onload = function() {
-            renderProducts();
+        function renderOrderHistory() {
+            const tbody = document.getElementById('orders-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            orderHistory.forEach(ord => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-4 px-2 font-bold text-white">${ord.id}</td>
+                    <td class="py-4 px-2">${ord.name}</td>
+                    <td class="py-4 px-2 text-cyan-400 font-bold">NT$ ${ord.price.toLocaleString()}</td>
+                    <td class="py-4 px-2"><span class="bg-cyan-950 text-cyan-300 font-mono font-bold px-2.5 py-1 rounded border border-cyan-500/40">${ord.key}</span></td>
+                    <td class="py-4 px-2 text-right">
+                        <button onclick="copyToClipboard('${ord.key}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-900 text-cyan-400 border border-slate-700 cursor-pointer">複製</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
+
+        function queryOrders() {
+            showToast('正在向 24H 雲端發卡資料庫調閱紀錄...');
+        }
+
+        function processTopup() {
+            const amount = document.getElementById('topup-amount').value;
+            showToast(`已成功產生 NT$ ${amount} 儲值單據！請至超商繳費。`);
+        }
+
+        function switchAuthTab(type) {
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+            const tabLogin = document.getElementById('auth-tab-login');
+            const tabReg = document.getElementById('auth-tab-reg');
+
+            if (type === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                tabLogin.className = 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer';
+                tabReg.className = 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer';
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                tabReg.className = 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer';
+                tabLogin.className = 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer';
+            }
+        }
+
+        // Status Chip Click Listener
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            
+            const bar = document.getElementById('status-chips-bar');
+            const detailText = document.getElementById('status-detail-text');
+            if (bar && detailText) {
+                bar.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.t1st-chip');
+                    if (!btn) return;
+                    bar.querySelectorAll('.t1st-chip').forEach(b => b.classList.remove('is-on'));
+                    btn.classList.add('is-on');
+
+                    const game = btn.dataset.game;
+                    const status = btn.dataset.status;
+                    const plat = btn.dataset.plat;
+                    const desc = btn.dataset.desc;
+
+                    const statusColor = status.includes('維護') ? 'text-amber-400' : 'text-emerald-400';
+                    detailText.innerHTML = `<b>${game}</b> 狀態：<span class="${statusColor} font-bold">${status}</span> (平台：${plat}) — ${desc}`;
+                });
+            }
+        });
     </script>
 </body>
 </html>
