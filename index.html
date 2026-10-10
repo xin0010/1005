@@ -129,20 +129,20 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black cyber-bg-grid">
 
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-50 bg-[#060913]/90 backdrop-blur-xl border-b border-cyan-900/40 shadow-2xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('home')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-bolt text-black text-xl"></i>
-                </div>
-                <div>
-                    <span class="font-mono font-extrabold text-xl tracking-wider text-cyan-400">AXG<span class="text-white"> SHOP</span></span>
-                    <span class="block text-[9px] font-mono text-cyan-500/80 -mt-1 tracking-widest uppercase">Automated Execution</span>
-                </div>
+   <!-- Navigation Header -->
+<header class="sticky top-0 z-50 bg-[#060913]/90 backdrop-blur-xl border-b border-cyan-900/40 shadow-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <!-- Brand Logo -->
+        <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('home')">
+            <!-- 替換為真實圖片 Logo -->
+            <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-transform flex items-center justify-center bg-[#060913]">
+                <img src="logo.jpg" alt="AXG Logo" class="w-full h-full object-cover">
             </div>
-            
+            <div>
+                <span class="font-mono font-extrabold text-xl tracking-wider text-cyan-400">AXG<span class="text-white"> SHOP</span></span>
+                <span class="block text-[9px] font-mono text-cyan-500/80 -mt-1 tracking-widest uppercase">輔助官網</span>
+            </div>
+        </div>
             <!-- Desktop Nav Items -->
             <nav class="hidden lg:flex items-center space-x-1 text-sm font-medium font-mono text-slate-300">
                 <button onclick="switchTab('home')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">首頁</button>
