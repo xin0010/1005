@@ -1,3 +1,21 @@
+begin;
+
+alter table public.shop_products add column if not exists image_file text not null default 'logo-700x700.png';
+alter table public.shop_products add column if not exists revision integer not null default 1;
+
+create sequence if not exists public.shop_product_id_seq as integer start with 1000;
+alter sequence public.shop_product_id_seq owned by public.shop_products.id;
+alter table public.shop_products alter column id set default pg_catalog.nextval('public.shop_product_id_seq'::pg_catalog.regclass);
+select pg_catalog.setval(
+    'public.shop_product_id_seq'::pg_catalog.regclass,
+    pg_catalog.greatest(
+        (select coalesce(pg_catalog.max(p.id), 0) from public.shop_products as p),
+        (select last_value from public.shop_product_id_seq),
+        999
+    )
+);
+revoke all on sequence public.shop_product_id_seq from public, anon, authenticated;
+
 create table if not exists public.shop_admins (
     user_id uuid primary key references auth.users (id) on delete cascade,
     created_at timestamptz not null default pg_catalog.now(),
@@ -20,7 +38,7 @@ create index if not exists shop_admin_audit_log_order_created_idx
     on public.shop_admin_audit_log (order_id, created_at desc);
 
 create unique index if not exists shop_admin_payment_reference_uq
-    on public.shop_admin_audit_log ((details->>'reference'))
+    on public.shop_admin_audit_log (pg_catalog.upper(details->>'reference'))
     where action = 'confirm_payment' and details ? 'reference';
 
 alter table public.shop_admin_audit_log enable row level security;
@@ -301,7 +319,7 @@ security definer
 set search_path = ''
 as $$
 declare
-    v_reference text := pg_catalog.btrim(coalesce(p_reference, ''));
+    v_reference text := pg_catalog.upper(pg_catalog.btrim(coalesce(p_reference, '')));
     v_updated_id uuid;
 begin
     if (select auth.uid()) is null
@@ -338,14 +356,162 @@ begin
 end;
 $$;
 
+create or replace function public.admin_list_products(
+    p_search text default null,
+    p_status text default null,
+    p_limit integer default 25,
+    p_offset integer default 0
+)
+returns table (
+    id integer,
+    name text,
+    category text,
+    price integer,
+    tag text,
+    description text,
+    image_file text,
+    active boolean,
+    revision integer
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+    v_search text := nullif(pg_catalog.lower(pg_catalog.btrim(pg_catalog.left(coalesce(p_search, ''), 160))), '');
+    v_limit integer := pg_catalog.least(pg_catalog.greatest(coalesce(p_limit, 25), 1), 100);
+    v_offset integer := pg_catalog.greatest(coalesce(p_offset, 0), 0);
+begin
+    if (select auth.uid()) is null
+       or not exists (
+            select 1 from public.shop_admins as a
+            where a.user_id = (select auth.uid())
+       ) then
+        raise exception 'Admin access required' using errcode = '42501';
+    end if;
+
+    if p_status is not null and p_status not in ('active', 'inactive') then
+        raise exception 'Invalid product status filter' using errcode = '22023';
+    end if;
+
+    return query
+    select p.id, p.name, p.category, p.price, p.tag, p.description, p.image_file, p.active, p.revision
+    from public.shop_products as p
+    where (p_status is null or p.active = (p_status = 'active'))
+      and (v_search is null
+        or pg_catalog.strpos(pg_catalog.lower(p.name), v_search) > 0
+        or pg_catalog.strpos(pg_catalog.lower(p.category), v_search) > 0
+        or pg_catalog.strpos(p.id::text, v_search) > 0)
+    order by p.id desc
+    limit v_limit offset v_offset;
+end;
+$$;
+
+create or replace function public.admin_save_product(
+    p_product_id integer,
+    p_name text,
+    p_category text,
+    p_price integer,
+    p_tag text,
+    p_description text,
+    p_image_file text,
+    p_active boolean,
+    p_expected_revision integer
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_name text := pg_catalog.btrim(coalesce(p_name, ''));
+    v_tag text := pg_catalog.btrim(coalesce(p_tag, ''));
+    v_description text := pg_catalog.btrim(coalesce(p_description, ''));
+    v_image_file text := pg_catalog.btrim(coalesce(p_image_file, ''));
+    v_before public.shop_products%rowtype;
+    v_saved public.shop_products%rowtype;
+begin
+    if (select auth.uid()) is null
+       or not exists (
+            select 1 from public.shop_admins as a
+            where a.user_id = (select auth.uid())
+       ) then
+        raise exception 'Admin access required' using errcode = '42501';
+    end if;
+
+    if pg_catalog.length(v_name) not between 1 and 160
+       or p_category is null or p_category not in ('valorant', 'pubg', 'mobile', 'account')
+       or p_price is null or p_price not between 1 and 500000
+       or pg_catalog.length(v_tag) > 32 or pg_catalog.length(v_description) > 2000
+       or v_image_file !~ '^[A-Za-z0-9_-]+[.](png|jpg|jpeg|webp)$'
+       or p_active is null then
+        raise exception 'Invalid product data' using errcode = '22023';
+    end if;
+
+    if p_product_id is null then
+        if p_expected_revision is not null then
+            raise exception 'Product version conflict' using errcode = '40001';
+        end if;
+
+        insert into public.shop_products (name, category, price, tag, description, image_file, active)
+        values (v_name, p_category, p_price, v_tag, v_description, v_image_file, p_active)
+        returning * into v_saved;
+    else
+        select p.* into v_before
+        from public.shop_products as p
+        where p.id = p_product_id
+        for update;
+
+        if not found then
+            raise exception 'Product not found' using errcode = '22023';
+        end if;
+        if p_expected_revision is null or v_before.revision <> p_expected_revision then
+            raise exception 'Product version conflict' using errcode = '40001';
+        end if;
+
+        update public.shop_products as p
+           set name = v_name,
+               category = p_category,
+               price = p_price,
+               tag = v_tag,
+               description = v_description,
+               image_file = v_image_file,
+               active = p_active,
+               revision = p.revision + 1
+         where p.id = p_product_id
+        returning p.* into v_saved;
+    end if;
+
+    insert into public.shop_admin_audit_log (admin_user_id, action, details)
+    values (
+        (select auth.uid()),
+        case when p_product_id is null then 'create_product' else 'update_product' end,
+        pg_catalog.jsonb_build_object(
+            'product_id', v_saved.id,
+            'before', pg_catalog.to_jsonb(v_before),
+            'after', pg_catalog.to_jsonb(v_saved)
+        )
+    );
+
+    return pg_catalog.jsonb_build_object('id', v_saved.id, 'revision', v_saved.revision);
+end;
+$$;
+
 revoke all on function public.admin_dashboard_summary() from public, anon, authenticated;
 revoke all on function public.admin_list_orders(text, text, integer, integer) from public, anon, authenticated;
 revoke all on function public.admin_get_order_detail(uuid) from public, anon, authenticated;
 revoke all on function public.admin_cancel_pending_order(uuid, text) from public, anon, authenticated;
 revoke all on function public.admin_confirm_order_payment(uuid, text, boolean) from public, anon, authenticated;
+revoke all on function public.admin_list_products(text, text, integer, integer) from public, anon, authenticated;
+revoke all on function public.admin_save_product(integer, text, text, integer, text, text, text, boolean, integer) from public, anon, authenticated;
 grant usage on schema public to authenticated;
 grant execute on function public.admin_dashboard_summary() to authenticated;
 grant execute on function public.admin_list_orders(text, text, integer, integer) to authenticated;
 grant execute on function public.admin_get_order_detail(uuid) to authenticated;
 grant execute on function public.admin_cancel_pending_order(uuid, text) to authenticated;
 grant execute on function public.admin_confirm_order_payment(uuid, text, boolean) to authenticated;
+grant execute on function public.admin_list_products(text, text, integer, integer) to authenticated;
+grant execute on function public.admin_save_product(integer, text, text, integer, text, text, text, boolean, integer) to authenticated;
+
+commit;

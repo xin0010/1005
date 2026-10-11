@@ -713,7 +713,6 @@
         }
 
         const DISCORD_PAYMENT_URL = 'https://discord.gg/CahMc8zNjN';
-        const PRODUCT_IMAGES = { 1: 'PUBGM-700x700.png', 2: 'freefire.png', 3: 'moba.png', 4: 'logo-700x700.png' };
         const products = [];
         let catalogLoaded = false;
         let catalogLoadPromise = null;
@@ -737,7 +736,7 @@
 
             if (tabId === 'mobile-store') {
                 searchProducts();
-                if (!catalogLoaded) void loadCatalog();
+                if (!isCreatingOrder && !orderOutcomeUnknown) void loadCatalog();
             }
             if (tabId === 'orders') {
                 queryOrders();
@@ -772,6 +771,12 @@
                 ));
             } catch {
             }
+        }
+
+        function safeProductImage(filename) {
+            return typeof filename === 'string' && /^[A-Za-z0-9_-]+\.(?:png|jpg|jpeg|webp)$/.test(filename)
+                ? filename
+                : 'logo-700x700.png';
         }
 
         function getOrderRequestStorageKey(userId) {
@@ -878,18 +883,23 @@
                             throw new Error('商品目錄資料不完整');
                         }
                         return { id: item.id, name: item.name, category: item.category, price: item.price,
-                            tag: item.tag, desc: item.description, img: PRODUCT_IMAGES[item.id] || 'logo-700x700.png' };
+                            tag: item.tag, desc: item.description, img: safeProductImage(item.image_file) };
                     });
 
                     products.splice(0, products.length, ...updatedProducts);
                     catalogLoaded = true;
+                    const previousItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
                     cart = loadCart();
                     updateCartUI();
                     searchProducts();
-                    if (status) status.textContent = products.length ? '' : '目前沒有可購買的商品。';
+                    if (status) status.textContent = previousItemCount > cart.reduce((sum, item) => sum + item.quantity, 0)
+                        ? '部分商品已下架，已從購物車移除。請重新確認品項及金額。'
+                        : (products.length ? '' : '目前沒有可購買的商品。');
                 } catch (error) {
                     console.error('Catalog loading failed:', error);
+                    catalogLoaded = false;
                     if (status) status.textContent = '無法載入商品或價格，已停用下單。請確認已套用資料庫設定，稍後重新進入商城重試。';
+                    updateCartUI();
                     renderProducts();
                 }
             })().finally(() => { catalogLoadPromise = null; });
@@ -936,6 +946,10 @@
                         </button>
                     </div>
                 `;
+                const image = card.querySelector('img');
+                image.addEventListener('error', () => {
+                    if (image.getAttribute('src') !== 'logo-700x700.png') image.src = 'logo-700x700.png';
+                });
                 grid.appendChild(card);
             });
         }
@@ -962,7 +976,12 @@
             const p = products.find(prod => prod.id === id);
             if (!p) return;
 
-            document.getElementById('modal-img').src = p.img;
+            const modalImage = document.getElementById('modal-img');
+            modalImage.onerror = () => {
+                modalImage.onerror = null;
+                modalImage.src = 'logo-700x700.png';
+            };
+            modalImage.src = p.img;
             document.getElementById('modal-title').innerText = p.name;
             document.getElementById('modal-category').innerText = p.category.toUpperCase();
             document.getElementById('modal-price').innerText = `NT$ ${p.price.toLocaleString()}`;
@@ -1029,7 +1048,7 @@
                 if (label) label.textContent = isCreatingOrder ? '正在建立待付款訂單…' : (orderOutcomeUnknown ? '重試確認訂單並前往 Discord' : '建立訂單並前往 Discord');
             }
             if (!container) {
-                saveCart();
+                if (catalogLoaded) saveCart();
                 return;
             }
 
@@ -1106,7 +1125,7 @@
                 });
             }
 
-            saveCart();
+            if (catalogLoaded) saveCart();
         }
 
         function changeCartQuantity(id, delta) {
