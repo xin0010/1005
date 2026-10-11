@@ -184,9 +184,9 @@
                     <span>Discord 客服</span>
                 </a>
                 
-                <button onclick="toggleCart()" class="relative p-2.5 rounded-xl bg-slate-900 border border-cyan-900/60 hover:border-cyan-400 transition-all text-slate-300 hover:text-cyan-400 cursor-pointer" aria-label="檢視購物車">
+                <button id="cart-toggle-button" type="button" onclick="toggleCart(true)" aria-controls="cart-drawer" aria-expanded="false" class="relative p-2.5 rounded-xl bg-slate-900 border border-cyan-900/60 hover:border-cyan-400 transition-all text-slate-300 hover:text-cyan-400 cursor-pointer" aria-label="檢視購物車">
                     <i class="fa-solid fa-cart-shopping text-base"></i>
-                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-cyan-400 text-black font-extrabold font-mono text-[10px] rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-cyan-400/50">0</span>
+                    <span id="cart-badge" aria-live="polite" aria-atomic="true" class="absolute -top-1 -right-1 bg-cyan-400 text-black font-extrabold font-mono text-[10px] rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-cyan-400/50">0</span>
                 </button>
                 
                 <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:text-cyan-400 border border-slate-800 cursor-pointer">
@@ -365,38 +365,37 @@
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">訂單與授權卡號查詢</h2>
-                    <p class="text-xs text-slate-400">輸入您的訂單號碼、購買時填寫的信箱或聯絡電話即可快速查詢授權金鑰。</p>
+                    <p class="text-xs text-slate-400">登入後僅能查詢目前會員帳號所屬的訂單；可用訂單編號篩選。為保護卡號，不能透過公開信箱或電話查詢。</p>
                 </div>
 
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl mb-8">
-                    <div class="flex flex-col sm:flex-row gap-3 mb-6">
-                        <input type="text" id="order-search-input" placeholder="請輸入訂單編號或購買信箱 (例如: AXG-8812...)" class="flex-1 px-4 py-3 text-sm">
-                        <button onclick="queryOrders()" class="cyber-button px-6 py-3 rounded-xl font-bold text-sm border-0 cursor-pointer flex items-center justify-center gap-2">
+                    <form id="order-search-form" class="flex flex-col sm:flex-row gap-3 mb-3" onsubmit="queryOrders(event)">
+                        <label for="order-search-input" class="sr-only">訂單編號</label>
+                        <input type="search" id="order-search-input" name="orderNumber" maxlength="80" autocomplete="off" placeholder="訂單編號（選填，例如 AXG-20261011）" aria-describedby="order-search-hint" class="flex-1 px-4 py-3 text-sm">
+                        <button id="orders-search-button" type="submit" disabled class="cyber-button px-6 py-3 rounded-xl font-bold text-sm border-0 cursor-pointer flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <span>調閱紀錄</span>
+                            <span>查詢本人訂單</span>
                         </button>
-                    </div>
+                    </form>
+                    <p id="order-search-hint" class="mb-5 text-[11px] leading-relaxed text-slate-500">訂單及授權卡號只會在登入後由資料庫依帳戶權限讀取；不會用瀏覽器輸入的信箱或電話搜尋其他會員資料。</p>
+                    <p id="orders-query-status" class="mb-4 rounded-lg border border-slate-700 bg-slate-900/70 p-3 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">請先登入會員以查詢個人訂單。</p>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-slate-300">
                             <thead class="border-b border-cyan-900/60 text-cyan-400 uppercase">
                                 <tr>
+                                    <th class="pb-3 px-2">成立時間</th>
                                     <th class="pb-3 px-2">訂單編號</th>
-                                    <th class="pb-3 px-2">商品名稱</th>
-                                    <th class="pb-3 px-2">金額</th>
-                                    <th class="pb-3 px-2">授權卡號 / 狀態</th>
+                                    <th class="pb-3 px-2">商品／數量</th>
+                                    <th class="pb-3 px-2">小計</th>
+                                    <th class="pb-3 px-2">授權狀態</th>
+                                    <th class="pb-3 px-2">授權卡號</th>
                                     <th class="pb-3 px-2 text-right">操作</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800/80" id="orders-table-body">
                                 <tr>
-                                    <td class="py-4 px-2 font-bold text-white">#AXG-20261011</td>
-                                    <td class="py-4 px-2"></td>
-                                    <td class="py-4 px-2 text-cyan-400 font-bold">NT$ 1,500</td>
-                                    <td class="py-4 px-2"><span class="bg-cyan-950 text-cyan-300 font-mono font-bold px-2.5 py-1 rounded border border-cyan-500/40">AXGVAL-998A-44BC-77XX</span></td>
-                                    <td class="py-4 px-2 text-right">
-                                        <button onclick="copyToClipboard('AXGVAL-998A-44BC-77XX')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-900 text-cyan-400 border border-slate-700 cursor-pointer">複製</button>
-                                    </td>
+                                    <td class="py-5 px-2 text-center text-slate-500" colspan="7">登入後顯示此會員的訂單與授權資料。</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -444,31 +443,96 @@
 
         <!-- Wallet Topup View -->
         <section id="view-wallet" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
-            <div class="max-w-md mx-auto">
-                <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">商城餘額儲值</h2>
-                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl space-y-5">
-                    <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800">
-                        <label class="block text-xs text-slate-400 mb-1">當前帳戶餘額：</label>
-                        <div class="text-3xl font-extrabold text-cyan-400">NT$ <span id="user-balance">0</span></div>
+            <div class="max-w-2xl mx-auto">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">商城餘額儲值</h2>
+                    <p class="text-xs text-slate-400">先選擇金額與方式，確認摘要後再由正式付款服務處理。</p>
+                </div>
+
+                <div class="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 p-4 text-xs text-amber-200" role="note">
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
+                        <p class="m-0 leading-relaxed"><strong>重要提醒：</strong>目前未連接會員錢包或金流服務。下方帳號為固定顯示資料，不會依每筆訂單產生專屬虛擬帳號，也不會自動確認入帳或變更餘額；轉帳前請先核實收款資訊。</p>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-300 mb-2">儲值金額 (TWD)：</label>
-                        <input type="number" id="topup-amount" value="1000" min="100" class="w-full px-4 py-3 text-sm">
+                </div>
+
+                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl space-y-6">
+                    <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800" aria-live="polite">
+                        <label class="block text-xs text-slate-400 mb-1" for="user-balance">目前帳戶餘額</label>
+                        <div class="text-2xl font-extrabold text-cyan-400" id="user-balance">尚未連接</div>
+                        <p class="text-[11px] text-slate-500 mt-2 mb-0">正式餘額應由伺服器驗證後提供，請勿以瀏覽器資料作為付款或入帳依據。</p>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-300 mb-2">選擇支付方式：</label>
-                        <select class="w-full px-4 py-3 text-sm">
-                            <option>超商代碼代收 (全家 / 7-11 / 萊爾富)</option>
-                            <option>ATM 虛擬帳號轉帳</option>
-                            <option>USDT (TRC-20) 加密貨幣代收</option>
-                        </select>
-                    </div>
-                    <button onclick="processTopup()" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">
-                        產生繳費單據
-                    </button>
+
+                    <form id="topup-form" class="space-y-5" onsubmit="processTopup(event)">
+                        <div>
+                            <label for="topup-amount" class="block text-xs text-slate-300 mb-2">儲值金額 (TWD)</label>
+                            <input type="number" id="topup-amount" name="amount" value="1000" min="100" max="50000" step="100" required inputmode="numeric" aria-describedby="topup-amount-hint" class="w-full px-4 py-3 text-sm">
+                            <p id="topup-amount-hint" class="text-[11px] text-slate-500 mt-2 mb-0">每筆 NT$ 100–50,000，以 NT$ 100 為單位。</p>
+                            <div class="flex flex-wrap gap-2 mt-3" aria-label="常用儲值金額">
+                                <button type="button" data-topup-amount="500" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 500</button>
+                                <button type="button" data-topup-amount="1000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 1,000</button>
+                                <button type="button" data-topup-amount="2000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 2,000</button>
+                                <button type="button" data-topup-amount="5000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 5,000</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="topup-method" class="block text-xs text-slate-300 mb-2">預計付款方式</label>
+                            <select id="topup-method" name="paymentMethod" required aria-describedby="topup-method-hint" class="w-full px-4 py-3 text-sm">
+                                <option value="atm">ATM 虛擬帳號轉帳</option>
+                            </select>
+                            <p id="topup-method-hint" class="text-[11px] text-slate-500 mt-2 mb-0">送出後會顯示固定收款帳號與金額；網站不會傳送付款資料或驗證入帳。</p>
+                        </div>
+
+                        <div id="topup-summary" class="hidden rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-4" aria-live="polite" aria-atomic="true">
+                            <h3 class="text-sm font-bold text-cyan-300 mb-3">儲值資料摘要</h3>
+                            <dl class="space-y-2 text-xs">
+                                <div class="flex justify-between gap-4"><dt class="text-slate-400">儲值金額</dt><dd id="topup-summary-amount" class="m-0 text-white font-bold"></dd></div>
+                                <div class="flex justify-between gap-4"><dt class="text-slate-400">預計付款方式</dt><dd id="topup-summary-method" class="m-0 text-right text-white"></dd></div>
+                            </dl>
+                            <p class="text-[11px] text-amber-200 mt-3 mb-0">摘要不代表付款申請或交易成功；目前不會向任何服務傳送資料。</p>
+                        </div>
+
+                        <button id="topup-submit-btn" type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">查看 ATM 轉帳資訊</button>
+                    </form>
                 </div>
             </div>
         </section>
+
+        <!-- ATM Account Details Modal -->
+        <div id="topup-account-modal" class="fixed inset-0 z-[60] overflow-y-auto hidden" aria-hidden="true">
+            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeTopupAccountModal()" aria-hidden="true"></div>
+            <div class="relative min-h-screen flex items-center justify-center p-4">
+                <section role="dialog" aria-modal="true" aria-labelledby="topup-account-title" aria-describedby="topup-account-disclaimer" class="relative w-full max-w-md rounded-2xl border border-cyan-500/50 bg-[#0d1527] p-6 shadow-2xl font-mono">
+                    <button id="topup-account-close" type="button" onclick="closeTopupAccountModal()" aria-label="關閉轉帳資訊" class="absolute right-3 top-3 rounded-lg p-2 text-slate-400 hover:text-white bg-transparent border-0 cursor-pointer">
+                        <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
+                    </button>
+                    <div class="mb-5 pr-8">
+                        <span class="inline-flex items-center gap-2 rounded-full border border-cyan-500/40 bg-cyan-950/60 px-3 py-1 text-[11px] font-bold text-cyan-300">
+                            <i class="fa-solid fa-building-columns" aria-hidden="true"></i> ATM 虛擬帳號資訊
+                        </span>
+                        <h2 id="topup-account-title" class="mt-3 text-xl font-bold text-white">郵局轉帳資料</h2>
+                    </div>
+
+                    <dl class="space-y-3 rounded-xl border border-slate-700 bg-slate-900/80 p-4 text-sm">
+                        <div class="flex justify-between gap-4"><dt class="text-slate-400">銀行</dt><dd class="m-0 text-right font-bold text-white">郵局（代碼 700）</dd></div>
+                        <div>
+                            <dt class="mb-2 text-slate-400">帳號</dt>
+                            <dd class="m-0 flex flex-wrap items-center justify-between gap-3">
+                                <span id="post-account-number" class="select-all break-all font-mono text-lg font-extrabold tracking-wider text-cyan-300">00812410802456</span>
+                                <button type="button" onclick="copyPostAccount()" class="rounded-lg border border-cyan-500/40 bg-cyan-950/60 px-3 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-900/70 cursor-pointer">
+                                    <i class="fa-regular fa-copy mr-1" aria-hidden="true"></i>複製帳號
+                                </button>
+                            </dd>
+                        </div>
+                        <div class="flex justify-between gap-4 border-t border-slate-700 pt-3"><dt class="text-slate-400">本次金額</dt><dd id="topup-account-amount" class="m-0 text-right text-lg font-extrabold text-cyan-300"></dd></div>
+                    </dl>
+
+                    <p id="topup-account-disclaimer" class="mt-4 text-xs leading-relaxed text-amber-200">請在匯款前自行核對帳號與金額。此為固定顯示資料，不代表已建立繳費單或完成付款；網站不會接收匯款證明或自動入帳。</p>
+                    <button type="button" onclick="closeTopupAccountModal()" class="cyber-button mt-2 w-full rounded-xl py-3 text-sm font-bold cursor-pointer border-0">我知道了</button>
+                </section>
+            </div>
+        </div>
 
         <!-- Troubleshooting View -->
         <section id="view-trouble" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
@@ -498,33 +562,79 @@
         <section id="view-account" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-md mx-auto">
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl">
-                    <div class="flex border-b border-slate-800 mb-6">
-                        <button onclick="switchAuthTab('login')" id="auth-tab-login" class="flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer">會員登入</button>
-                        <button onclick="switchAuthTab('register')" id="auth-tab-reg" class="flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer">帳號註冊</button>
+                    <div class="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 p-3 text-xs leading-relaxed text-amber-200" role="note">
+                        會員驗證由 Supabase Auth 處理。請在 Supabase 專案設定允許的網站網址、郵件驗證及重新導向網址；不要將資料庫密碼或 secret/service-role key 放進前端。
                     </div>
 
-                    <form id="form-login" onsubmit="event.preventDefault(); showToast('登入成功！'); switchTab('mobile-store');">
+                    <div id="auth-session-panel" class="hidden mb-5 rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-4" aria-live="polite">
+                        <p class="mb-1 text-xs text-slate-400">目前登入帳號</p>
+                        <p id="auth-session-email" class="mb-4 break-all text-sm font-bold text-cyan-300"></p>
+                        <button type="button" onclick="signOutMember()" class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:border-cyan-400 cursor-pointer">登出</button>
+                    </div>
+                    <p id="auth-status" class="hidden mb-4 rounded-lg border border-slate-700 bg-slate-900/80 p-3 text-xs leading-relaxed" role="status" aria-live="polite"></p>
+
+                    <div id="auth-tabs" class="flex border-b border-slate-800 mb-6" role="tablist" aria-label="會員驗證方式">
+                        <button type="button" onclick="switchAuthTab('login')" id="auth-tab-login" role="tab" aria-controls="form-login" aria-selected="true" class="flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer">會員登入</button>
+                        <button type="button" onclick="switchAuthTab('register')" id="auth-tab-reg" role="tab" aria-controls="form-register" aria-selected="false" tabindex="-1" class="flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer">帳號註冊</button>
+                    </div>
+
+                    <form id="form-login" role="tabpanel" aria-labelledby="auth-tab-login" onsubmit="handleLoginSubmit(event)">
                         <div class="mb-4">
-                            <label class="block text-xs font-bold text-slate-300 mb-1.5">會員帳號 / 電子郵件</label>
-                            <input type="text" required placeholder="請輸入帳號" class="w-full px-4 py-3 text-sm">
+                            <label for="login-identifier" class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
+                            <input id="login-identifier" name="email" type="email" required maxlength="254" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
                         </div>
                         <div class="mb-6">
-                            <label class="block text-xs font-bold text-slate-300 mb-1.5">密碼</label>
-                            <input type="password" required placeholder="請輸入密碼" class="w-full px-4 py-3 text-sm">
+                            <label for="login-password" class="block text-xs font-bold text-slate-300 mb-1.5">密碼</label>
+                            <div class="relative">
+                                <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="請輸入密碼" class="w-full px-4 py-3 pr-16 text-sm">
+                                <button type="button" data-password-toggle="login-password" aria-label="顯示密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
+                            </div>
                         </div>
                         <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">登入系統</button>
+                        <button type="button" onclick="sendPasswordReset()" class="mt-4 w-full bg-transparent border-0 text-center text-xs text-cyan-300 hover:text-cyan-200 underline cursor-pointer">忘記密碼？寄送重設連結</button>
                     </form>
 
-                    <form id="form-register" class="hidden" onsubmit="event.preventDefault(); showToast('註冊成功！自動獲得新手權限'); switchTab('mobile-store');">
+                    <form id="form-register" class="hidden" role="tabpanel" aria-labelledby="auth-tab-reg" onsubmit="handleRegisterSubmit(event)">
                         <div class="mb-4">
-                            <label class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
-                            <input type="email" required placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
+                            <label for="register-email" class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
+                            <input id="register-email" name="email" type="email" required maxlength="254" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
+                        </div>
+                        <div class="mb-4">
+                            <label for="register-password" class="block text-xs font-bold text-slate-300 mb-1.5">設定密碼</label>
+                            <div class="relative">
+                                <input id="register-password" name="new-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="register-password-hint register-password-strength" placeholder="至少 12 個字元" class="w-full px-4 py-3 pr-16 text-sm">
+                                <button type="button" data-password-toggle="register-password" aria-label="顯示密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
+                            </div>
+                            <p id="register-password-hint" class="text-[11px] text-slate-500 mt-2 mb-0">建議使用容易記住的長密語；不要求特定大小寫或符號組合。</p>
+                            <p id="register-password-strength" class="text-[11px] text-slate-400 mt-1 mb-0" aria-live="polite">密碼長度狀態：尚未輸入</p>
                         </div>
                         <div class="mb-6">
-                            <label class="block text-xs font-bold text-slate-300 mb-1.5">設定密碼</label>
-                            <input type="password" required placeholder="至少 6 位字元" class="w-full px-4 py-3 text-sm">
+                            <label for="register-password-confirm" class="block text-xs font-bold text-slate-300 mb-1.5">再次輸入密碼</label>
+                            <div class="relative">
+                                <input id="register-password-confirm" name="confirm-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入相同密碼" class="w-full px-4 py-3 pr-16 text-sm">
+                                <button type="button" data-password-toggle="register-password-confirm" aria-label="顯示確認密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
+                            </div>
                         </div>
                         <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">建立新帳號</button>
+                    </form>
+
+                    <form id="form-reset-password" class="hidden" role="region" aria-labelledby="recovery-form-title" onsubmit="handlePasswordRecoverySubmit(event)">
+                        <h3 id="recovery-form-title" class="mb-4 text-lg font-bold text-white">設定新密碼</h3>
+                        <div class="mb-4">
+                            <label for="recovery-password" class="block text-xs font-bold text-slate-300 mb-1.5">新密碼</label>
+                            <div class="relative">
+                                <input id="recovery-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="至少 12 個字元" class="w-full px-4 py-3 pr-16 text-sm">
+                                <button type="button" data-password-toggle="recovery-password" aria-label="顯示新密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="recovery-password-confirm" class="block text-xs font-bold text-slate-300 mb-1.5">再次輸入新密碼</label>
+                            <div class="relative">
+                                <input id="recovery-password-confirm" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入相同密碼" class="w-full px-4 py-3 pr-16 text-sm">
+                                <button type="button" data-password-toggle="recovery-password-confirm" aria-label="顯示確認密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">更新密碼</button>
                     </form>
                 </div>
             </div>
@@ -560,19 +670,22 @@
     </div>
 
     <!-- Cart Drawer -->
-    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="toggleCart()"></div>
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="toggleCart(false)" aria-hidden="true"></div>
         <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
             <div class="w-screen max-w-md bg-[#0d1527] border-l border-cyan-900/60 p-6 flex flex-col justify-between shadow-2xl font-mono">
                 <div>
-                    <div class="flex items-center justify-between pb-4 border-b border-cyan-900/40">
-                        <h3 class="text-lg font-bold text-cyan-400 flex items-center gap-2">
+                    <div class="flex items-center justify-between gap-3 pb-4 border-b border-cyan-900/40">
+                        <h3 id="cart-title" class="text-lg font-bold text-cyan-400 flex items-center gap-2">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span>購物車與發卡明細</span>
                         </h3>
-                        <button onclick="toggleCart()" class="text-slate-400 hover:text-white p-2 bg-transparent border-0 cursor-pointer"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        <div class="flex items-center gap-2">
+                            <button id="cart-clear-btn" type="button" onclick="clearCart()" disabled class="rounded-lg border border-slate-700 px-2.5 py-2 text-[11px] text-slate-400 hover:border-red-400 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">清空</button>
+                            <button id="cart-close-button" type="button" onclick="toggleCart(false)" aria-label="關閉購物車" class="text-slate-400 hover:text-white p-2 bg-transparent border-0 cursor-pointer"><i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i></button>
+                        </div>
                     </div>
-                    <div id="cart-items-container" class="mt-6 space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+                    <div id="cart-items-container" aria-live="polite" aria-label="購物車商品明細" class="mt-6 space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
                 </div>
 
                 <div class="pt-4 border-t border-cyan-900/40">
@@ -580,9 +693,10 @@
                         <span class="text-slate-300 text-sm">總計金額：</span>
                         <span id="cart-total" class="text-cyan-400 font-bold text-2xl">NT$ 0</span>
                     </div>
-                    <button onclick="checkout()" class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg flex items-center justify-center gap-2">
+                    <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">購物車僅暫存在此瀏覽器，不代表訂單成立。付款與授權發放服務尚未連接，請勿將此頁當作已付款或已發卡證明。</p>
+                    <button type="button" disabled class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-not-allowed border-0 shadow-lg opacity-50 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-check"></i>
-                        <span>確認結帳並自動發卡</span>
+                        <span>付款與自動發卡尚未啟用</span>
                     </button>
                 </div>
             </div>
@@ -632,7 +746,29 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Browser-safe Supabase configuration. Never put database or service-role secrets here.
+        const SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
+        let supabaseClient = null;
+        let authRecoveryActive = false;
+        let currentAuthUser = null;
+        let activeAuthTab = 'login';
+        try {
+            if (window.supabase?.createClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+                    auth: {
+                        autoRefreshToken: true,
+                        persistSession: true,
+                        detectSessionInUrl: true
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Supabase initialization failed.', error);
+        }
+
         // Store Product Database
         const products = [
             
@@ -642,10 +778,11 @@
             { id: 4, name: '蘋果 P12 證書個人獨立簽名 (1年保固)', category: 'account', price: 650, tag: '獨立憑證', img: 'logo-700x700.png', desc: '個人獨享企業開發者證書，支援所有 IPA 直裝應用，提供一年內掉簽補簽服務。' }
         ];
 
-        let cart = [];
-        let orderHistory = [
-            { id: '#AXG-20261011', name: '', price: 1500, key: 'AXGVAL-998A-44BC-77XX' }
-        ];
+        const CART_STORAGE_KEY = 'axg-shop-cart-v1';
+        let cart = loadCart();
+        let topupModalPreviousFocus = null;
+        let cartPreviousFocus = null;
+        let orderLookupRequestId = 0;
 
         // Tab Switcher
         function switchTab(tabId) {
@@ -658,7 +795,40 @@
             if (tabId === 'mobile-store') {
                 renderProducts();
             }
+            if (tabId === 'orders') {
+                queryOrders();
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadCart() {
+            try {
+                const savedCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
+                if (!Array.isArray(savedCart)) return [];
+
+                return savedCart.reduce((items, savedItem) => {
+                    const product = products.find(item => item.id === Number(savedItem?.id));
+                    const quantity = Number(savedItem?.quantity);
+                    if (!product || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) return items;
+
+                    const existingItem = items.find(item => item.id === product.id);
+                    if (existingItem) existingItem.quantity = Math.min(99, existingItem.quantity + quantity);
+                    else items.push({ ...product, quantity });
+                    return items;
+                }, []);
+            } catch {
+                return [];
+            }
+        }
+
+        function saveCart() {
+            try {
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(
+                    cart.map(item => ({ id: item.id, quantity: item.quantity }))
+                ));
+            } catch {
+                // Cart remains available for this page session if storage is blocked or full.
+            }
         }
 
         // Render Product Cards
@@ -739,48 +909,167 @@
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
-            cart.push(product);
+
+            const existingItem = cart.find(item => item.id === product.id);
+            if (existingItem) {
+                if (existingItem.quantity >= 99) {
+                    showToast('單一商品最多可加入 99 件。');
+                    return;
+                }
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
             updateCartUI();
-            showToast(`已成功將「${product.name}」加入購物車！`);
+            showToast(`「${product.name}」已加入購物車。這只是本機購物車，尚未建立訂單。`);
         }
 
         function updateCartUI() {
-            document.getElementById('cart-badge').innerText = cart.length;
+            const badge = document.getElementById('cart-badge');
             const container = document.getElementById('cart-items-container');
             const totalEl = document.getElementById('cart-total');
-            if (!container || !totalEl) return;
+            const clearButton = document.getElementById('cart-clear-btn');
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
 
-            container.innerHTML = '';
-            let total = 0;
+            if (badge) {
+                badge.textContent = itemCount > 99 ? '99+' : String(itemCount);
+                badge.setAttribute('aria-label', `購物車共 ${itemCount} 件商品`);
+            }
+            const cartToggleButton = document.getElementById('cart-toggle-button');
+            if (cartToggleButton) cartToggleButton.setAttribute('aria-label', `檢視購物車，共 ${itemCount} 件商品`);
+            if (totalEl) totalEl.textContent = `NT$ ${formatter.format(total)}`;
+            if (clearButton) clearButton.disabled = cart.length === 0;
+            if (!container) {
+                saveCart();
+                return;
+            }
+
+            container.replaceChildren();
 
             if (cart.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-center font-mono py-8 text-xs">購物車內尚無商品</p>';
+                const emptyMessage = document.createElement('p');
+                emptyMessage.className = 'text-slate-500 text-center font-mono py-8 text-xs';
+                emptyMessage.textContent = '購物車內尚無商品。加入商品後會顯示數量與小計。';
+                container.appendChild(emptyMessage);
             } else {
-                cart.forEach((item, idx) => {
-                    total += item.price;
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-xs';
-                    div.innerHTML = `
-                        <div>
-                            <div class="text-white font-bold mb-1">${item.name}</div>
-                            <div class="text-cyan-400 font-bold">NT$ ${item.price.toLocaleString()}</div>
-                        </div>
-                        <button onclick="removeFromCart(${idx})" class="text-red-400 hover:text-red-300 p-2 bg-transparent border-0 cursor-pointer"><i class="fa-solid fa-trash"></i></button>
-                    `;
-                    container.appendChild(div);
+                cart.forEach(item => {
+                    const article = document.createElement('article');
+                    article.className = 'rounded-xl border border-slate-800 bg-slate-900/90 p-4';
+
+                    const header = document.createElement('div');
+                    header.className = 'flex items-start justify-between gap-3';
+                    const title = document.createElement('h4');
+                    title.className = 'm-0 text-sm font-bold leading-relaxed text-white';
+                    title.textContent = item.name;
+                    header.appendChild(title);
+
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.className = 'rounded-lg p-2 text-slate-400 hover:bg-red-950/50 hover:text-red-300 cursor-pointer bg-transparent border-0';
+                    removeButton.setAttribute('aria-label', `移除 ${item.name}`);
+                    removeButton.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>';
+                    removeButton.addEventListener('click', () => removeFromCart(item.id));
+                    header.appendChild(removeButton);
+                    article.appendChild(header);
+
+                    const priceLine = document.createElement('p');
+                    priceLine.className = 'mt-2 mb-3 text-xs text-slate-400';
+                    priceLine.textContent = `單價 NT$ ${formatter.format(item.price)}`;
+                    article.appendChild(priceLine);
+
+                    const controls = document.createElement('div');
+                    controls.className = 'flex items-center justify-between gap-3';
+                    const quantityControl = document.createElement('div');
+                    quantityControl.className = 'inline-flex items-center rounded-lg border border-slate-700 bg-[#060913]';
+
+                    const decreaseButton = document.createElement('button');
+                    decreaseButton.type = 'button';
+                    decreaseButton.className = 'h-9 w-9 rounded-l-lg text-slate-300 hover:bg-slate-800 disabled:opacity-40 cursor-pointer';
+                    decreaseButton.textContent = '−';
+                    decreaseButton.setAttribute('aria-label', `減少 ${item.name} 數量`);
+                    decreaseButton.disabled = item.quantity <= 1;
+                    decreaseButton.addEventListener('click', () => changeCartQuantity(item.id, -1));
+                    quantityControl.appendChild(decreaseButton);
+
+                    const quantity = document.createElement('span');
+                    quantity.className = 'min-w-10 px-2 text-center text-xs font-bold text-white';
+                    quantity.textContent = String(item.quantity);
+                    quantity.setAttribute('aria-label', `${item.quantity} 件`);
+                    quantityControl.appendChild(quantity);
+
+                    const increaseButton = document.createElement('button');
+                    increaseButton.type = 'button';
+                    increaseButton.className = 'h-9 w-9 rounded-r-lg text-slate-300 hover:bg-slate-800 disabled:opacity-40 cursor-pointer';
+                    increaseButton.textContent = '+';
+                    increaseButton.setAttribute('aria-label', `增加 ${item.name} 數量`);
+                    increaseButton.disabled = item.quantity >= 99;
+                    increaseButton.addEventListener('click', () => changeCartQuantity(item.id, 1));
+                    quantityControl.appendChild(increaseButton);
+                    controls.appendChild(quantityControl);
+
+                    const subtotal = document.createElement('p');
+                    subtotal.className = 'm-0 text-right text-sm font-bold text-cyan-300';
+                    subtotal.textContent = `小計 NT$ ${formatter.format(item.price * item.quantity)}`;
+                    controls.appendChild(subtotal);
+                    article.appendChild(controls);
+                    container.appendChild(article);
                 });
             }
-            totalEl.innerText = `NT$ ${total.toLocaleString()}`;
+
+            saveCart();
         }
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
+        function changeCartQuantity(id, delta) {
+            const item = cart.find(cartItem => cartItem.id === Number(id));
+            if (!item || !Number.isInteger(delta)) return;
+
+            const nextQuantity = item.quantity + delta;
+            if (nextQuantity < 1) return;
+            if (nextQuantity > 99) {
+                showToast('單一商品最多可加入 99 件。');
+                return;
+            }
+            item.quantity = nextQuantity;
             updateCartUI();
-            showToast('已移除商品');
         }
 
-        function toggleCart() {
-            document.getElementById('cart-drawer').classList.toggle('hidden');
+        function removeFromCart(id) {
+            const item = cart.find(cartItem => cartItem.id === Number(id));
+            if (!item) return;
+            cart = cart.filter(cartItem => cartItem.id !== item.id);
+            updateCartUI();
+            showToast(`已移除「${item.name}」。`);
+        }
+
+        function clearCart() {
+            if (cart.length === 0) return;
+            cart = [];
+            updateCartUI();
+            showToast('購物車已清空。');
+        }
+
+        function toggleCart(forceOpen) {
+            const drawer = document.getElementById('cart-drawer');
+            const toggleButton = document.getElementById('cart-toggle-button');
+            if (!drawer) return;
+
+            const isOpen = !drawer.classList.contains('hidden');
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+            if (shouldOpen === isOpen) return;
+
+            drawer.classList.toggle('hidden', !shouldOpen);
+            drawer.setAttribute('aria-hidden', String(!shouldOpen));
+            toggleButton?.setAttribute('aria-expanded', String(shouldOpen));
+            if (shouldOpen) {
+                cartPreviousFocus = document.activeElement;
+                document.getElementById('cart-close-button')?.focus();
+            } else {
+                const focusTarget = cartPreviousFocus instanceof HTMLElement ? cartPreviousFocus : toggleButton;
+                focusTarget?.focus();
+                cartPreviousFocus = null;
+            }
         }
 
         function toggleMobileMenu() {
@@ -798,13 +1087,30 @@
         }
 
         function copyToClipboard(text) {
-            const input = document.createElement('input');
-            input.value = text;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
-            showToast('授權卡號已成功複製至剪貼簿！');
+            if (typeof text !== 'string' || !text) return;
+
+            const copy = async () => {
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(text);
+                    } else {
+                        const input = document.createElement('textarea');
+                        input.value = text;
+                        input.setAttribute('readonly', '');
+                        input.style.position = 'fixed';
+                        input.style.opacity = '0';
+                        document.body.appendChild(input);
+                        input.select();
+                        const copied = document.execCommand('copy');
+                        input.remove();
+                        if (!copied) throw new Error('Clipboard copy failed');
+                    }
+                    showToast('授權卡號已複製。');
+                } catch {
+                    showToast('複製失敗，請手動選取並複製授權卡號。');
+                }
+            };
+            void copy();
         }
 
         // Automated Checkout Simulation
@@ -813,48 +1119,261 @@
                 showToast('購物車內尚無商品！');
                 return;
             }
-
-            cart.forEach(item => {
-                const randomOrder = '#AXG-' + Math.floor(10000000 + Math.random() * 90000000);
-                const randomKey = 'AXG-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-2026';
-                orderHistory.unshift({ id: randomOrder, name: item.name, price: item.price, key: randomKey });
-            });
-
-            renderOrderHistory();
-            cart = [];
-            updateCartUI();
-            toggleCart();
-            showToast('結帳成功！授權卡號已自動發放並寫入查詢紀錄。');
-            switchTab('orders');
+            showToast('付款與自動發卡尚未啟用；購物車只保存在本機，沒有建立訂單或發放授權。');
         }
 
-        function renderOrderHistory() {
+        function setOrderQueryStatus(message, tone = 'info') {
+            const status = document.getElementById('orders-query-status');
+            if (!status) return;
+
+            const toneClasses = {
+                info: 'border-slate-700 bg-slate-900/70 text-slate-300',
+                success: 'border-emerald-500/30 bg-emerald-950/30 text-emerald-200',
+                error: 'border-red-500/30 bg-red-950/30 text-red-200'
+            };
+            status.className = `mb-4 rounded-lg border p-3 text-xs leading-relaxed ${toneClasses[tone] || toneClasses.info}`;
+            status.textContent = message;
+        }
+
+        function clearOrderRows(message = '登入後顯示此會員的訂單與授權資料。') {
             const tbody = document.getElementById('orders-table-body');
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            orderHistory.forEach(ord => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="py-4 px-2 font-bold text-white">${ord.id}</td>
-                    <td class="py-4 px-2">${ord.name}</td>
-                    <td class="py-4 px-2 text-cyan-400 font-bold">NT$ ${ord.price.toLocaleString()}</td>
-                    <td class="py-4 px-2"><span class="bg-cyan-950 text-cyan-300 font-mono font-bold px-2.5 py-1 rounded border border-cyan-500/40">${ord.key}</span></td>
-                    <td class="py-4 px-2 text-right">
-                        <button onclick="copyToClipboard('${ord.key}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-900 text-cyan-400 border border-slate-700 cursor-pointer">複製</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.className = 'py-5 px-2 text-center text-slate-500';
+            td.colSpan = 7;
+            td.textContent = message;
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        }
+
+        function renderOrderHistory(orders) {
+            const tbody = document.getElementById('orders-table-body');
+            if (!tbody) return;
+            tbody.replaceChildren();
+
+            const statusLabels = {
+                order: { pending: '待付款', paid: '已付款', cancelled: '已取消', refunded: '已退款' },
+                authorization: { pending: '待發放', active: '有效', expired: '已到期', revoked: '已撤銷' }
+            };
+            const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+
+            if (!orders.length) {
+                clearOrderRows('查無符合條件的訂單。');
+                return;
+            }
+
+            orders.forEach(order => {
+                    const tr = document.createElement('tr');
+                    const addCell = (value, className = 'py-4 px-2') => {
+                        const td = document.createElement('td');
+                        td.className = className;
+                        td.textContent = value;
+                        tr.appendChild(td);
+                        return td;
+                    };
+
+                    const quantity = Number(order.quantity) || 1;
+                    const createdAt = order.created_at ? new Date(order.created_at) : null;
+                    const createdAtText = createdAt && !Number.isNaN(createdAt.getTime())
+                        ? createdAt.toLocaleString('zh-TW')
+                        : '—';
+                    addCell(createdAtText, 'py-4 px-2 whitespace-nowrap text-slate-400');
+                    addCell(order.order_number ? `#${order.order_number}` : '—', 'py-4 px-2 font-bold text-white whitespace-nowrap');
+                    addCell(order.product_name ? `${order.product_name} × ${quantity}` : '商品明細尚未建立');
+                    const unitPrice = order.unit_price == null ? Number.NaN : Number(order.unit_price);
+                    const lineTotal = Number.isSafeInteger(unitPrice) && unitPrice >= 0 ? unitPrice * quantity : Number(order.total_amount);
+                    addCell(Number.isSafeInteger(lineTotal) && lineTotal >= 0 ? `NT$ ${formatter.format(lineTotal)}` : '—', 'py-4 px-2 text-cyan-400 font-bold whitespace-nowrap');
+
+                    const orderStatus = statusLabels.order[order.order_status] || '處理中';
+                    const expiresAt = order.expires_at ? new Date(order.expires_at) : null;
+                    const isExpired = Boolean(expiresAt && !Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() <= Date.now());
+                    const effectiveAuthorizationStatus = isExpired && order.authorization_status === 'active'
+                        ? 'expired'
+                        : order.authorization_status;
+                    const authStatus = order.order_status !== 'paid'
+                        ? (order.order_status === 'pending' ? '付款後處理' : '不可用')
+                        : (order.item_id ? (statusLabels.authorization[effectiveAuthorizationStatus] || '尚無資料') : '待建立明細');
+                    addCell(`${orderStatus}／${authStatus}`, 'py-4 px-2 whitespace-nowrap');
+
+                    const keyCell = document.createElement('td');
+                    keyCell.className = 'py-4 px-2';
+                    const canRevealKey = order.order_status === 'paid'
+                        && order.authorization_key
+                        && order.authorization_status === 'active'
+                        && !isExpired;
+                    if (canRevealKey) {
+                        const keyLabel = document.createElement('span');
+                        keyLabel.className = 'inline-block select-all break-all rounded border border-cyan-500/40 bg-cyan-950 px-2.5 py-1 font-mono font-bold text-cyan-300';
+                        keyLabel.textContent = order.authorization_key;
+                        keyCell.appendChild(keyLabel);
+                        if (order.expires_at) {
+                            const expiry = new Date(order.expires_at);
+                            if (!Number.isNaN(expiry.getTime())) {
+                                const expiryText = document.createElement('span');
+                                expiryText.className = 'mt-1 block text-[10px] text-slate-500';
+                                expiryText.textContent = `到期：${expiry.toLocaleString('zh-TW')}`;
+                                keyCell.appendChild(expiryText);
+                            }
+                        }
+                    } else {
+                        keyCell.textContent = order.order_status === 'pending'
+                            ? '付款完成後顯示'
+                            : (isExpired ? '授權已到期' : (order.authorization_status === 'revoked' ? '此授權已撤銷' : '尚未發放或不可用'));
+                    }
+                    tr.appendChild(keyCell);
+
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'py-4 px-2 text-right';
+                    if (canRevealKey) {
+                        const copyButton = document.createElement('button');
+                        copyButton.type = 'button';
+                        copyButton.className = 'rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-cyan-400 hover:bg-cyan-900 cursor-pointer';
+                        copyButton.textContent = '複製';
+                        copyButton.setAttribute('aria-label', `複製 ${order.order_number || '訂單'} 的授權卡號`);
+                        copyButton.addEventListener('click', () => copyToClipboard(order.authorization_key));
+                        actionCell.appendChild(copyButton);
+                    } else {
+                        actionCell.textContent = '—';
+                    }
+                    tr.appendChild(actionCell);
+                    tbody.appendChild(tr);
             });
         }
 
-        function queryOrders() {
-            showToast('正在向 24H 雲端發卡資料庫調閱紀錄...');
+        async function queryOrders(event) {
+            event?.preventDefault();
+            const input = document.getElementById('order-search-input');
+            const button = document.getElementById('orders-search-button');
+            const userId = currentAuthUser?.id;
+
+            if (!userId) {
+                orderLookupRequestId += 1;
+                setOrderQueryStatus('請先登入會員。為保護授權卡號，系統只查詢登入帳號本人的訂單。', 'error');
+                clearOrderRows();
+                return;
+            }
+            if (!supabaseClient) {
+                setOrderQueryStatus('Supabase 服務目前不可用，請稍後再試。', 'error');
+                return;
+            }
+
+            const orderNumber = input?.value.trim().replace(/^#/, '').toUpperCase() || '';
+            if (orderNumber && !/^AXG-[A-Z0-9-]{1,72}$/.test(orderNumber)) {
+                setOrderQueryStatus('訂單編號格式不正確，請使用 AXG- 開頭的訂單編號。', 'error');
+                input?.focus();
+                return;
+            }
+
+            const requestId = ++orderLookupRequestId;
+            if (button) {
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+            }
+            setOrderQueryStatus('正在安全讀取本人訂單…');
+            clearOrderRows('正在載入訂單…');
+
+            try {
+                const { data, error } = await supabaseClient.rpc('get_my_orders', {
+                    p_order_number: orderNumber || null
+                });
+                if (error) throw error;
+                if (requestId !== orderLookupRequestId || currentAuthUser?.id !== userId) return;
+
+                const orders = Array.isArray(data) ? data : [];
+                renderOrderHistory(orders);
+                const orderCount = new Set(orders.map(order => order.order_id)).size;
+                setOrderQueryStatus(`查詢完成，共 ${orderCount} 張訂單、${orders.length} 項商品${orderCount === 50 ? '（最多顯示最近 50 張訂單）' : ''}。授權資料由登入權限保護。`, 'success');
+            } catch (error) {
+                if (requestId !== orderLookupRequestId) return;
+                console.error('Order lookup failed:', error);
+                clearOrderRows('訂單無法載入。');
+                setOrderQueryStatus('查詢失敗。請確認已套用訂單資料表與 RLS 權限設定，或稍後再試。', 'error');
+            } finally {
+                if (requestId === orderLookupRequestId && button) {
+                    button.disabled = false;
+                    button.removeAttribute('aria-busy');
+                }
+            }
         }
 
-        function processTopup() {
-            const amount = document.getElementById('topup-amount').value;
-            showToast(`已成功產生 NT$ ${amount} 儲值單據！請至超商繳費。`);
+        function processTopup(event) {
+            event?.preventDefault();
+
+            const form = document.getElementById('topup-form');
+            const amountInput = document.getElementById('topup-amount');
+            const methodSelect = document.getElementById('topup-method');
+            const summary = document.getElementById('topup-summary');
+            if (!form || !amountInput || !methodSelect || !summary) return;
+
+            amountInput.setCustomValidity('');
+            const amount = amountInput.valueAsNumber;
+            if (!Number.isSafeInteger(amount) || amount < 100 || amount > 50000 || amount % 100 !== 0) {
+                amountInput.setCustomValidity('請輸入 NT$ 100 至 NT$ 50,000 之間，且為 NT$ 100 的整數倍。');
+                form.reportValidity();
+                return;
+            }
+
+            if (!form.reportValidity()) return;
+
+            const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+            const selectedMethod = methodSelect.options[methodSelect.selectedIndex];
+            document.getElementById('topup-summary-amount').textContent = `NT$ ${formatter.format(amount)}`;
+            document.getElementById('topup-summary-method').textContent = selectedMethod ? selectedMethod.textContent.trim() : '未選擇';
+            summary.classList.remove('hidden');
+            openTopupAccountModal(amount);
+        }
+
+        function openTopupAccountModal(amount) {
+            const modal = document.getElementById('topup-account-modal');
+            const amountEl = document.getElementById('topup-account-amount');
+            if (!modal || !amountEl) return;
+
+            topupModalPreviousFocus = document.activeElement;
+            amountEl.textContent = `NT$ ${new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(amount)}`;
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            document.getElementById('topup-account-close')?.focus();
+        }
+
+        function closeTopupAccountModal() {
+            const modal = document.getElementById('topup-account-modal');
+            if (!modal) return;
+
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            const focusTarget = topupModalPreviousFocus instanceof HTMLElement
+                ? topupModalPreviousFocus
+                : document.getElementById('topup-submit-btn');
+            focusTarget?.focus();
+            topupModalPreviousFocus = null;
+        }
+
+        async function copyPostAccount() {
+            const accountNumber = document.getElementById('post-account-number')?.textContent.trim();
+            if (!accountNumber) return;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(accountNumber);
+                } else {
+                    const temporaryInput = document.createElement('textarea');
+                    temporaryInput.value = accountNumber;
+                    temporaryInput.setAttribute('readonly', '');
+                    temporaryInput.style.position = 'fixed';
+                    temporaryInput.style.opacity = '0';
+                    document.body.appendChild(temporaryInput);
+                    temporaryInput.select();
+                    const copied = document.execCommand('copy');
+                    temporaryInput.remove();
+                    if (!copied) throw new Error('Clipboard copy failed');
+                }
+                showToast('帳號已複製，匯款前請再次核對收款資訊。');
+            } catch {
+                showToast('複製失敗，請手動選取並複製帳號。');
+            }
         }
 
         function switchAuthTab(type) {
@@ -862,23 +1381,423 @@
             const regForm = document.getElementById('form-register');
             const tabLogin = document.getElementById('auth-tab-login');
             const tabReg = document.getElementById('auth-tab-reg');
+            if (!loginForm || !regForm || !tabLogin || !tabReg) return;
+            if (currentAuthUser || authRecoveryActive) return;
 
-            if (type === 'login') {
-                loginForm.classList.remove('hidden');
-                regForm.classList.add('hidden');
-                tabLogin.className = 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer';
-                tabReg.className = 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer';
-            } else {
-                loginForm.classList.add('hidden');
-                regForm.classList.remove('hidden');
-                tabReg.className = 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer';
-                tabLogin.className = 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer';
+            activeAuthTab = type === 'register' ? 'register' : 'login';
+            const showLogin = activeAuthTab === 'login';
+            tabLogin.setAttribute('aria-selected', String(showLogin));
+            tabReg.setAttribute('aria-selected', String(!showLogin));
+            tabLogin.tabIndex = showLogin ? 0 : -1;
+            tabReg.tabIndex = showLogin ? -1 : 0;
+            tabLogin.className = showLogin
+                ? 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer'
+                : 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer';
+            tabReg.className = showLogin
+                ? 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer'
+                : 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer';
+            renderAuthView();
+        }
+
+        function getAuthRedirectUrl() {
+            if (!['http:', 'https:'].includes(window.location.protocol)) {
+                throw new Error('請先透過 localhost 或 HTTPS 網址開啟網站，再使用電子郵件驗證功能。');
             }
+            const redirectUrl = new URL(window.location.href);
+            redirectUrl.hash = '';
+            redirectUrl.search = '';
+            return redirectUrl.toString();
+        }
+
+        function ensureSupportedAuthOrigin() {
+            if (['http:', 'https:'].includes(window.location.protocol)) return true;
+            setAuthStatus('請勿直接以 file:// 開啟此頁。請使用 localhost 開發伺服器或部署後的 HTTPS 網址，並將該網址加入 Supabase Auth 的允許重新導向清單。', 'error');
+            return false;
+        }
+
+        function setAuthStatus(message, tone = 'info') {
+            const status = document.getElementById('auth-status');
+            if (!status) return;
+
+            const toneClasses = {
+                info: 'border-cyan-500/30 bg-cyan-950/30 text-cyan-200',
+                success: 'border-emerald-500/30 bg-emerald-950/30 text-emerald-200',
+                error: 'border-red-500/30 bg-red-950/30 text-red-200'
+            };
+            status.className = `mb-4 rounded-lg border p-3 text-xs leading-relaxed ${toneClasses[tone] || toneClasses.info}`;
+            status.textContent = message;
+            status.classList.remove('hidden');
+        }
+
+        function renderAuthView() {
+            const sessionPanel = document.getElementById('auth-session-panel');
+            const sessionEmail = document.getElementById('auth-session-email');
+            const tabs = document.getElementById('auth-tabs');
+            const loginForm = document.getElementById('form-login');
+            const registerForm = document.getElementById('form-register');
+            const recoveryForm = document.getElementById('form-reset-password');
+            if (!sessionPanel || !tabs || !loginForm || !registerForm || !recoveryForm) return;
+
+            const signedIn = Boolean(currentAuthUser);
+            const showNormalAuth = !signedIn && !authRecoveryActive;
+            sessionPanel.classList.toggle('hidden', !signedIn || authRecoveryActive);
+            if (sessionEmail) sessionEmail.textContent = currentAuthUser?.email || '';
+            tabs.classList.toggle('hidden', !showNormalAuth);
+            loginForm.classList.toggle('hidden', !showNormalAuth || activeAuthTab !== 'login');
+            registerForm.classList.toggle('hidden', !showNormalAuth || activeAuthTab !== 'register');
+            recoveryForm.classList.toggle('hidden', !authRecoveryActive);
+
+            const orderSearchButton = document.getElementById('orders-search-button');
+            if (orderSearchButton) orderSearchButton.disabled = !signedIn;
+            if (!signedIn) {
+                orderLookupRequestId += 1;
+                clearOrderRows();
+                setOrderQueryStatus('請先登入會員。為保護授權卡號，系統只查詢登入帳號本人的訂單。');
+            } else {
+                setOrderQueryStatus('已登入。查詢範圍僅限目前會員帳號所屬訂單。');
+            }
+        }
+
+        function setSubmitLoading(form, isLoading, loadingText = '處理中…') {
+            const button = form?.querySelector('button[type="submit"]');
+            if (!button) return;
+
+            if (!button.dataset.idleText) button.dataset.idleText = button.textContent.trim();
+            button.disabled = isLoading;
+            button.setAttribute('aria-busy', String(isLoading));
+            button.textContent = isLoading ? loadingText : button.dataset.idleText;
+            form.setAttribute('aria-busy', String(isLoading));
+        }
+
+        function getAuthErrorMessage(error) {
+            const message = String(error?.message || '未知錯誤');
+            if (/invalid login credentials/i.test(message)) return '電子郵件或密碼錯誤，請確認後再試。';
+            if (/email not confirmed/i.test(message)) return '電子郵件尚未驗證，請先到信箱點擊確認連結。';
+            if (/password should be at least/i.test(message)) return '密碼未符合 Supabase 專案設定的最低長度。';
+            if (/user already registered/i.test(message)) return '此電子郵件可能已註冊；若無法登入，請使用忘記密碼功能。';
+            if (/failed to fetch|networkerror|load failed/i.test(message)) return '無法連線 Supabase。請確認網路、專案狀態與網站允許來源設定。';
+            return `驗證失敗：${message}`;
+        }
+
+        async function handleLoginSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('form-login');
+            if (!form?.reportValidity()) return;
+            if (!ensureSupportedAuthOrigin()) return;
+            if (!supabaseClient) {
+                setAuthStatus('Supabase SDK 尚未載入，請檢查網路或稍後重試。', 'error');
+                return;
+            }
+
+            setAuthStatus('正在安全驗證帳號…');
+            setSubmitLoading(form, true, '登入中…');
+            try {
+                const email = document.getElementById('login-identifier').value.trim();
+                const password = document.getElementById('login-password').value;
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+
+                form.reset();
+                setAuthStatus('登入成功。', 'success');
+                showToast('登入成功。');
+            } catch (error) {
+                setAuthStatus(getAuthErrorMessage(error), 'error');
+            } finally {
+                setSubmitLoading(form, false);
+            }
+        }
+
+        async function handleRegisterSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('form-register');
+            if (!form) return;
+
+            updateRegisterPasswordValidation();
+            if (!form.reportValidity()) return;
+            if (!ensureSupportedAuthOrigin()) return;
+            if (!supabaseClient) {
+                setAuthStatus('Supabase SDK 尚未載入，請檢查網路或稍後重試。', 'error');
+                return;
+            }
+
+            setAuthStatus('正在建立帳號…');
+            setSubmitLoading(form, true, '建立中…');
+            try {
+                const email = document.getElementById('register-email').value.trim();
+                const password = document.getElementById('register-password').value;
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: { emailRedirectTo: getAuthRedirectUrl() }
+                });
+                if (error) throw error;
+
+                form.reset();
+                updateRegisterPasswordValidation();
+                if (data.session) {
+                    currentAuthUser = data.user;
+                    renderAuthView();
+                    setAuthStatus('帳號已建立並登入。', 'success');
+                } else {
+                    setAuthStatus('註冊申請已送出。請至電子郵件收件匣（含垃圾郵件）完成驗證後再登入。', 'success');
+                }
+            } catch (error) {
+                setAuthStatus(getAuthErrorMessage(error), 'error');
+            } finally {
+                setSubmitLoading(form, false);
+            }
+        }
+
+        async function sendPasswordReset() {
+            const emailInput = document.getElementById('login-identifier');
+            if (!emailInput) return;
+
+            emailInput.setCustomValidity('');
+            if (!emailInput.value.trim()) {
+                emailInput.setCustomValidity('請先輸入註冊用的電子郵件地址。');
+                emailInput.reportValidity();
+                return;
+            }
+            if (!emailInput.reportValidity()) return;
+            if (!ensureSupportedAuthOrigin()) return;
+            if (!supabaseClient) {
+                setAuthStatus('Supabase SDK 尚未載入，請檢查網路或稍後重試。', 'error');
+                return;
+            }
+
+            const button = document.querySelector('#form-login button[onclick="sendPasswordReset()"]');
+            if (button) {
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+            }
+            setAuthStatus('正在寄送密碼重設連結…');
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(emailInput.value.trim(), {
+                    redirectTo: getAuthRedirectUrl()
+                });
+                if (error) throw error;
+                setAuthStatus('若此信箱已註冊，系統會寄送密碼重設連結；請檢查收件匣與垃圾郵件。', 'success');
+            } catch (error) {
+                setAuthStatus(getAuthErrorMessage(error), 'error');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.removeAttribute('aria-busy');
+                }
+            }
+        }
+
+        function updateRecoveryPasswordValidation() {
+            const password = document.getElementById('recovery-password');
+            const confirmation = document.getElementById('recovery-password-confirm');
+            if (!password || !confirmation) return;
+            confirmation.setCustomValidity(
+                confirmation.value && confirmation.value !== password.value
+                    ? '兩次輸入的新密碼不一致。'
+                    : ''
+            );
+        }
+
+        async function handlePasswordRecoverySubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('form-reset-password');
+            if (!form) return;
+
+            updateRecoveryPasswordValidation();
+            if (!form.reportValidity()) return;
+            if (!authRecoveryActive || !supabaseClient) {
+                setAuthStatus('重設連結無效或已過期。請返回登入頁重新寄送連結。', 'error');
+                return;
+            }
+
+            setSubmitLoading(form, true, '更新中…');
+            setAuthStatus('正在更新密碼…');
+            try {
+                const password = document.getElementById('recovery-password').value;
+                const { data, error } = await supabaseClient.auth.updateUser({ password });
+                if (error) throw error;
+
+                authRecoveryActive = false;
+                currentAuthUser = data.user || currentAuthUser;
+                form.reset();
+                renderAuthView();
+                setAuthStatus('密碼已更新，請妥善保管新密碼。', 'success');
+            } catch (error) {
+                setAuthStatus(getAuthErrorMessage(error), 'error');
+            } finally {
+                setSubmitLoading(form, false);
+            }
+        }
+
+        async function signOutMember() {
+            if (!supabaseClient) {
+                setAuthStatus('Supabase SDK 尚未載入，無法登出。', 'error');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                currentAuthUser = null;
+                authRecoveryActive = false;
+                activeAuthTab = 'login';
+                renderAuthView();
+                setAuthStatus('已安全登出。', 'success');
+            } catch (error) {
+                setAuthStatus(getAuthErrorMessage(error), 'error');
+            }
+        }
+
+        function initializeSupabaseAuth() {
+            if (!supabaseClient) {
+                setAuthStatus('Supabase SDK 載入失敗。請確認網路可連線至 CDN，並以 localhost 或 HTTPS 網址開啟本站。', 'error');
+                return;
+            }
+
+            if (!ensureSupportedAuthOrigin()) return;
+
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'PASSWORD_RECOVERY') {
+                    authRecoveryActive = true;
+                    setAuthStatus('重設連結已驗證，請設定新密碼。', 'info');
+                } else if (event === 'SIGNED_OUT') {
+                    authRecoveryActive = false;
+                    activeAuthTab = 'login';
+                }
+
+                currentAuthUser = session?.user || null;
+                renderAuthView();
+                const ordersView = document.getElementById('view-orders');
+                if (currentAuthUser && ordersView && !ordersView.classList.contains('hidden') && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
+                    window.setTimeout(() => {
+                        if (currentAuthUser?.id === session?.user?.id) void queryOrders();
+                    }, 0);
+                }
+            });
+        }
+
+        function updateRegisterPasswordValidation() {
+            const password = document.getElementById('register-password');
+            const confirmation = document.getElementById('register-password-confirm');
+            const strength = document.getElementById('register-password-strength');
+            if (!password || !confirmation || !strength) return;
+
+            const characterCount = Array.from(password.value).length;
+            if (characterCount === 0) {
+                strength.textContent = '密碼長度狀態：尚未輸入';
+            } else if (characterCount < 12) {
+                strength.textContent = `密碼長度狀態：還需 ${12 - characterCount} 個字元，才符合至少 12 個字元的要求`;
+            } else if (characterCount >= 20) {
+                strength.textContent = '密碼長度狀態：長度充足；請避免重複使用其他網站的密碼';
+            } else {
+                strength.textContent = '密碼長度狀態：已符合至少 12 個字元的要求';
+            }
+
+            confirmation.setCustomValidity(
+                confirmation.value && confirmation.value !== password.value
+                    ? '兩次輸入的密碼不一致。'
+                    : ''
+            );
         }
 
         // Status Chip Click Listener
         document.addEventListener('DOMContentLoaded', function() {
             renderProducts();
+            updateCartUI();
+            initializeSupabaseAuth();
+
+            document.addEventListener('keydown', function(event) {
+                const cartDrawer = document.getElementById('cart-drawer');
+                if (cartDrawer && !cartDrawer.classList.contains('hidden')) {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        toggleCart(false);
+                        return;
+                    }
+
+                    if (event.key === 'Tab') {
+                        const focusableElements = [...cartDrawer.querySelectorAll('button:not(:disabled), input:not(:disabled), [href], [tabindex]:not([tabindex="-1"])')]
+                            .filter(element => !element.hasAttribute('hidden'));
+                        if (!focusableElements.length) return;
+
+                        const firstElement = focusableElements[0];
+                        const lastElement = focusableElements[focusableElements.length - 1];
+                        if (event.shiftKey && (document.activeElement === firstElement || !cartDrawer.contains(document.activeElement))) {
+                            event.preventDefault();
+                            lastElement.focus();
+                        } else if (!event.shiftKey && (document.activeElement === lastElement || !cartDrawer.contains(document.activeElement))) {
+                            event.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                    return;
+                }
+
+                const modal = document.getElementById('topup-account-modal');
+                if (!modal || modal.classList.contains('hidden')) return;
+
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeTopupAccountModal();
+                }
+            });
+
+            const topupAmount = document.getElementById('topup-amount');
+            const topupMethod = document.getElementById('topup-method');
+            const topupSummary = document.getElementById('topup-summary');
+            if (topupAmount && topupMethod && topupSummary) {
+                document.querySelectorAll('[data-topup-amount]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        topupAmount.value = button.dataset.topupAmount;
+                        topupAmount.setCustomValidity('');
+                        topupSummary.classList.add('hidden');
+                        topupAmount.focus();
+                    });
+                });
+
+                [topupAmount, topupMethod].forEach(control => {
+                    control.addEventListener('input', () => topupSummary.classList.add('hidden'));
+                    control.addEventListener('change', () => topupSummary.classList.add('hidden'));
+                });
+            }
+
+            document.querySelectorAll('[data-password-toggle]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = document.getElementById(button.dataset.passwordToggle);
+                    if (!input) return;
+
+                    const shouldShow = input.type === 'password';
+                    input.type = shouldShow ? 'text' : 'password';
+                    button.textContent = shouldShow ? '隱藏' : '顯示';
+                    button.setAttribute('aria-pressed', String(shouldShow));
+                    const isConfirmation = input.id === 'register-password-confirm';
+                    button.setAttribute('aria-label', shouldShow
+                        ? (isConfirmation ? '隱藏確認密碼' : '隱藏密碼')
+                        : (isConfirmation ? '顯示確認密碼' : '顯示密碼'));
+                });
+            });
+
+            const registerPassword = document.getElementById('register-password');
+            const registerPasswordConfirmation = document.getElementById('register-password-confirm');
+            [registerPassword, registerPasswordConfirmation].forEach(input => {
+                input?.addEventListener('input', updateRegisterPasswordValidation);
+            });
+
+            ['recovery-password', 'recovery-password-confirm'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', updateRecoveryPasswordValidation);
+            });
+
+            const authTabList = document.querySelector('[role="tablist"][aria-label="會員驗證方式"]');
+            authTabList?.addEventListener('keydown', function(event) {
+                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+                event.preventDefault();
+                const nextTab = event.key === 'Home' || event.key === 'ArrowLeft'
+                    ? document.getElementById('auth-tab-login')
+                    : document.getElementById('auth-tab-reg');
+                const nextType = nextTab?.id === 'auth-tab-reg' ? 'register' : 'login';
+                switchAuthTab(nextType);
+                nextTab?.focus();
+            });
             
             const bar = document.getElementById('status-chips-bar');
             const detailText = document.getElementById('status-detail-text');
