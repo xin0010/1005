@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#080d18">
+    <title>AXG SHOP｜管理後台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { color-scheme: dark; }
+        * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+        body { margin: 0; min-height: 100vh; background: #080d18; color: #e5edf8; font-family: 'DM Sans', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .admin-grid { background-image: linear-gradient(rgba(56,189,248,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.035) 1px, transparent 1px); background-size: 32px 32px; }
+        .glass { background: rgba(13,21,39,.82); border: 1px solid rgba(148,163,184,.13); backdrop-filter: blur(14px); }
+        .nav-item[aria-current="page"] { color: #67e8f9; background: rgba(8,145,178,.13); border-color: rgba(34,211,238,.22); }
+        :focus-visible { outline: 2px solid #22d3ee; outline-offset: 3px; }
+        dialog { color: inherit; background: #0d1527; border: 1px solid rgba(34,211,238,.3); border-radius: 20px; padding: 0; }
+        dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(5px); }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+    </style>
+</head>
+<body class="admin-grid">
+    <main id="admin-login-screen" class="min-h-screen flex items-center justify-center px-4 py-10">
+        <section class="glass w-full max-w-md rounded-3xl p-7 shadow-2xl shadow-black/40">
+            <div class="mb-7 flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400 font-extrabold text-slate-950">AXG</div>
+                <div>
+                    <p class="mono mb-1 text-xs font-semibold uppercase tracking-[.22em] text-cyan-300">AXG SHOP</p>
+                    <h1 class="m-0 text-xl font-bold text-white">管理後台登入</h1>
+                </div>
+            </div>
+            <p class="mb-5 text-sm leading-relaxed text-slate-400">請使用已加入 Supabase 管理員名單的帳號。登入後仍會由資料庫端再次驗證管理權限。</p>
+            <form id="admin-login-form" class="space-y-4" onsubmit="adminSignIn(event)">
+                <div>
+                    <label for="admin-email" class="mb-2 block text-xs font-semibold text-slate-300">管理員電子郵件</label>
+                    <input id="admin-email" type="email" autocomplete="username" required maxlength="254" class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="admin@example.com">
+                </div>
+                <div>
+                    <label for="admin-password" class="mb-2 block text-xs font-semibold text-slate-300">密碼</label>
+                    <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="輸入管理員密碼">
+                </div>
+                <button id="admin-login-button" type="submit" class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-wait disabled:opacity-60">登入並驗證管理權限</button>
+            </form>
+            <p id="admin-login-status" class="mt-4 rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">正在初始化安全連線…</p>
+            <button id="admin-login-signout" type="button" onclick="adminSignOut()" hidden class="mt-3 w-full rounded-xl border border-slate-700 px-4 py-2.5 text-xs text-slate-300 hover:border-cyan-400">登出目前帳號</button>
+            <p class="mt-6 border-t border-slate-800 pt-4 text-[11px] leading-relaxed text-slate-500">此頁不包含管理員密碼或 Service Role Key。僅限 HTTPS 網域使用；請勿把本頁當作公開使用者頁面。</p>
+        </section>
+    </main>
+
+    <div id="admin-app" hidden class="min-h-screen lg:flex">
+        <aside class="border-b border-slate-800 bg-[#0b1120] p-4 lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-5">
+            <div class="mb-5 flex items-center gap-3 px-2 lg:mb-10">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400 font-extrabold text-slate-950">AXG</div>
+                <div><p class="mono m-0 text-[10px] uppercase tracking-[.2em] text-cyan-300">CONTROL DESK</p><p class="m-0 text-sm font-bold text-white">管理中心</p></div>
+            </div>
+            <nav aria-label="後台導覽" class="flex gap-2 overflow-x-auto lg:flex-col">
+                <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="overview" aria-current="page"><span class="mr-2">◫</span>總覽</button>
+                <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="orders"><span class="mr-2">▤</span>訂單與授權</button>
+            </nav>
+            <div class="mt-auto hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-4 lg:block">
+                <p class="mb-1 text-[10px] uppercase tracking-widest text-slate-500">SECURITY</p>
+                <p class="m-0 text-xs leading-relaxed text-slate-400">資料由管理員專用 RPC 讀取，後端會依帳號名單逐次授權。</p>
+            </div>
+        </aside>
+
+        <div class="min-w-0 flex-1 lg:ml-64">
+            <header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-800 bg-[#080d18]/90 px-4 py-3 backdrop-blur-xl sm:px-7">
+                <div><p class="mono mb-0.5 text-[10px] uppercase tracking-[.2em] text-slate-500">ADMINISTRATION</p><h2 id="admin-page-title" class="m-0 text-lg font-bold text-white">營運總覽</h2></div>
+                <div class="flex items-center gap-3">
+                    <span id="admin-email-label" class="hidden max-w-48 truncate text-xs text-slate-400 sm:block"></span>
+                    <button type="button" onclick="refreshCurrentView()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400">重新整理</button>
+                    <button type="button" onclick="adminSignOut()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-red-400 hover:text-red-300">登出</button>
+                </div>
+            </header>
+
+            <div class="mx-auto max-w-7xl p-4 sm:p-7">
+                <p id="admin-app-status" class="mb-5 hidden rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-xs leading-relaxed" role="status" aria-live="polite"></p>
+
+                <section id="admin-view-overview" class="admin-view space-y-6">
+                    <div class="flex flex-wrap items-end justify-between gap-3">
+                        <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">OVERVIEW</p><h3 class="m-0 text-2xl font-bold text-white">營運總覽</h3><p class="mt-2 text-sm text-slate-400">訂單與授權統計。數字只讀自 Supabase 後端。</p></div>
+                        <span id="overview-updated" class="text-[11px] text-slate-500">尚未載入</span>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">訂單總數</p><p id="metric-total-orders" class="mono m-0 text-3xl font-bold text-white">—</p><p class="mt-2 text-[11px] text-slate-500">資料庫全部訂單</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">待付款</p><p id="metric-pending-orders" class="mono m-0 text-3xl font-bold text-amber-300">—</p><p class="mt-2 text-[11px] text-slate-500">尚未確認付款</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">已付款訂單</p><p id="metric-paid-orders" class="mono m-0 text-3xl font-bold text-emerald-300">—</p><p class="mt-2 text-[11px] text-slate-500">依資料庫訂單狀態統計</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">已付款金額</p><p id="metric-paid-revenue" class="mono m-0 text-3xl font-bold text-cyan-300">—</p><p class="mt-2 text-[11px] text-slate-500">僅統計已付款訂單</p></article>
+                    </div>
+                    <div class="grid gap-4 xl:grid-cols-3">
+                        <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">有效授權</p><p id="metric-active-authorizations" class="mono m-0 text-2xl font-bold text-violet-300">—</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">近 7 日訂單</p><p id="metric-recent-orders" class="mono m-0 text-2xl font-bold text-white">—</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">發卡待處理</p><p id="metric-pending-authorizations" class="mono m-0 text-2xl font-bold text-amber-300">—</p></article>
+                    </div>
+                    <div class="glass rounded-2xl p-5 sm:p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-3"><div><h4 class="m-0 font-bold text-white">最近訂單</h4><p class="mt-1 text-xs text-slate-500">點選訂單可查看授權狀態。</p></div><button type="button" onclick="setAdminView('orders')" class="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs text-cyan-300 hover:bg-cyan-950/40">管理全部訂單</button></div>
+                        <div class="mt-4 overflow-x-auto"><table class="w-full min-w-[760px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="px-3 py-3">時間</th><th class="px-3 py-3">訂單</th><th class="px-3 py-3">會員</th><th class="px-3 py-3">金額</th><th class="px-3 py-3">狀態</th><th class="px-3 py-3">明細</th></tr></thead><tbody id="overview-orders-body" class="divide-y divide-slate-800/80"><tr><td colspan="6" class="px-3 py-8 text-center text-slate-500">登入後載入訂單。</td></tr></tbody></table></div>
+                    </div>
+                </section>
+
+                <section id="admin-view-orders" class="admin-view hidden space-y-5">
+                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">ORDER OPERATIONS</p><h3 class="m-0 text-2xl font-bold text-white">訂單與授權</h3><p class="mt-2 text-sm text-slate-400">依訂單編號、會員信箱或狀態篩選。授權卡號只會在已付款且有效時顯示。</p></div>
+                    <form id="admin-orders-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminOrders(0, event)">
+                        <label class="sr-only" for="admin-order-search">搜尋訂單</label><input id="admin-order-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋訂單編號或會員信箱" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                        <label class="sr-only" for="admin-order-status">訂單狀態</label><select id="admin-order-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">所有狀態</option><option value="pending">待付款</option><option value="paid">已付款</option><option value="cancelled">已取消</option><option value="refunded">已退款</option></select>
+                        <button id="admin-orders-search-button" type="submit" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">搜尋訂單</button>
+                        <button type="button" onclick="exportAdminOrdersCsv()" class="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 hover:border-cyan-400">匯出本頁 CSV</button>
+                    </form>
+                    <div class="glass overflow-hidden rounded-2xl">
+                        <div class="overflow-x-auto"><table class="w-full min-w-[900px] text-left text-xs"><thead class="border-b border-slate-800 bg-slate-950/40 text-slate-500"><tr><th class="px-4 py-3">成立時間</th><th class="px-4 py-3">訂單編號</th><th class="px-4 py-3">會員信箱</th><th class="px-4 py-3">總額</th><th class="px-4 py-3">訂單狀態</th><th class="px-4 py-3">商品／授權</th><th class="px-4 py-3 text-right">操作</th></tr></thead><tbody id="admin-orders-body" class="divide-y divide-slate-800/80"><tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">登入管理員帳號後載入資料。</td></tr></tbody></table></div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-prev-page" type="button" onclick="changeAdminPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-next-page" type="button" onclick="changeAdminPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="admin-order-dialog" class="w-[calc(100%-2rem)] max-w-3xl shadow-2xl shadow-black/50">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-800 p-5 sm:p-6"><div><p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-cyan-300">ORDER DETAIL</p><h2 id="detail-title" class="m-0 text-lg font-bold text-white">訂單明細</h2><p id="detail-subtitle" class="mb-0 mt-1 text-xs text-slate-500"></p></div><button type="button" onclick="closeOrderDetail()" aria-label="關閉訂單明細" class="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 hover:border-cyan-400">關閉</button></div>
+        <div id="detail-status" class="mx-5 mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300 sm:mx-6" role="status" aria-live="polite">正在載入…</div>
+        <div class="max-h-[65vh] overflow-auto p-5 sm:p-6"><table class="w-full min-w-[620px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="py-3 pr-3">商品</th><th class="py-3 pr-3">數量／單價</th><th class="py-3 pr-3">授權狀態</th><th class="py-3 pr-3">卡號（符合條件時）</th><th class="py-3">到期日</th></tr></thead><tbody id="detail-items-body" class="divide-y divide-slate-800"></tbody></table></div>
+    </dialog>
+
+    <dialog id="admin-cancel-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
+        <form id="admin-cancel-form" class="p-5 sm:p-6" onsubmit="submitCancelOrder(event)">
+            <p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-amber-300">CANCEL PENDING ORDER</p>
+            <h2 id="cancel-order-title" class="m-0 text-lg font-bold text-white">取消待付款訂單</h2>
+            <p class="mt-2 text-sm leading-relaxed text-slate-400">此操作只允許取消待付款訂單，且會記錄管理員與原因。已付款及退款狀態不會由此頁修改。</p>
+            <label for="cancel-order-reason" class="mb-2 mt-5 block text-xs font-semibold text-slate-300">取消原因（選填，最多 500 字）</label>
+            <textarea id="cancel-order-reason" maxlength="500" rows="3" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-amber-400" placeholder="例如：會員來信要求取消"></textarea>
+            <p id="cancel-order-status" class="mt-3 hidden rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300" role="status" aria-live="polite"></p>
+            <div class="mt-5 flex justify-end gap-3"><button type="button" onclick="closeCancelDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="cancel-order-submit" type="submit" class="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-300">確認取消訂單</button></div>
+        </form>
+    </dialog>
+
+    <script>
+        // Only the public publishable key belongs in browser code.
+        const ADMIN_SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
+        const ADMIN_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
+        const ADMIN_PAGE_SIZE = 25;
+        let adminClient = null;
+        let adminUser = null;
+        let adminPage = 0;
+        let adminVisibleOrders = [];
+        let adminRequestId = 0;
+        let adminAuthCheckId = 0;
+        let adminOverviewRequestId = 0;
+        let adminDetailRequestId = 0;
+        let pendingCancelOrderId = null;
+        let activeAdminView = 'overview';
+        const orderDialog = document.getElementById('admin-order-dialog');
+        const cancelDialog = document.getElementById('admin-cancel-dialog');
+
+        try {
+            if (window.supabase?.createClient) {
+                adminClient = window.supabase.createClient(ADMIN_SUPABASE_URL, ADMIN_SUPABASE_PUBLISHABLE_KEY, {
+                    auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+                });
+            }
+        } catch (error) {
+            console.error('Admin Supabase initialization failed:', error);
+        }
+
+        function setLoginStatus(message, tone = 'info') {
+            const element = document.getElementById('admin-login-status');
+            if (!element) return;
+            const colors = { info: 'border-slate-700 text-slate-300', success: 'border-emerald-500/30 text-emerald-200', error: 'border-red-500/30 text-red-200' };
+            element.className = `mt-4 rounded-xl border bg-slate-950/70 p-3 text-xs leading-relaxed ${colors[tone] || colors.info}`;
+            element.textContent = message;
+        }
+
+        function setAppStatus(message, tone = 'info') {
+            const element = document.getElementById('admin-app-status');
+            if (!element) return;
+            if (!message) {
+                element.hidden = true;
+                element.textContent = '';
+                return;
+            }
+            const colors = { info: 'border-slate-700 text-slate-300', success: 'border-emerald-500/30 text-emerald-200', error: 'border-red-500/30 text-red-200' };
+            element.className = `mb-5 rounded-xl border bg-slate-900/70 p-3 text-xs leading-relaxed ${colors[tone] || colors.info}`;
+            element.textContent = message;
+            element.hidden = false;
+        }
+
+        function formatCurrency(amount) {
+            const value = Number(amount);
+            return Number.isFinite(value) ? `NT$ ${new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(value)}` : '—';
+        }
+
+        function formatDate(value) {
+            const date = value ? new Date(value) : null;
+            return date && !Number.isNaN(date.getTime()) ? date.toLocaleString('zh-TW') : '—';
+        }
+
+        function isAllowedAdminOrigin() {
+            return window.location.protocol === 'https:' ||
+                (window.location.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname));
+        }
+
+        function getAdminError(error) {
+            const message = String(error?.message || '未知錯誤');
+            if (/only pending orders can be cancelled/i.test(message)) return '此訂單已不在待付款狀態，無法取消；請重新整理訂單列表。';
+            if (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message)) return '找不到管理 RPC。請先執行 supabase-admin-schema.sql，並確認資料表結構已建立。';
+            if (/relation .*shop_admins.* does not exist/i.test(message)) return '尚未建立管理員名單。請先執行 supabase-admin-schema.sql，再把管理帳號加入 public.shop_admins。';
+            if (/permission denied|not authorized|42501|admin access required/i.test(message)) return '管理權限未通過。請確認登入帳號已加入 public.shop_admins，或先在 Supabase SQL Editor 執行管理後台 SQL。';
+            if (/failed to fetch|networkerror|load failed/i.test(message)) return '無法連線 Supabase。請確認網路、專案狀態及此網域的 Auth URL 設定。';
+            return `操作失敗：${message}`;
+        }
+
+        function showAdminLogin(message, tone = 'info', hasSession = false) {
+            document.getElementById('admin-login-screen').hidden = false;
+            document.getElementById('admin-app').hidden = true;
+            document.getElementById('admin-login-signout').hidden = !hasSession;
+            if (message) setLoginStatus(message, tone);
+        }
+
+        function setMetric(id, value) {
+            const element = document.getElementById(id);
+            if (element) element.textContent = value ?? '0';
+        }
+
+        function renderAdminMetrics(summary) {
+            setMetric('metric-total-orders', new Intl.NumberFormat('zh-TW').format(Number(summary?.total_orders) || 0));
+            setMetric('metric-pending-orders', new Intl.NumberFormat('zh-TW').format(Number(summary?.pending_orders) || 0));
+            setMetric('metric-paid-orders', new Intl.NumberFormat('zh-TW').format(Number(summary?.paid_orders) || 0));
+            setMetric('metric-paid-revenue', formatCurrency(summary?.paid_revenue_twd));
+            setMetric('metric-active-authorizations', new Intl.NumberFormat('zh-TW').format(Number(summary?.active_authorizations) || 0));
+            setMetric('metric-recent-orders', new Intl.NumberFormat('zh-TW').format(Number(summary?.recent_orders) || 0));
+            setMetric('metric-pending-authorizations', new Intl.NumberFormat('zh-TW').format(Number(summary?.pending_authorizations) || 0));
+            document.getElementById('overview-updated').textContent = `更新於 ${new Date().toLocaleTimeString('zh-TW')}`;
+        }
+
+        function statusBadge(status) {
+            const labels = { pending: '待付款', paid: '已付款', cancelled: '已取消', refunded: '已退款' };
+            const colors = { pending: 'border-amber-400/20 bg-amber-400/10 text-amber-200', paid: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200', cancelled: 'border-slate-600 bg-slate-800 text-slate-300', refunded: 'border-violet-400/20 bg-violet-400/10 text-violet-200' };
+            const badge = document.createElement('span');
+            badge.className = `inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-[10px] font-semibold ${colors[status] || 'border-slate-700 bg-slate-900 text-slate-300'}`;
+            badge.textContent = labels[status] || '處理中';
+            return badge;
+        }
+
+        function buildTableCell(row, value, className = 'px-4 py-3 text-slate-300') {
+            const cell = document.createElement('td');
+            cell.className = className;
+            cell.textContent = value ?? '—';
+            row.appendChild(cell);
+            return cell;
+        }
+
+        function fillAdminOrderTable(body, orders, mode = 'orders') {
+            body.replaceChildren();
+            if (!orders.length) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = mode === 'overview' ? 6 : 7;
+                cell.className = 'px-4 py-10 text-center text-slate-500';
+                cell.textContent = '目前沒有符合條件的訂單。';
+                row.appendChild(cell);
+                body.appendChild(row);
+                return;
+            }
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.className = 'transition hover:bg-slate-900/60';
+                buildTableCell(row, formatDate(order.created_at), 'whitespace-nowrap px-4 py-3 text-slate-400');
+                buildTableCell(row, order.order_number ? `#${order.order_number}` : '—', 'mono px-4 py-3 font-semibold text-white');
+                buildTableCell(row, order.customer_email || '—', 'max-w-56 truncate px-4 py-3 text-slate-300');
+                buildTableCell(row, formatCurrency(order.total_amount), 'whitespace-nowrap px-4 py-3 font-semibold text-cyan-300');
+                const statusCell = document.createElement('td');
+                statusCell.className = 'px-4 py-3';
+                statusCell.appendChild(statusBadge(order.status));
+                row.appendChild(statusCell);
+                if (mode !== 'overview') {
+                    const count = `${Number(order.line_count) || 0} 項／${Number(order.active_authorization_count) || 0} 有效授權`;
+                    buildTableCell(row, count, 'px-4 py-3 text-slate-400');
+                }
+                const actionCell = document.createElement('td');
+                actionCell.className = 'px-4 py-3 text-right';
+                const detailButton = document.createElement('button');
+                detailButton.type = 'button';
+                detailButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-cyan-300 hover:border-cyan-400 hover:bg-cyan-950/40';
+                detailButton.textContent = '查看明細';
+                detailButton.addEventListener('click', () => openAdminOrderDetail(order.order_id));
+                actionCell.appendChild(detailButton);
+                if (mode !== 'overview' && order.status === 'pending') {
+                    const cancelButton = document.createElement('button');
+                    cancelButton.type = 'button';
+                    cancelButton.className = 'ml-2 rounded-lg border border-amber-500/30 px-3 py-2 text-[11px] text-amber-300 hover:border-amber-400 hover:bg-amber-950/30';
+                    cancelButton.textContent = '取消待付款';
+                    cancelButton.setAttribute('aria-label', `取消待付款訂單 ${order.order_number || ''}`);
+                    cancelButton.addEventListener('click', () => openCancelDialog(order.order_id, order.order_number));
+                    actionCell.appendChild(cancelButton);
+                }
+                row.appendChild(actionCell);
+                body.appendChild(row);
+            });
+        }
+
+        async function refreshAdminSummary() {
+            const { data, error } = await adminClient.rpc('admin_dashboard_summary');
+            if (error) throw error;
+            renderAdminMetrics(data || {});
+        }
+
+        async function loadOverviewOrders() {
+            const requestId = ++adminOverviewRequestId;
+            const userId = adminUser?.id;
+            const { data, error } = await adminClient.rpc('admin_list_orders', {
+                p_search: null,
+                p_status: null,
+                p_limit: 6,
+                p_offset: 0
+            });
+            if (error) throw error;
+            if (!adminUser || adminUser.id !== userId || requestId !== adminOverviewRequestId) return;
+            fillAdminOrderTable(document.getElementById('overview-orders-body'), Array.isArray(data) ? data : [], 'overview');
+        }
+
+        async function loadAdminOrders(page = adminPage, event) {
+            event?.preventDefault();
+            if (!adminUser || !adminClient) return;
+            adminPage = Math.max(0, Number(page) || 0);
+            const requestId = ++adminRequestId;
+            const search = document.getElementById('admin-order-search').value.trim();
+            const status = document.getElementById('admin-order-status').value || null;
+            const button = document.getElementById('admin-orders-search-button');
+            button.disabled = true;
+            button.setAttribute('aria-busy', 'true');
+            setAppStatus('正在安全載入訂單…');
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_list_orders', {
+                    p_search: search || null,
+                    p_status: status,
+                    p_limit: ADMIN_PAGE_SIZE,
+                    p_offset: adminPage * ADMIN_PAGE_SIZE
+                });
+                if (error) throw error;
+                if (requestId !== adminRequestId || !adminUser) return;
+                adminVisibleOrders = Array.isArray(data) ? data : [];
+                fillAdminOrderTable(document.getElementById('admin-orders-body'), adminVisibleOrders);
+                document.getElementById('admin-page-label').textContent = `第 ${adminPage + 1} 頁 · 本頁 ${adminVisibleOrders.length} 筆`;
+                document.getElementById('admin-prev-page').disabled = adminPage === 0;
+                document.getElementById('admin-next-page').disabled = adminVisibleOrders.length < ADMIN_PAGE_SIZE;
+                setAppStatus('');
+            } catch (error) {
+                if (requestId !== adminRequestId) return;
+                console.error('Admin order listing failed:', error);
+                setAppStatus(getAdminError(error), 'error');
+            } finally {
+                if (requestId === adminRequestId) {
+                    button.disabled = false;
+                    button.removeAttribute('aria-busy');
+                }
+            }
+        }
+
+        function changeAdminPage(delta) {
+            void loadAdminOrders(Math.max(0, adminPage + delta));
+        }
+
+        function safeCsvCell(value) {
+            let text = String(value ?? '');
+            if (/^[\s]*[=+@-]/.test(text)) text = `'${text}`;
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+
+        function exportAdminOrdersCsv() {
+            if (!adminUser) return;
+            if (!adminVisibleOrders.length) {
+                setAppStatus('本頁沒有可匯出的訂單。', 'error');
+                return;
+            }
+            const rows = [
+                ['成立時間', '訂單編號', '會員信箱', '總額 TWD', '訂單狀態', '商品數', '有效授權數'],
+                ...adminVisibleOrders.map(order => [
+                    formatDate(order.created_at),
+                    order.order_number,
+                    order.customer_email,
+                    Number(order.total_amount) || 0,
+                    order.status,
+                    Number(order.line_count) || 0,
+                    Number(order.active_authorization_count) || 0
+                ])
+            ];
+            const csv = '\uFEFF' + rows.map(row => row.map(safeCsvCell).join(',')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `axg-orders-page-${adminPage + 1}-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            setAppStatus('已匯出目前頁面的訂單摘要；CSV 不包含授權卡號。', 'success');
+        }
+
+        async function openAdminOrderDetail(orderId) {
+            if (!adminUser || !adminClient || !orderId) return;
+            const requestId = ++adminDetailRequestId;
+            const userId = adminUser.id;
+            const tbody = document.getElementById('detail-items-body');
+            tbody.replaceChildren();
+            document.getElementById('detail-title').textContent = '訂單明細';
+            document.getElementById('detail-subtitle').textContent = '';
+            document.getElementById('detail-status').textContent = '正在載入訂單授權明細…';
+            if (!orderDialog.open) orderDialog.showModal();
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_get_order_detail', { p_order_id: orderId });
+                if (error) throw error;
+                if (requestId !== adminDetailRequestId || adminUser?.id !== userId) return;
+                const items = Array.isArray(data) ? data : [];
+                if (!items.length) {
+                    document.getElementById('detail-status').textContent = '沒有查到訂單明細，或此筆資料已不存在。';
+                    return;
+                }
+
+                const order = items[0];
+                document.getElementById('detail-title').textContent = `訂單 #${order.order_number || ''}`;
+                document.getElementById('detail-subtitle').textContent = `${order.customer_email || '會員'} · ${formatDate(order.created_at)} · ${formatCurrency(order.total_amount)}`;
+                document.getElementById('detail-status').textContent = '僅提供管理查閱；卡號只在已付款、授權有效且未到期時回傳。訂單狀態與金鑰不可在此頁手動改寫。';
+                const labels = { pending: '待發放', active: '有效', expired: '已到期', revoked: '已撤銷' };
+                items.forEach(item => {
+                    if (!item.item_id) return;
+                    const row = document.createElement('tr');
+                    buildTableCell(row, item.product_name || '—', 'py-3 pr-3 text-slate-200');
+                    buildTableCell(row, `${Number(item.quantity) || 1} 件 × ${formatCurrency(item.unit_price)}`, 'py-3 pr-3 whitespace-nowrap text-slate-400');
+                    buildTableCell(row, order.status === 'paid' ? (labels[item.authorization_status] || '無資料') : '訂單未付款', 'py-3 pr-3 whitespace-nowrap text-slate-300');
+
+                    const keyCell = document.createElement('td');
+                    keyCell.className = 'py-3 pr-3';
+                    if (order.status === 'paid' && item.authorization_status === 'active' && item.authorization_key) {
+                        const key = document.createElement('span');
+                        key.className = 'mono inline-block max-w-52 select-all break-all text-cyan-300';
+                        key.textContent = item.authorization_key;
+                        keyCell.appendChild(key);
+                        const copy = document.createElement('button');
+                        copy.type = 'button';
+                        copy.className = 'ml-2 rounded border border-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:border-cyan-400';
+                        copy.textContent = '複製';
+                        copy.addEventListener('click', async () => {
+                            try {
+                                await navigator.clipboard.writeText(item.authorization_key);
+                                document.getElementById('detail-status').textContent = '授權卡號已複製至剪貼簿。';
+                            } catch {
+                                document.getElementById('detail-status').textContent = '無法直接複製，請手動選取卡號。';
+                            }
+                        });
+                        keyCell.appendChild(copy);
+                    } else {
+                        keyCell.textContent = '未核發或目前不可顯示';
+                    }
+                    row.appendChild(keyCell);
+                    buildTableCell(row, item.expires_at ? formatDate(item.expires_at) : '—', 'py-3 whitespace-nowrap text-slate-400');
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                if (requestId !== adminDetailRequestId || adminUser?.id !== userId) return;
+                console.error('Admin order detail failed:', error);
+                document.getElementById('detail-status').textContent = getAdminError(error);
+            }
+        }
+
+        function closeOrderDetail() {
+            if (orderDialog.open) orderDialog.close();
+        }
+
+        function openCancelDialog(orderId, orderNumber) {
+            if (!adminUser || !orderId) return;
+            pendingCancelOrderId = orderId;
+            document.getElementById('cancel-order-title').textContent = `取消待付款訂單 #${orderNumber || ''}`;
+            document.getElementById('cancel-order-reason').value = '';
+            document.getElementById('cancel-order-status').hidden = true;
+            document.getElementById('cancel-order-status').textContent = '';
+            document.getElementById('cancel-order-submit').disabled = false;
+            cancelDialog.showModal();
+        }
+
+        function closeCancelDialog() {
+            if (cancelDialog.open) cancelDialog.close();
+            pendingCancelOrderId = null;
+        }
+
+        function clearSensitiveAdminData() {
+            adminRequestId += 1;
+            adminOverviewRequestId += 1;
+            adminDetailRequestId += 1;
+            adminVisibleOrders = [];
+            pendingCancelOrderId = null;
+            document.getElementById('admin-orders-body').replaceChildren();
+            document.getElementById('overview-orders-body').replaceChildren();
+            document.getElementById('detail-items-body').replaceChildren();
+            document.getElementById('detail-title').textContent = '訂單明細';
+            document.getElementById('detail-subtitle').textContent = '';
+            document.getElementById('detail-status').textContent = '';
+            document.getElementById('admin-email-label').textContent = '';
+            if (orderDialog.open) orderDialog.close();
+            if (cancelDialog.open) cancelDialog.close();
+        }
+
+        async function submitCancelOrder(event) {
+            event.preventDefault();
+            if (!adminUser || !adminClient || !pendingCancelOrderId) return;
+
+            const button = document.getElementById('cancel-order-submit');
+            const status = document.getElementById('cancel-order-status');
+            button.disabled = true;
+            status.className = 'mt-3 rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300';
+            status.textContent = '正在向資料庫送出取消請求…';
+            status.hidden = false;
+            try {
+                const { error } = await adminClient.rpc('admin_cancel_pending_order', {
+                    p_order_id: pendingCancelOrderId,
+                    p_reason: document.getElementById('cancel-order-reason').value.trim() || null
+                });
+                if (error) throw error;
+                cancelDialog.close();
+                pendingCancelOrderId = null;
+                setAppStatus('待付款訂單已取消，操作已寫入管理稽核紀錄。', 'success');
+                try {
+                    await refreshAdminSummary();
+                    await loadAdminOrders(adminPage);
+                } catch (refreshError) {
+                    setAppStatus(`訂單已取消，但重新載入資料失敗：${getAdminError(refreshError)}`, 'error');
+                }
+            } catch (error) {
+                console.error('Admin order cancellation failed:', error);
+                status.className = 'mt-3 rounded-lg border border-red-500/30 bg-slate-950/60 p-3 text-xs text-red-200';
+                status.textContent = getAdminError(error);
+                button.disabled = false;
+            }
+        }
+
+        function setAdminView(view) {
+            activeAdminView = view === 'orders' ? 'orders' : 'overview';
+            document.querySelectorAll('.admin-view').forEach(section => section.classList.toggle('hidden', section.id !== `admin-view-${activeAdminView}`));
+            document.querySelectorAll('[data-admin-view]').forEach(button => {
+                if (button.dataset.adminView === activeAdminView) button.setAttribute('aria-current', 'page');
+                else button.removeAttribute('aria-current');
+            });
+            document.getElementById('admin-page-title').textContent = activeAdminView === 'orders' ? '訂單與授權' : '營運總覽';
+            if (activeAdminView === 'orders') void loadAdminOrders(0);
+        }
+
+        async function refreshCurrentView() {
+            if (!adminUser) return;
+            try {
+                await refreshAdminSummary();
+                if (activeAdminView === 'orders') {
+                    await loadAdminOrders(adminPage);
+                } else {
+                    await loadOverviewOrders();
+                    setAppStatus('資料已更新。', 'success');
+                }
+            } catch (error) {
+                setAppStatus(getAdminError(error), 'error');
+            }
+        }
+
+        async function verifyAdminSession(session) {
+            const checkId = ++adminAuthCheckId;
+            const user = session?.user || null;
+            if (!user) {
+                adminUser = null;
+                clearSensitiveAdminData();
+                showAdminLogin('請使用管理員帳號登入。');
+                return;
+            }
+
+            showAdminLogin('正在驗證管理員權限…', 'info', true);
+            try {
+                const { data, error } = await adminClient.rpc('admin_dashboard_summary');
+                if (error) throw error;
+                if (checkId !== adminAuthCheckId) return;
+
+                adminUser = user;
+                document.getElementById('admin-login-screen').hidden = true;
+                document.getElementById('admin-app').hidden = false;
+                document.getElementById('admin-email-label').textContent = user.email || '';
+                renderAdminMetrics(data || {});
+                setAdminView('overview');
+                setAppStatus('管理權限已驗證。此介面不會建立付款或人工發卡。', 'success');
+                try {
+                    await loadOverviewOrders();
+                } catch (error) {
+                    console.error('Admin overview orders failed:', error);
+                    setAppStatus(getAdminError(error), 'error');
+                }
+                setTimeout(() => { if (adminUser?.id === user.id) setAppStatus(''); }, 4000);
+            } catch (error) {
+                if (checkId !== adminAuthCheckId) return;
+                console.error('Admin role verification failed:', error);
+                adminUser = null;
+                clearSensitiveAdminData();
+                showAdminLogin(getAdminError(error), 'error', true);
+            }
+        }
+
+        async function adminSignIn(event) {
+            event.preventDefault();
+            const form = document.getElementById('admin-login-form');
+            if (!form.reportValidity()) return;
+            if (!adminClient) {
+                setLoginStatus('Supabase SDK 無法載入。請確認網路及 CDN 連線。', 'error');
+                return;
+            }
+            if (!isAllowedAdminOrigin()) {
+                setLoginStatus('請使用 HTTPS 網址登入管理後台，不要以 file:// 開啟。', 'error');
+                return;
+            }
+
+            const button = document.getElementById('admin-login-button');
+            button.disabled = true;
+            setLoginStatus('正在驗證帳號…');
+            try {
+                const email = document.getElementById('admin-email').value.trim();
+                const password = document.getElementById('admin-password').value;
+                const { error } = await adminClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                document.getElementById('admin-password').value = '';
+                setLoginStatus('登入完成，正在確認是否為管理員…');
+            } catch (error) {
+                setLoginStatus(/invalid login credentials/i.test(String(error?.message)) ? '帳號或密碼錯誤。' : `登入失敗：${String(error?.message || '未知錯誤')}`, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function adminSignOut() {
+            if (!adminClient) return;
+            const { error } = await adminClient.auth.signOut();
+            if (error) {
+                setAppStatus(`登出失敗：${String(error.message || '未知錯誤')}`, 'error');
+                return;
+            }
+            adminUser = null;
+            clearSensitiveAdminData();
+            showAdminLogin('已安全登出。', 'success');
+        }
+
+        function initializeAdmin() {
+            if (!adminClient) {
+                showAdminLogin('Supabase SDK 載入失敗；請確認可連線至 CDN。', 'error');
+                return;
+            }
+            if (!isAllowedAdminOrigin()) {
+                showAdminLogin('請透過正式 HTTPS 網域或 localhost 使用本後台。', 'error');
+                return;
+            }
+
+            adminClient.auth.onAuthStateChange((_event, session) => {
+                setTimeout(() => void verifyAdminSession(session), 0);
+            });
+
+            document.querySelectorAll('[data-admin-view]').forEach(button => {
+                button.addEventListener('click', () => setAdminView(button.dataset.adminView));
+            });
+            document.getElementById('admin-order-status').addEventListener('change', () => void loadAdminOrders(0));
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeAdmin);
+    </script>
+</body>
+</html>
