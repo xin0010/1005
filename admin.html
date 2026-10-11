@@ -141,8 +141,20 @@
         </form>
     </dialog>
 
+    <dialog id="admin-payment-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
+        <form id="admin-payment-form" class="p-5 sm:p-6" onsubmit="submitPaymentConfirmation(event)">
+            <p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-emerald-300">MANUAL PAYMENT REVIEW</p>
+            <h2 id="payment-order-title" class="m-0 text-lg font-bold text-white">人工確認已收款</h2>
+            <p class="mt-2 text-sm leading-relaxed text-slate-400">請先在 Discord 或實際收款管道核對收款金額與交易。此操作會將待付款訂單改為已付款並記錄管理員；不會自動發放卡號。</p>
+            <label for="payment-reference" class="mb-2 mt-5 block text-xs font-semibold text-slate-300">實際交易參考編號</label>
+            <input id="payment-reference" required minlength="8" maxlength="80" pattern="[A-Za-z0-9_-]{8,80}" autocomplete="off" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400" placeholder="輸入金流／銀行交易識別碼">
+            <label class="mt-4 flex items-start gap-2 text-xs text-slate-300"><input id="payment-verified" type="checkbox" required class="mt-0.5">已在實際收款管道核對此筆款項及訂單金額</label>
+            <p id="payment-order-status" class="mt-3 hidden rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300" role="status" aria-live="polite"></p>
+            <div class="mt-5 flex justify-end gap-3"><button type="button" onclick="closePaymentDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="payment-confirm-submit" type="submit" class="rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-emerald-300">確認已收到款項</button></div>
+        </form>
+    </dialog>
+
     <script>
-        // Only the public publishable key belongs in browser code.
         const ADMIN_SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
         const ADMIN_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
         const ADMIN_PAGE_SIZE = 25;
@@ -155,9 +167,11 @@
         let adminOverviewRequestId = 0;
         let adminDetailRequestId = 0;
         let pendingCancelOrderId = null;
+        let pendingPaymentOrderId = null;
         let activeAdminView = 'overview';
         const orderDialog = document.getElementById('admin-order-dialog');
         const cancelDialog = document.getElementById('admin-cancel-dialog');
+        const paymentDialog = document.getElementById('admin-payment-dialog');
 
         try {
             if (window.supabase?.createClient) {
@@ -209,6 +223,9 @@
         function getAdminError(error) {
             const message = String(error?.message || '未知錯誤');
             if (/only pending orders can be cancelled/i.test(message)) return '此訂單已不在待付款狀態，無法取消；請重新整理訂單列表。';
+            if (/only pending orders can be confirmed/i.test(message)) return '此訂單已不在待付款狀態，無法再確認收款；請重新整理。';
+            if (/verified payment reference required/i.test(message)) return '請先實際核對款項，並輸入 8–80 字的有效交易參考編號。';
+            if (/duplicate key value|23505/i.test(message)) return '此交易參考編號已用於另一筆訂單，請核對後重新輸入。';
             if (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message)) return '找不到管理 RPC。請先執行 supabase-admin-schema.sql，並確認資料表結構已建立。';
             if (/relation .*shop_admins.* does not exist/i.test(message)) return '尚未建立管理員名單。請先執行 supabase-admin-schema.sql，再把管理帳號加入 public.shop_admins。';
             if (/permission denied|not authorized|42501|admin access required/i.test(message)) return '管理權限未通過。請確認登入帳號已加入 public.shop_admins，或先在 Supabase SQL Editor 執行管理後台 SQL。';
@@ -293,6 +310,14 @@
                 detailButton.addEventListener('click', () => openAdminOrderDetail(order.order_id));
                 actionCell.appendChild(detailButton);
                 if (mode !== 'overview' && order.status === 'pending') {
+                    const paymentButton = document.createElement('button');
+                    paymentButton.type = 'button';
+                    paymentButton.className = 'ml-2 rounded-lg border border-emerald-500/30 px-3 py-2 text-[11px] text-emerald-300 hover:border-emerald-400 hover:bg-emerald-950/30';
+                    paymentButton.textContent = '核對收款';
+                    paymentButton.setAttribute('aria-label', `核對訂單 ${order.order_number || ''} 的實際收款`);
+                    paymentButton.addEventListener('click', () => openPaymentDialog(order.order_id, order.order_number));
+                    actionCell.appendChild(paymentButton);
+
                     const cancelButton = document.createElement('button');
                     cancelButton.type = 'button';
                     cancelButton.className = 'ml-2 rounded-lg border border-amber-500/30 px-3 py-2 text-[11px] text-amber-300 hover:border-amber-400 hover:bg-amber-950/30';
@@ -493,12 +518,29 @@
             pendingCancelOrderId = null;
         }
 
+        function openPaymentDialog(orderId, orderNumber) {
+            if (!adminUser || !orderId) return;
+            pendingPaymentOrderId = orderId;
+            document.getElementById('payment-order-title').textContent = `核對訂單 #${orderNumber || ''} 的收款`;
+            document.getElementById('admin-payment-form').reset();
+            document.getElementById('payment-order-status').hidden = true;
+            document.getElementById('payment-order-status').textContent = '';
+            document.getElementById('payment-confirm-submit').disabled = false;
+            paymentDialog.showModal();
+        }
+
+        function closePaymentDialog() {
+            if (paymentDialog.open) paymentDialog.close();
+            pendingPaymentOrderId = null;
+        }
+
         function clearSensitiveAdminData() {
             adminRequestId += 1;
             adminOverviewRequestId += 1;
             adminDetailRequestId += 1;
             adminVisibleOrders = [];
             pendingCancelOrderId = null;
+            pendingPaymentOrderId = null;
             document.getElementById('admin-orders-body').replaceChildren();
             document.getElementById('overview-orders-body').replaceChildren();
             document.getElementById('detail-items-body').replaceChildren();
@@ -508,6 +550,48 @@
             document.getElementById('admin-email-label').textContent = '';
             if (orderDialog.open) orderDialog.close();
             if (cancelDialog.open) cancelDialog.close();
+            if (paymentDialog.open) paymentDialog.close();
+        }
+
+        async function submitPaymentConfirmation(event) {
+            event.preventDefault();
+            if (!adminUser || !adminClient || !pendingPaymentOrderId) return;
+            const form = document.getElementById('admin-payment-form');
+            if (!form.reportValidity()) return;
+
+            const userId = adminUser.id;
+            const orderId = pendingPaymentOrderId;
+            const button = document.getElementById('payment-confirm-submit');
+            const status = document.getElementById('payment-order-status');
+            button.disabled = true;
+            status.className = 'mt-3 rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300';
+            status.textContent = '正在驗證管理權限並紀錄收款確認…';
+            status.hidden = false;
+
+            try {
+                const { error } = await adminClient.rpc('admin_confirm_order_payment', {
+                    p_order_id: orderId,
+                    p_reference: document.getElementById('payment-reference').value.trim(),
+                    p_funds_verified: document.getElementById('payment-verified').checked
+                });
+                if (error) throw error;
+                if (adminUser?.id !== userId) return;
+
+                closePaymentDialog();
+                setAppStatus('已記錄核對收款，訂單更新為已付款。授權卡號仍需另行核發。', 'success');
+                try {
+                    await refreshAdminSummary();
+                    await loadAdminOrders(adminPage);
+                } catch (refreshError) {
+                    setAppStatus(`收款已確認，但重新載入資料失敗：${getAdminError(refreshError)}`, 'error');
+                }
+            } catch (error) {
+                if (adminUser?.id !== userId) return;
+                console.error('Admin payment confirmation failed:', error);
+                status.className = 'mt-3 rounded-lg border border-red-500/30 bg-slate-950/60 p-3 text-xs text-red-200';
+                status.textContent = getAdminError(error);
+                button.disabled = false;
+            }
         }
 
         async function submitCancelOrder(event) {
@@ -591,7 +675,7 @@
                 document.getElementById('admin-email-label').textContent = user.email || '';
                 renderAdminMetrics(data || {});
                 setAdminView('overview');
-                setAppStatus('管理權限已驗證。此介面不會建立付款或人工發卡。', 'success');
+                setAppStatus('管理權限已驗證。收款確認需先在平台外核實，且不會自動發卡。', 'success');
                 try {
                     await loadOverviewOrders();
                 } catch (error) {

@@ -1,8 +1,3 @@
--- AXG SHOP admin dashboard migration.
--- Run AFTER supabase-orders-schema.sql in the Supabase SQL Editor.
--- No service_role key or database secret belongs in ADMIN.HTML.
-
--- Admin membership can only be managed by a trusted database owner/operator.
 create table if not exists public.shop_admins (
     user_id uuid primary key references auth.users (id) on delete cascade,
     created_at timestamptz not null default pg_catalog.now(),
@@ -12,8 +7,6 @@ create table if not exists public.shop_admins (
 alter table public.shop_admins enable row level security;
 revoke all on public.shop_admins from public, anon, authenticated;
 
--- Keep an immutable record of admin order-detail access. License keys are never
--- written to this audit table, and browser roles cannot read or edit the log.
 create table if not exists public.shop_admin_audit_log (
     id bigint generated always as identity primary key,
     admin_user_id uuid not null,
@@ -26,10 +19,13 @@ create table if not exists public.shop_admin_audit_log (
 create index if not exists shop_admin_audit_log_order_created_idx
     on public.shop_admin_audit_log (order_id, created_at desc);
 
+create unique index if not exists shop_admin_payment_reference_uq
+    on public.shop_admin_audit_log ((details->>'reference'))
+    where action = 'confirm_payment' and details ? 'reference';
+
 alter table public.shop_admin_audit_log enable row level security;
 revoke all on public.shop_admin_audit_log from public, anon, authenticated;
 
--- Return high-level order and authorization metrics to verified admins only.
 create or replace function public.admin_dashboard_summary()
 returns jsonb
 language plpgsql
@@ -95,7 +91,6 @@ begin
 end;
 $$;
 
--- Search and paginate orders without granting direct table access to browsers.
 create or replace function public.admin_list_orders(
     p_search text default null,
     p_status text default null,
@@ -166,8 +161,6 @@ begin
 end;
 $$;
 
--- License keys are returned only to verified admins, for paid orders with an
--- active, non-expired authorization. Each detail access is audited.
 create or replace function public.admin_get_order_detail(p_order_id uuid)
 returns table (
     order_id uuid,
@@ -249,8 +242,6 @@ begin
 end;
 $$;
 
--- The dashboard may cancel only unpaid orders. Payment and refund states must
--- be driven by a verified payment-provider integration, never by this browser.
 create or replace function public.admin_cancel_pending_order(
     p_order_id uuid,
     p_reason text default null
@@ -299,18 +290,62 @@ begin
 end;
 $$;
 
--- SECURITY DEFINER functions must not be executable by PUBLIC or anonymous users.
+create or replace function public.admin_confirm_order_payment(
+    p_order_id uuid,
+    p_reference text,
+    p_funds_verified boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_reference text := pg_catalog.btrim(coalesce(p_reference, ''));
+    v_updated_id uuid;
+begin
+    if (select auth.uid()) is null
+       or not exists (
+            select 1 from public.shop_admins as a
+            where a.user_id = (select auth.uid())
+       ) then
+        raise exception 'Admin access required' using errcode = '42501';
+    end if;
+
+    if p_funds_verified is distinct from true
+       or pg_catalog.length(v_reference) not between 8 and 80
+       or v_reference !~ '^[A-Za-z0-9_-]+$' then
+        raise exception 'Verified payment reference required' using errcode = '22023';
+    end if;
+
+    update public.orders as o
+       set status = 'paid'
+     where o.id = p_order_id
+       and o.status = 'pending'
+    returning o.id into v_updated_id;
+
+    if v_updated_id is null then
+        raise exception 'Only pending orders can be confirmed' using errcode = '22023';
+    end if;
+
+    insert into public.shop_admin_audit_log (admin_user_id, action, order_id, details)
+    values (
+        (select auth.uid()),
+        'confirm_payment',
+        v_updated_id,
+        pg_catalog.jsonb_build_object('reference', v_reference, 'source', 'ADMIN')
+    );
+end;
+$$;
+
 revoke all on function public.admin_dashboard_summary() from public, anon, authenticated;
 revoke all on function public.admin_list_orders(text, text, integer, integer) from public, anon, authenticated;
 revoke all on function public.admin_get_order_detail(uuid) from public, anon, authenticated;
 revoke all on function public.admin_cancel_pending_order(uuid, text) from public, anon, authenticated;
+revoke all on function public.admin_confirm_order_payment(uuid, text, boolean) from public, anon, authenticated;
 grant usage on schema public to authenticated;
 grant execute on function public.admin_dashboard_summary() to authenticated;
 grant execute on function public.admin_list_orders(text, text, integer, integer) to authenticated;
 grant execute on function public.admin_get_order_detail(uuid) to authenticated;
 grant execute on function public.admin_cancel_pending_order(uuid, text) to authenticated;
-
--- Provision an administrator manually as the database owner in SQL Editor:
---   select id, email from auth.users where email = 'your-admin@example.com';
---   insert into public.shop_admins (user_id) values ('AUTH_USER_UUID');
--- Never add every authenticated user as an administrator.
+grant execute on function public.admin_confirm_order_payment(uuid, text, boolean) to authenticated;

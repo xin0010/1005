@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXG SHOP — 亞洲遊戲輔助經銷商 | 24小時自動發卡</title>
-    <meta name="description" content="AXG SHOP 亞洲經銷商，提供 24 小時自動發卡、即買即用、獨家底層防封驅動與 Discord 專人售後服務。">
+    <title>AXG SHOP — 亞洲遊戲輔助經銷商 | 線上選購</title>
+    <meta name="description" content="AXG SHOP 亞洲經銷商，提供線上商品選購、會員訂單查詢與 Discord 客服協助付款。">
     
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -34,7 +33,6 @@
         }
     </script>
     
-    <!-- Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -55,7 +53,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Cyber Background Grid Grid Effect */
         .cyber-bg-grid {
             background-image: 
                 linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
@@ -129,12 +126,9 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black cyber-bg-grid">
 
-   <!-- Navigation Header -->
 <header class="sticky top-0 z-50 bg-[#060913]/90 backdrop-blur-xl border-b border-cyan-900/40 shadow-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <!-- Brand Logo -->
         <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('home')">
-            <!-- 替換為真實圖片 Logo -->
             <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-transform flex items-center justify-center bg-[#060913]">
                 <img src="logo.jpg" alt="AXG Logo" class="w-full h-full object-cover">
             </div>
@@ -143,11 +137,9 @@
                 <span class="block text-[9px] font-mono text-cyan-500/80 -mt-1 tracking-widest uppercase">輔助官網</span>
             </div>
         </div>
-            <!-- Desktop Nav Items -->
             <nav class="hidden lg:flex items-center space-x-1 text-sm font-medium font-mono text-slate-300">
                 <button onclick="switchTab('home')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">首頁</button>
                 
-                <!-- Category Dropdown -->
                 <div class="relative group py-2">
                     <button class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors inline-flex items-center gap-1.5 bg-transparent border-0 cursor-pointer">
                         <span>輔助分類</span>
@@ -177,7 +169,6 @@
                 <button onclick="switchTab('account')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">會員中心</button>
             </nav>
 
-            <!-- Header Action Icons -->
             <div class="flex items-center space-x-3">
                 <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
                     <i class="fa-brands fa-discord text-sm"></i>
@@ -195,7 +186,6 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Drawer -->
         <div id="mobile-menu" class="lg:hidden hidden bg-[#0d1527] border-b border-cyan-900/50 px-5 py-4 space-y-3 font-mono text-sm max-h-[80vh] overflow-y-auto">
             <button onclick="switchTab('home'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 首頁</button>
             <button onclick="switchTab('mobile-store'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 輔助授權商城</button>
@@ -208,7 +198,6 @@
         </div>
     </header>
 
-    <!-- Marquee Announcement Banner -->
     <div class="bg-cyan-950/60 border-b border-cyan-900/40 py-2 px-4 overflow-hidden relative z-40 font-mono text-xs backdrop-blur-md">
         <div class="max-w-7xl mx-auto flex items-center">
             <div class="flex items-center gap-2 text-cyan-400 font-bold whitespace-nowrap mr-4 bg-cyan-950/90 px-3 py-1 rounded-lg border border-cyan-500/30">
@@ -217,7 +206,7 @@
             </div>
             <div class="overflow-hidden whitespace-nowrap w-full">
                 <div class="inline-block animate-[marquee_25s_linear_infinite] text-slate-300" role="marquee" aria-label="即時公告">
-                    🔥 歡迎來到AXG SHOP 亞洲遊戲輔助官網24小時自動發卡商城！網站維護中，如有疑問請私訊 <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="text-cyan-400 underline">Discord 客群</a>
+                    🔥 歡迎來到 AXG SHOP！登入後可建立待付款訂單，請攜帶訂單編號至 <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="text-cyan-400 underline">Discord 客群</a>洽詢付款。
                 </div>
             </div>
         </div>
@@ -231,12 +220,11 @@
 
     <main class="flex-grow flex flex-col w-full">
 
-        <!-- Home / Landing View -->
         <section id="view-home" class="relative w-full min-h-[85vh] flex flex-col items-center justify-center py-16 px-4">
             <div class="max-w-5xl mx-auto text-center z-10">
                 <div class="inline-flex items-center gap-2 mb-6 font-mono text-xs text-cyan-400 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span>AXG SHOP 24H 自動發卡</span>
+                    <span>AXG SHOP 線上選購</span>
                 </div>
                 
                 <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-mono tracking-tight text-white mb-6 leading-tight">
@@ -245,7 +233,7 @@
                 </h1>
                 
                 <p class="text-slate-300 max-w-2xl mx-auto font-mono text-sm sm:text-base mb-10 leading-relaxed">
-                    提供 PC 端與 iOS/Android 熱門遊戲。全自動金鑰發放，秒速開通，搭配 Discord 售後服務 專業技術團隊售後保障。
+                    提供 PC 端與 iOS/Android 熱門遊戲商品。建立訂單後可至 Discord 洽詢付款與授權事宜。
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4 mb-16">
@@ -259,14 +247,13 @@
                     </a>
                 </div>
 
-                <!-- Feature Highlights -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left max-w-4xl mx-auto font-mono">
                     <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
                         <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
                             <i class="fa-solid fa-bolt"></i>
                         </div>
-                        <h3 class="text-white font-bold text-sm mb-1">24小時自動發卡</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">金鑰系統全天候自動運作，付款完成後即刻取得卡號免等待。</p>
+                        <h3 class="text-white font-bold text-sm mb-1">會員訂單查詢</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">登入後可查看本人的待付款訂單與授權處理狀態。</p>
                     </div>
 
                     <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
@@ -288,84 +275,83 @@
             </div>
         </section>
 
-        <!-- Store View -->
         <section id="view-mobile-store" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden">
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-8 font-mono">
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide mb-3">AXG SHOP 授權商城</h2>
-                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">選擇您需要的遊戲輔助或數位商品，點擊商品卡片可預覽詳細功能與設定。支援全自動發卡。</p>
+                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">選擇所需的遊戲輔助或數位商品，登入後建立訂單並至 Discord 聯繫客服洽詢付款。</p>
                 </div>
 
-                <!-- Game Status Monitor Widget -->
+                <p id="catalog-status" role="status" aria-live="polite" class="mb-6 text-center font-mono text-xs text-slate-400">正在載入商品與即時價格…</p>
+
                 <div class="mb-10 bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-2xl font-mono">
                     <div class="flex items-center justify-between mb-3">
                         <div class="text-xs text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span>輔助即時狀態監控 (Real-time Status)</span>
+                            <span>遊戲與平台資訊</span>
                         </div>
-                        <span class="text-[11px] text-slate-500">最後更新: 剛才</span>
+                        <span class="text-[11px] text-slate-500">實際販售以商品目錄為準</span>
                     </div>
 
                    <div class="flex flex-wrap gap-2.5 mb-3" id="status-chips-bar">
     
 
-    <!-- PUBG 絕地求生 -->
-    <button class="t1st-chip border-0" data-game="PUBG 絕地求生" data-status="正常運營" data-plat="PC / 防封" data-desc="PUBG 絕地求生透視自瞄輔助穩定運行中，即時更新。">
+    <button class="t1st-chip border-0" data-game="PUBG 絕地求生" data-status="請洽客服確認" data-plat="PC" data-desc="商品資訊、相容性及授權條件請以客服答覆為準。">
         <img src="PUBGM-700x700.png" alt="PUBG 絕地求生" class="w-5 h-5 rounded-full object-cover">
         <span>PUBG 絕地求生</span>
          <span class="t1st-dot"></span>
         <span class="text-[10px] opacity-70">[PC]</span>
     </button>
 
-    <!-- Free Fire (保留原點點，或您可以自行補上圖標) -->
-    <button class="t1st-chip border-0" data-game="Free Fire" data-status="正常運營" data-plat="iOS / Android" data-desc="Free Fire ，免越獄/免Root輕鬆安裝。">
-        <img src="freefire_m.png" alt="Free Fire" class="w-5 h-5 rounded-full object-cover">
+    <button class="t1st-chip border-0" data-game="Free Fire" data-status="請洽客服確認" data-plat="iOS / Android" data-desc="實際支援版本與安裝方式請以客服答覆為準。">
+        <img src="freefire.png" alt="Free Fire" class="w-5 h-5 rounded-full object-cover">
         <span class="t1st-dot"></span>
         <span>Free Fire</span>
         <span class="text-[10px] opacity-70">[iOS/Android]</span>
     </button>
 
-    <!-- 傳說對決 -->
-    <button class="t1st-chip border-0" data-game="傳說對決" data-status="正常運營" data-plat="iOS" data-desc="傳說對決 iOS 地圖全開透視掛，穩定通過各版本安全檢測。">
+    <button class="t1st-chip border-0" data-game="傳說對決" data-status="請洽客服確認" data-plat="iOS" data-desc="實際支援版本與授權條件請以客服答覆為準。">
         <img src="moba.png" alt="傳說對決" class="w-5 h-5 rounded-full object-cover">
         <span>傳說對決</span>
          <span class="t1st-dot"></span>
         <span class="text-[10px] opacity-70">[iOS]</span>
     </button>
 
-    <!-- ios P12 證書 -->
+                    </div>
+                    <p id="status-detail-text" class="m-0 text-xs leading-relaxed text-slate-400">點選上方遊戲可檢視展示資訊。</p>
+                </div>
 
-                   
-
-                <!-- Search & Filters Bar -->
                 <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-8 font-mono">
-                    <!-- Filter Tabs -->
                     <div class="flex flex-wrap gap-2 w-full md:w-auto" id="filter-tabs">
-                        <button onclick="filterProducts('all', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer">全部商品</button>
-                        <button onclick="filterProducts('valorant', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">特戰英豪</button>
-                        <button onclick="filterProducts('pubg', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">絕地求生</button>
-                        <button onclick="filterProducts('mobile', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">熱門手遊</button>
-                        <button onclick="filterProducts('account', this)" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">帳號與憑證</button>
+                        <button onclick="filterProducts('all')" data-category="all" class="filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer">全部商品</button>
+                        <button onclick="filterProducts('valorant')" data-category="valorant" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">特戰英豪</button>
+                        <button onclick="filterProducts('pubg')" data-category="pubg" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">絕地求生</button>
+                        <button onclick="filterProducts('mobile')" data-category="mobile" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">熱門手遊</button>
+                        <button onclick="filterProducts('account')" data-category="account" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">帳號與憑證</button>
                     </div>
 
-                    <!-- Search Input -->
                     <div class="relative w-full md:w-64">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-                        <input type="text" id="store-search-input" onkeyup="searchProducts()" placeholder="搜尋關鍵字..." class="w-full pl-9 pr-4 py-2 text-xs">
+                        <input type="search" id="store-search-input" oninput="searchProducts()" placeholder="搜尋關鍵字..." class="w-full pl-9 pr-4 py-2 text-xs">
                     </div>
                 </div>
 
-                <!-- Product Grid Container -->
                 <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
             </div>
         </section>
 
-        <!-- Orders View -->
         <section id="view-orders" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">訂單與授權卡號查詢</h2>
                     <p class="text-xs text-slate-400">登入後僅能查詢目前會員帳號所屬的訂單；可用訂單編號篩選。為保護卡號，不能透過公開信箱或電話查詢。</p>
+                </div>
+
+                <div id="order-created-panel" class="hidden mb-6 rounded-2xl border border-indigo-500/40 bg-indigo-950/30 p-5 text-sm text-indigo-100" role="status" aria-live="polite">
+                    <p class="mb-2 font-bold">待付款訂單已建立</p>
+                    <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-cyan-300"></strong></p>
+                    <p class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
+                    <a id="order-discord-link" href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-lg border border-indigo-400/50 px-4 py-2 text-indigo-200 hover:bg-indigo-900/40">前往 Discord 洽詢付款</a>
                 </div>
 
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl mb-8">
@@ -404,7 +390,6 @@
             </div>
         </section>
 
-        <!-- Downloads View -->
         <section id="view-downloads" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">輔助程式下載專區</h2>
@@ -441,18 +426,17 @@
             </div>
         </section>
 
-        <!-- Wallet Topup View -->
         <section id="view-wallet" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-2xl mx-auto">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">商城餘額儲值</h2>
-                    <p class="text-xs text-slate-400">先選擇金額與方式，確認摘要後再由正式付款服務處理。</p>
+                    <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">儲值洽詢</h2>
+                    <p class="text-xs text-slate-400">選擇預計金額後前往 Discord 詢問客服；此頁不會建立儲值訂單。</p>
                 </div>
 
                 <div class="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 p-4 text-xs text-amber-200" role="note">
                     <div class="flex items-start gap-3">
                         <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
-                        <p class="m-0 leading-relaxed"><strong>重要提醒：</strong>目前未連接會員錢包或金流服務。下方帳號為固定顯示資料，不會依每筆訂單產生專屬虛擬帳號，也不會自動確認入帳或變更餘額；轉帳前請先核實收款資訊。</p>
+                        <p class="m-0 leading-relaxed"><strong>重要提醒：</strong>目前未連接會員錢包或金流服務。本頁僅提供洽詢入口；跳轉 Discord 不代表已建立儲值申請、完成付款或變更餘額。</p>
                     </div>
                 </div>
 
@@ -477,64 +461,28 @@
                         </div>
 
                         <div>
-                            <label for="topup-method" class="block text-xs text-slate-300 mb-2">預計付款方式</label>
+                            <label for="topup-method" class="block text-xs text-slate-300 mb-2">聯絡方式</label>
                             <select id="topup-method" name="paymentMethod" required aria-describedby="topup-method-hint" class="w-full px-4 py-3 text-sm">
-                                <option value="atm">ATM 虛擬帳號轉帳</option>
+                                <option value="discord">Discord 聯繫客服</option>
                             </select>
-                            <p id="topup-method-hint" class="text-[11px] text-slate-500 mt-2 mb-0">送出後會顯示固定收款帳號與金額；網站不會傳送付款資料或驗證入帳。</p>
+                            <p id="topup-method-hint" class="text-[11px] text-slate-500 mt-2 mb-0">網站不會送出金額或驗證入帳；請自行與客服確認付款方式。</p>
                         </div>
 
                         <div id="topup-summary" class="hidden rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-4" aria-live="polite" aria-atomic="true">
                             <h3 class="text-sm font-bold text-cyan-300 mb-3">儲值資料摘要</h3>
                             <dl class="space-y-2 text-xs">
                                 <div class="flex justify-between gap-4"><dt class="text-slate-400">儲值金額</dt><dd id="topup-summary-amount" class="m-0 text-white font-bold"></dd></div>
-                                <div class="flex justify-between gap-4"><dt class="text-slate-400">預計付款方式</dt><dd id="topup-summary-method" class="m-0 text-right text-white"></dd></div>
+                                <div class="flex justify-between gap-4"><dt class="text-slate-400">聯絡方式</dt><dd id="topup-summary-method" class="m-0 text-right text-white"></dd></div>
                             </dl>
                             <p class="text-[11px] text-amber-200 mt-3 mb-0">摘要不代表付款申請或交易成功；目前不會向任何服務傳送資料。</p>
                         </div>
 
-                        <button id="topup-submit-btn" type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">查看 ATM 轉帳資訊</button>
+                        <button id="topup-submit-btn" type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">前往 Discord 洽詢</button>
                     </form>
                 </div>
             </div>
         </section>
 
-        <!-- ATM Account Details Modal -->
-        <div id="topup-account-modal" class="fixed inset-0 z-[60] overflow-y-auto hidden" aria-hidden="true">
-            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeTopupAccountModal()" aria-hidden="true"></div>
-            <div class="relative min-h-screen flex items-center justify-center p-4">
-                <section role="dialog" aria-modal="true" aria-labelledby="topup-account-title" aria-describedby="topup-account-disclaimer" class="relative w-full max-w-md rounded-2xl border border-cyan-500/50 bg-[#0d1527] p-6 shadow-2xl font-mono">
-                    <button id="topup-account-close" type="button" onclick="closeTopupAccountModal()" aria-label="關閉轉帳資訊" class="absolute right-3 top-3 rounded-lg p-2 text-slate-400 hover:text-white bg-transparent border-0 cursor-pointer">
-                        <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
-                    </button>
-                    <div class="mb-5 pr-8">
-                        <span class="inline-flex items-center gap-2 rounded-full border border-cyan-500/40 bg-cyan-950/60 px-3 py-1 text-[11px] font-bold text-cyan-300">
-                            <i class="fa-solid fa-building-columns" aria-hidden="true"></i> ATM 虛擬帳號資訊
-                        </span>
-                        <h2 id="topup-account-title" class="mt-3 text-xl font-bold text-white">郵局轉帳資料</h2>
-                    </div>
-
-                    <dl class="space-y-3 rounded-xl border border-slate-700 bg-slate-900/80 p-4 text-sm">
-                        <div class="flex justify-between gap-4"><dt class="text-slate-400">銀行</dt><dd class="m-0 text-right font-bold text-white">郵局（代碼 700）</dd></div>
-                        <div>
-                            <dt class="mb-2 text-slate-400">帳號</dt>
-                            <dd class="m-0 flex flex-wrap items-center justify-between gap-3">
-                                <span id="post-account-number" class="select-all break-all font-mono text-lg font-extrabold tracking-wider text-cyan-300">00812410802456</span>
-                                <button type="button" onclick="copyPostAccount()" class="rounded-lg border border-cyan-500/40 bg-cyan-950/60 px-3 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-900/70 cursor-pointer">
-                                    <i class="fa-regular fa-copy mr-1" aria-hidden="true"></i>複製帳號
-                                </button>
-                            </dd>
-                        </div>
-                        <div class="flex justify-between gap-4 border-t border-slate-700 pt-3"><dt class="text-slate-400">本次金額</dt><dd id="topup-account-amount" class="m-0 text-right text-lg font-extrabold text-cyan-300"></dd></div>
-                    </dl>
-
-                    <p id="topup-account-disclaimer" class="mt-4 text-xs leading-relaxed text-amber-200">請在匯款前自行核對帳號與金額。此為固定顯示資料，不代表已建立繳費單或完成付款；網站不會接收匯款證明或自動入帳。</p>
-                    <button type="button" onclick="closeTopupAccountModal()" class="cyber-button mt-2 w-full rounded-xl py-3 text-sm font-bold cursor-pointer border-0">我知道了</button>
-                </section>
-            </div>
-        </div>
-
-        <!-- Troubleshooting View -->
         <section id="view-trouble" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-3xl mx-auto">
                 <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">疑難雜症與常見問題 (FAQ)</h2>
@@ -542,12 +490,12 @@
                 <div class="space-y-4">
                     <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
                         <div class="font-bold text-cyan-400 mb-2">Q1: 下載輔助主程式後被 Windows Defender 攔截怎麼辦？</div>
-                        <p class="text-xs text-slate-300 leading-relaxed">因為本站輔助採用底層驅動保護與記憶體加殼技術，防毒軟體可能會有誤報。請先將主程式資料夾加入「Windows 安全性排除項目」或暫時關閉即時防護後即可正常執行。</p>
+                        <p class="text-xs text-slate-300 leading-relaxed">請勿關閉防毒軟體。先確認下載來源與檔案安全性；若持續被攔截，請聯繫客服取得進一步協助。</p>
                     </div>
 
                     <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
-                        <div class="font-bold text-cyan-400 mb-2">Q2: 付款完成後卡號要去哪裡領取？</div>
-                        <p class="text-xs text-slate-300 leading-relaxed">本站為 24 小時全自動發卡系統，付款成功後頁面會直接顯示您的專屬授權卡號，同時您也可以點擊導覽列的「卡號查詢」隨時調閱歷史紀錄。</p>
+                        <div class="font-bold text-cyan-400 mb-2">Q2: 建立訂單後如何確認付款與取得卡號？</div>
+                        <p class="text-xs text-slate-300 leading-relaxed">請在 Discord 提供訂單編號並依客服指示確認付款。付款與發卡仍需處理，登入後可至「卡號查詢」查看本人訂單狀態。</p>
                     </div>
 
                     <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
@@ -558,7 +506,6 @@
             </div>
         </section>
 
-        <!-- Account / Login View -->
         <section id="view-account" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-md mx-auto">
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl">
@@ -642,7 +589,6 @@
 
     </main>
 
-    <!-- Product Detail Modal -->
     <div id="product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductModal()"></div>
         <div class="relative min-h-screen flex items-center justify-center p-4">
@@ -669,7 +615,6 @@
         </div>
     </div>
 
-    <!-- Cart Drawer -->
     <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="toggleCart(false)" aria-hidden="true"></div>
         <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
@@ -678,7 +623,7 @@
                     <div class="flex items-center justify-between gap-3 pb-4 border-b border-cyan-900/40">
                         <h3 id="cart-title" class="text-lg font-bold text-cyan-400 flex items-center gap-2">
                             <i class="fa-solid fa-cart-shopping"></i>
-                            <span>購物車與發卡明細</span>
+                            <span>購物車與訂單明細</span>
                         </h3>
                         <div class="flex items-center gap-2">
                             <button id="cart-clear-btn" type="button" onclick="clearCart()" disabled class="rounded-lg border border-slate-700 px-2.5 py-2 text-[11px] text-slate-400 hover:border-red-400 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">清空</button>
@@ -693,28 +638,27 @@
                         <span class="text-slate-300 text-sm">總計金額：</span>
                         <span id="cart-total" class="text-cyan-400 font-bold text-2xl">NT$ 0</span>
                     </div>
-                    <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">購物車僅暫存在此瀏覽器，不代表訂單成立。付款與授權發放服務尚未連接，請勿將此頁當作已付款或已發卡證明。</p>
-                    <button type="button" disabled class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-not-allowed border-0 shadow-lg opacity-50 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check"></i>
-                        <span>付款與自動發卡尚未啟用</span>
+                    <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。</p>
+                    <p id="cart-checkout-status" role="status" aria-live="polite" class="hidden mb-3 rounded-lg border border-amber-500/30 bg-amber-950/30 p-3 text-xs text-amber-200"></p>
+                    <button id="cart-abandon-request" type="button" onclick="abandonOrderRequest()" class="hidden mb-3 w-full rounded-lg border border-slate-600 p-2 text-xs text-slate-300 hover:border-cyan-400">已查詢訂單，放棄本次重試並修改購物車</button>
+                    <button id="cart-checkout-button" type="button" onclick="checkout()" disabled class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-not-allowed border-0 shadow-lg opacity-50 flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-discord"></i>
+                        <span>建立訂單並前往 Discord</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#0d1527] border border-cyan-400 text-white px-6 py-3.5 rounded-xl shadow-[0_0_25px_rgba(6,182,212,0.4)] flex items-center gap-3 font-mono text-xs">
         <i class="fa-solid fa-circle-check text-cyan-400 text-base"></i>
         <span id="toast-msg">Notification Message</span>
     </div>
 
-    <!-- Floating Discord Widget -->
     <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="fixed bottom-6 left-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 no-underline" title="Discord 真人客服">
         <i class="fa-brands fa-discord text-xl"></i>
     </a>
 
-    <!-- Footer -->
     <footer class="bg-[#04060d] text-slate-400 py-12 border-t border-cyan-950 mt-auto font-mono text-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -722,7 +666,7 @@
                     <div class="w-8 h-8 rounded-lg bg-cyan-400 flex items-center justify-center text-black font-extrabold">AXG</div>
                     <span class="font-bold text-white text-base">AXG SHOP</span>
                 </div>
-                <p class="text-slate-500 leading-relaxed">24 小時全自動發卡・頂級安全外掛與數位商品授權中心。</p>
+                <p class="text-slate-500 leading-relaxed">遊戲輔助與數位商品選購・會員訂單查詢與客服服務。</p>
             </div>
             <div>
                 <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">快速選單</h4>
@@ -741,14 +685,13 @@
             </div>
             <div>
                 <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">安全加密</h4>
-                <p class="text-slate-500 leading-relaxed">256-Bit SSL Encrypted Automated Gateway.<br>&copy; 2026 AXG SHOP. All rights reserved.</p>
+                <p class="text-slate-500 leading-relaxed">登入後僅能查詢個人訂單；請使用 HTTPS 網站以保護資料。<br>&copy; 2026 AXG SHOP. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Browser-safe Supabase configuration. Never put database or service-role secrets here.
         const SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
         let supabaseClient = null;
@@ -769,22 +712,22 @@
             console.error('Supabase initialization failed.', error);
         }
 
-        // Store Product Database
-        const products = [
-            
-            { id: 1, name: 'PUBG 絕地求生 透視輔助 (30天)', category: 'pubg', price: 1200, tag: '穩定防封', img: 'PUBGM-700x700.png', desc: '支援透視、物品顯示、預判自瞄與無後座力，即時雲端過安全檢測。' },
-            { id: 2, name: 'Free Fire 雙端雲端直裝外掛 (30天)', category: 'mobile', price: 800, tag: '手遊首選', img: 'freefire.png', desc: 'iOS / Android 雙端支援，免越獄免Root，包含自動鎖頭、透視顯敵與人物加速。' },
-            { id: 3, name: '傳說對決 iOS 專用安全透視 (永久授權)', category: 'mobile', price: 1200, tag: '蘋果專用', img: 'moba.png', desc: '全地圖視野顯敵、技能冷卻顯示、野怪血量計算，穩定不封號。' },
-            { id: 4, name: '蘋果 P12 證書個人獨立簽名 (1年保固)', category: 'account', price: 650, tag: '獨立憑證', img: 'logo-700x700.png', desc: '個人獨享企業開發者證書，支援所有 IPA 直裝應用，提供一年內掉簽補簽服務。' }
-        ];
-
+        const DISCORD_PAYMENT_URL = 'https://discord.gg/CahMc8zNjN';
+        const PRODUCT_IMAGES = { 1: 'PUBGM-700x700.png', 2: 'freefire.png', 3: 'moba.png', 4: 'logo-700x700.png' };
+        const products = [];
+        let catalogLoaded = false;
+        let catalogLoadPromise = null;
+        let activeCategory = 'all';
         const CART_STORAGE_KEY = 'axg-shop-cart-v1';
-        let cart = loadCart();
-        let topupModalPreviousFocus = null;
+        const ORDER_REQUEST_STORAGE_KEY = 'axg-shop-checkout-request-v1';
+        const LAST_ORDER_STORAGE_KEY = 'axg-shop-last-order-v1';
+        let cart = [];
+        let isCreatingOrder = false;
+        let orderOutcomeUnknown = false;
+        let inMemoryOrderRequest = null;
         let cartPreviousFocus = null;
         let orderLookupRequestId = 0;
 
-        // Tab Switcher
         function switchTab(tabId) {
             const views = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'account'];
             views.forEach(v => {
@@ -793,7 +736,8 @@
             });
 
             if (tabId === 'mobile-store') {
-                renderProducts();
+                searchProducts();
+                if (!catalogLoaded) void loadCatalog();
             }
             if (tabId === 'orders') {
                 queryOrders();
@@ -808,7 +752,7 @@
 
                 return savedCart.reduce((items, savedItem) => {
                     const product = products.find(item => item.id === Number(savedItem?.id));
-                    const quantity = Number(savedItem?.quantity);
+                    const quantity = savedItem?.quantity;
                     if (!product || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) return items;
 
                     const existingItem = items.find(item => item.id === product.id);
@@ -827,15 +771,148 @@
                     cart.map(item => ({ id: item.id, quantity: item.quantity }))
                 ));
             } catch {
-                // Cart remains available for this page session if storage is blocked or full.
             }
         }
 
-        // Render Product Cards
+        function getOrderRequestStorageKey(userId) {
+            return `${ORDER_REQUEST_STORAGE_KEY}:${userId}`;
+        }
+
+        function getCartFingerprint() {
+            return JSON.stringify(cart.map(item => [item.id, item.quantity]).sort((a, b) => a[0] - b[0]));
+        }
+
+        function newOrderRequestId() {
+            if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+            if (!window.crypto?.getRandomValues) return null;
+            const bytes = new Uint8Array(16);
+            window.crypto.getRandomValues(bytes);
+            bytes[6] = (bytes[6] & 15) | 64;
+            bytes[8] = (bytes[8] & 63) | 128;
+            const hex = [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('');
+            return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+        }
+
+        function getSavedOrderRequest(userId) {
+            if (inMemoryOrderRequest?.userId === userId) return inMemoryOrderRequest;
+            try {
+                const saved = JSON.parse(localStorage.getItem(getOrderRequestStorageKey(userId)) || 'null');
+                if (saved && typeof saved.fingerprint === 'string' &&
+                    /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(saved.key)) {
+                    inMemoryOrderRequest = { userId, key: saved.key, fingerprint: saved.fingerprint };
+                    return inMemoryOrderRequest;
+                }
+            } catch {
+                return null;
+            }
+            return null;
+        }
+
+        function getOrCreateOrderRequest(userId) {
+            const saved = getSavedOrderRequest(userId);
+            if (saved) {
+                if (saved.fingerprint !== getCartFingerprint()) {
+                    throw new Error('請先至訂單查詢確認前次下單結果，再放棄本次重試。');
+                }
+                return saved;
+            }
+            const key = newOrderRequestId();
+            if (!key) throw new Error('瀏覽器不支援安全訂單識別碼，請使用 HTTPS 網站重試。');
+            const request = { userId, key, fingerprint: getCartFingerprint() };
+            try {
+                localStorage.setItem(getOrderRequestStorageKey(userId), JSON.stringify(request));
+            } catch {
+                throw new Error('瀏覽器禁止儲存訂單識別碼。請允許此網站使用本機儲存後再下單。');
+            }
+            inMemoryOrderRequest = request;
+            return request;
+        }
+
+        function clearOrderRequest(userId, requestKey) {
+            const saved = getSavedOrderRequest(userId);
+            if (saved?.key !== requestKey) return;
+            try {
+                localStorage.removeItem(getOrderRequestStorageKey(userId));
+            } catch {
+            }
+            if (inMemoryOrderRequest?.key === requestKey) inMemoryOrderRequest = null;
+            orderOutcomeUnknown = false;
+        }
+
+        function setCartCheckoutStatus(message, tone = 'info') {
+            const status = document.getElementById('cart-checkout-status');
+            if (!status) return;
+            status.textContent = message;
+            status.className = message
+                ? `mb-3 rounded-lg border p-3 text-xs ${tone === 'error' ? 'border-red-500/40 bg-red-950/30 text-red-200' : 'border-amber-500/30 bg-amber-950/30 text-amber-200'}`
+                : 'hidden';
+            const abandon = document.getElementById('cart-abandon-request');
+            if (abandon) abandon.classList.toggle('hidden', !orderOutcomeUnknown);
+        }
+
+        function abandonOrderRequest() {
+            if (isCreatingOrder || !currentAuthUser) return;
+            const request = getSavedOrderRequest(currentAuthUser.id);
+            if (!request || !window.confirm('前次訂單可能已建立。請先在「卡號查詢」確認；放棄重試後再次下單可能產生另一筆訂單。確定要繼續？')) return;
+            clearOrderRequest(currentAuthUser.id, request.key);
+            setCartCheckoutStatus('已放棄前次重試。如原訂單已成立，請勿再次付款。');
+            updateCartUI();
+        }
+
+        async function loadCatalog() {
+            if (catalogLoadPromise) return catalogLoadPromise;
+            const status = document.getElementById('catalog-status');
+            if (status) status.textContent = '正在載入商品與即時價格…';
+
+            catalogLoadPromise = (async () => {
+                try {
+                    if (!supabaseClient) throw new Error('商品服務無法連線');
+                    const { data, error } = await supabaseClient.rpc('get_shop_products');
+                    if (error) throw error;
+                    if (!Array.isArray(data)) throw new Error('商品目錄資料不完整');
+
+                    const updatedProducts = data.map(item => {
+                        if (!Number.isSafeInteger(item.id) || !Number.isSafeInteger(item.price) || item.price < 0 ||
+                            typeof item.name !== 'string' || typeof item.category !== 'string' ||
+                            typeof item.tag !== 'string' || typeof item.description !== 'string') {
+                            throw new Error('商品目錄資料不完整');
+                        }
+                        return { id: item.id, name: item.name, category: item.category, price: item.price,
+                            tag: item.tag, desc: item.description, img: PRODUCT_IMAGES[item.id] || 'logo-700x700.png' };
+                    });
+
+                    products.splice(0, products.length, ...updatedProducts);
+                    catalogLoaded = true;
+                    cart = loadCart();
+                    updateCartUI();
+                    searchProducts();
+                    if (status) status.textContent = products.length ? '' : '目前沒有可購買的商品。';
+                } catch (error) {
+                    console.error('Catalog loading failed:', error);
+                    if (status) status.textContent = '無法載入商品或價格，已停用下單。請確認已套用資料庫設定，稍後重新進入商城重試。';
+                    renderProducts();
+                }
+            })().finally(() => { catalogLoadPromise = null; });
+            return catalogLoadPromise;
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+        }
+
         function renderProducts(items = products) {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
-            grid.innerHTML = '';
+            grid.replaceChildren();
+
+            if (!catalogLoaded) return;
+            if (!items.length) {
+                const message = document.createElement('p');
+                message.className = 'col-span-full py-8 text-center font-mono text-sm text-slate-400';
+                message.textContent = '目前沒有符合條件的商品。';
+                grid.appendChild(message);
+                return;
+            }
 
             items.forEach(p => {
                 const card = document.createElement('div');
@@ -843,10 +920,10 @@
                 card.innerHTML = `
                     <div>
                         <div class="relative overflow-hidden rounded-xl mb-3.5 bg-slate-900 group cursor-pointer" onclick="openProductModal(${p.id})">
-                            <img src="${p.img}" alt="${p.name}" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300">
-                            <span class="absolute top-2.5 right-2.5 bg-cyan-950/90 border border-cyan-400 text-cyan-300 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md backdrop-blur-md">${p.tag}</span>
+                            <img src="${p.img}" alt="${escapeHtml(p.name)}" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <span class="absolute top-2.5 right-2.5 bg-cyan-950/90 border border-cyan-400 text-cyan-300 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md backdrop-blur-md">${escapeHtml(p.tag)}</span>
                         </div>
-                        <h3 class="text-white font-mono font-bold text-sm mb-2 line-clamp-2 hover:text-cyan-400 cursor-pointer transition-colors" onclick="openProductModal(${p.id})">${p.name}</h3>
+                        <h3 class="text-white font-mono font-bold text-sm mb-2 line-clamp-2 hover:text-cyan-400 cursor-pointer transition-colors" onclick="openProductModal(${p.id})">${escapeHtml(p.name)}</h3>
                         <div class="text-cyan-400 font-mono font-extrabold text-lg mb-4">NT$ ${p.price.toLocaleString()}</div>
                     </div>
                     <div class="flex gap-2 font-mono">
@@ -863,27 +940,24 @@
             });
         }
 
-        // Filter Products by Category
-        function filterProducts(cat, btnEl) {
-            if (btnEl) {
-                document.querySelectorAll('.filter-tab-btn').forEach(btn => {
-                    btn.className = 'filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer';
-                });
-                btnEl.className = 'filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer';
-            }
-
-            const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
-            renderProducts(filtered);
+        function filterProducts(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.filter-tab-btn').forEach(btn => {
+                const selected = btn.dataset.category === cat;
+                btn.className = selected
+                    ? 'filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer'
+                    : 'filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer';
+            });
+            searchProducts();
         }
 
-        // Search Products Input
         function searchProducts() {
-            const query = document.getElementById('store-search-input').value.toLowerCase();
-            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query));
+            const query = document.getElementById('store-search-input').value.trim().toLocaleLowerCase();
+            const filtered = products.filter(p => (activeCategory === 'all' || p.category === activeCategory) &&
+                (p.name.toLocaleLowerCase().includes(query) || p.desc.toLocaleLowerCase().includes(query)));
             renderProducts(filtered);
         }
 
-        // Modal Functions
         function openProductModal(id) {
             const p = products.find(prod => prod.id === id);
             if (!p) return;
@@ -905,8 +979,11 @@
             document.getElementById('product-modal').classList.add('hidden');
         }
 
-        // Cart Actions
         function addToCart(id) {
+            if (isCreatingOrder || orderOutcomeUnknown) {
+                showToast('請先確認前次下單結果，再修改購物車。');
+                return;
+            }
             const product = products.find(p => p.id === id);
             if (!product) return;
 
@@ -929,6 +1006,7 @@
             const container = document.getElementById('cart-items-container');
             const totalEl = document.getElementById('cart-total');
             const clearButton = document.getElementById('cart-clear-btn');
+            const checkoutButton = document.getElementById('cart-checkout-button');
             const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
             const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
             const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
@@ -940,7 +1018,16 @@
             const cartToggleButton = document.getElementById('cart-toggle-button');
             if (cartToggleButton) cartToggleButton.setAttribute('aria-label', `檢視購物車，共 ${itemCount} 件商品`);
             if (totalEl) totalEl.textContent = `NT$ ${formatter.format(total)}`;
-            if (clearButton) clearButton.disabled = cart.length === 0;
+            if (clearButton) clearButton.disabled = cart.length === 0 || isCreatingOrder || orderOutcomeUnknown;
+            if (checkoutButton) {
+                checkoutButton.disabled = cart.length === 0 || !catalogLoaded || isCreatingOrder;
+                checkoutButton.classList.toggle('cursor-not-allowed', checkoutButton.disabled);
+                checkoutButton.classList.toggle('opacity-50', checkoutButton.disabled);
+                checkoutButton.classList.toggle('cursor-pointer', !checkoutButton.disabled);
+                checkoutButton.setAttribute('aria-busy', String(isCreatingOrder));
+                const label = checkoutButton.querySelector('span');
+                if (label) label.textContent = isCreatingOrder ? '正在建立待付款訂單…' : (orderOutcomeUnknown ? '重試確認訂單並前往 Discord' : '建立訂單並前往 Discord');
+            }
             if (!container) {
                 saveCart();
                 return;
@@ -969,6 +1056,7 @@
                     removeButton.type = 'button';
                     removeButton.className = 'rounded-lg p-2 text-slate-400 hover:bg-red-950/50 hover:text-red-300 cursor-pointer bg-transparent border-0';
                     removeButton.setAttribute('aria-label', `移除 ${item.name}`);
+                    removeButton.disabled = isCreatingOrder || orderOutcomeUnknown;
                     removeButton.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>';
                     removeButton.addEventListener('click', () => removeFromCart(item.id));
                     header.appendChild(removeButton);
@@ -989,7 +1077,7 @@
                     decreaseButton.className = 'h-9 w-9 rounded-l-lg text-slate-300 hover:bg-slate-800 disabled:opacity-40 cursor-pointer';
                     decreaseButton.textContent = '−';
                     decreaseButton.setAttribute('aria-label', `減少 ${item.name} 數量`);
-                    decreaseButton.disabled = item.quantity <= 1;
+                    decreaseButton.disabled = item.quantity <= 1 || isCreatingOrder || orderOutcomeUnknown;
                     decreaseButton.addEventListener('click', () => changeCartQuantity(item.id, -1));
                     quantityControl.appendChild(decreaseButton);
 
@@ -1004,7 +1092,7 @@
                     increaseButton.className = 'h-9 w-9 rounded-r-lg text-slate-300 hover:bg-slate-800 disabled:opacity-40 cursor-pointer';
                     increaseButton.textContent = '+';
                     increaseButton.setAttribute('aria-label', `增加 ${item.name} 數量`);
-                    increaseButton.disabled = item.quantity >= 99;
+                    increaseButton.disabled = item.quantity >= 99 || isCreatingOrder || orderOutcomeUnknown;
                     increaseButton.addEventListener('click', () => changeCartQuantity(item.id, 1));
                     quantityControl.appendChild(increaseButton);
                     controls.appendChild(quantityControl);
@@ -1022,6 +1110,7 @@
         }
 
         function changeCartQuantity(id, delta) {
+            if (isCreatingOrder || orderOutcomeUnknown) return;
             const item = cart.find(cartItem => cartItem.id === Number(id));
             if (!item || !Number.isInteger(delta)) return;
 
@@ -1036,6 +1125,7 @@
         }
 
         function removeFromCart(id) {
+            if (isCreatingOrder || orderOutcomeUnknown) return;
             const item = cart.find(cartItem => cartItem.id === Number(id));
             if (!item) return;
             cart = cart.filter(cartItem => cartItem.id !== item.id);
@@ -1044,6 +1134,7 @@
         }
 
         function clearCart() {
+            if (isCreatingOrder || orderOutcomeUnknown) return;
             if (cart.length === 0) return;
             cart = [];
             updateCartUI();
@@ -1113,13 +1204,130 @@
             void copy();
         }
 
-        // Automated Checkout Simulation
-        function checkout() {
+        function getCheckoutErrorMessage(error) {
+            const message = String(error?.message || '未知錯誤');
+            if (/價格已變更|cart prices have changed/i.test(message)) {
+                return '價格已變更，請重新整理頁面確認最新金額後再送出。';
+            }
+            if (/商品已下架|one or more products are unavailable/i.test(message)) {
+                return '有商品已下架，請重新整理頁面確認購物車。';
+            }
+            if (/登入才能下單|authentication required|jwt/i.test(message)) {
+                return '登入狀態失效，請重新登入後重試。';
+            }
+            if (/could not find the function|schema cache|PGRST202|create_my_order.*does not exist/i.test(message)) {
+                return '下單功能尚未在 Supabase 啟用，請先執行訂單資料庫腳本。';
+            }
+            return /failed to fetch|networkerror|load failed/i.test(message)
+                ? '連線中斷，訂單可能已成立。請勿修改購物車；重試會查詢同一筆訂單。'
+                : `無法確認訂單是否成立：${message}。請勿重複付款，重試將使用同一請求。`;
+        }
+
+        async function checkout() {
+            if (isCreatingOrder) return;
             if (cart.length === 0) {
-                showToast('購物車內尚無商品！');
+                showToast('購物車內尚無商品。');
                 return;
             }
-            showToast('付款與自動發卡尚未啟用；購物車只保存在本機，沒有建立訂單或發放授權。');
+            if (!isAllowedMemberOrigin()) {
+                setCartCheckoutStatus('下單請使用正式 HTTPS 網站，或 localhost 開發網址。', 'error');
+                return;
+            }
+            if (!catalogLoaded) {
+                setCartCheckoutStatus('商品目錄尚未載入，請稍後再試。', 'error');
+                return;
+            }
+            if (!currentAuthUser) {
+                toggleCart(false);
+                switchTab('account');
+                setAuthStatus('請先登入會員，再送出購物車並前往 Discord 洽詢付款。');
+                return;
+            }
+            if (!supabaseClient) {
+                setCartCheckoutStatus('訂單服務無法連線，請稍後重試。', 'error');
+                return;
+            }
+
+            const userId = currentAuthUser.id;
+            let request;
+            try {
+                request = getOrCreateOrderRequest(userId);
+            } catch (error) {
+                setCartCheckoutStatus(error.message, 'error');
+                return;
+            }
+
+            isCreatingOrder = true;
+            updateCartUI();
+            setCartCheckoutStatus('正在核對商品價格並建立待付款訂單…');
+            let completedOrder = null;
+            try {
+                const { data, error } = await supabaseClient.rpc('create_my_order', {
+                    p_items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
+                    p_expected_total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                    p_request_id: request.key
+                });
+                if (error) throw error;
+                if (currentAuthUser?.id !== userId) {
+                    orderOutcomeUnknown = true;
+                    setCartCheckoutStatus('帳號已切換，請使用原登入帳號到訂單查詢確認下單結果。', 'error');
+                    return;
+                }
+
+                const order = Array.isArray(data) ? data[0] : data;
+                if (!order?.order_id || typeof order.order_number !== 'string' ||
+                    !Number.isSafeInteger(order.total_amount)) {
+                    throw new Error('訂單服務回傳資料不完整');
+                }
+
+                if (order.order_status !== 'pending') {
+                    clearOrderRequest(userId, request.key);
+                    if (order.order_status === 'paid') cart = [];
+                    updateCartUI();
+                    toggleCart(false);
+                    switchTab('orders');
+                    setOrderQueryStatus(`原訂單 ${order.order_number} 已是「${{ paid: '已付款', cancelled: '已取消', refunded: '已退款' }[order.order_status] || '處理中'}」狀態；沒有建立新訂單，也不會再次前往付款。`);
+                    return;
+                }
+
+                try {
+                    sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${userId}`, order.order_number);
+                } catch {
+                }
+                clearOrderRequest(userId, request.key);
+                cart = [];
+                updateCartUI();
+                const orderNumber = document.getElementById('order-created-number');
+                if (orderNumber) orderNumber.textContent = order.order_number;
+                document.getElementById('order-created-panel')?.classList.remove('hidden');
+                const searchInput = document.getElementById('order-search-input');
+                if (searchInput) searchInput.value = order.order_number;
+                toggleCart(false);
+                switchTab('orders');
+                setOrderQueryStatus(`訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 告知客服訂單編號。`);
+                completedOrder = order;
+            } catch (error) {
+                console.error('Checkout failed:', error);
+                const knownFailure = /價格已變更|cart prices have changed|商品已下架|one or more products are unavailable|authentication required|登入才能下單|could not find the function|schema cache|PGRST202/i.test(String(error?.message || ''));
+                if (knownFailure) clearOrderRequest(userId, request.key);
+                else orderOutcomeUnknown = true;
+                setCartCheckoutStatus(getCheckoutErrorMessage(error), 'error');
+            } finally {
+                isCreatingOrder = false;
+                updateCartUI();
+            }
+            if (completedOrder) {
+                try {
+                    redirectToDiscord();
+                } catch (error) {
+                    console.error('Discord navigation failed:', error);
+                    setOrderQueryStatus('待付款訂單已建立，但瀏覽器未能開啟 Discord。請使用上方連結前往並提供訂單編號。');
+                }
+            }
+        }
+
+        function redirectToDiscord() {
+            window.location.assign(DISCORD_PAYMENT_URL);
         }
 
         function setOrderQueryStatus(message, tone = 'info') {
@@ -1235,6 +1443,15 @@
                         copyButton.setAttribute('aria-label', `複製 ${order.order_number || '訂單'} 的授權卡號`);
                         copyButton.addEventListener('click', () => copyToClipboard(order.authorization_key));
                         actionCell.appendChild(copyButton);
+                    } else if (order.order_status === 'pending') {
+                        const discordLink = document.createElement('a');
+                        discordLink.href = DISCORD_PAYMENT_URL;
+                        discordLink.target = '_blank';
+                        discordLink.rel = 'noopener noreferrer';
+                        discordLink.className = 'inline-block whitespace-nowrap rounded border border-indigo-500/40 bg-indigo-950/40 px-2.5 py-1 text-indigo-200 hover:bg-indigo-900/50';
+                        discordLink.textContent = 'Discord 洽詢付款';
+                        discordLink.setAttribute('aria-label', `訂單 ${order.order_number || ''} 前往 Discord 洽詢付款`);
+                        actionCell.appendChild(discordLink);
                     } else {
                         actionCell.textContent = '—';
                     }
@@ -1323,56 +1540,11 @@
             document.getElementById('topup-summary-amount').textContent = `NT$ ${formatter.format(amount)}`;
             document.getElementById('topup-summary-method').textContent = selectedMethod ? selectedMethod.textContent.trim() : '未選擇';
             summary.classList.remove('hidden');
-            openTopupAccountModal(amount);
-        }
-
-        function openTopupAccountModal(amount) {
-            const modal = document.getElementById('topup-account-modal');
-            const amountEl = document.getElementById('topup-account-amount');
-            if (!modal || !amountEl) return;
-
-            topupModalPreviousFocus = document.activeElement;
-            amountEl.textContent = `NT$ ${new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(amount)}`;
-            modal.classList.remove('hidden');
-            modal.setAttribute('aria-hidden', 'false');
-            document.getElementById('topup-account-close')?.focus();
-        }
-
-        function closeTopupAccountModal() {
-            const modal = document.getElementById('topup-account-modal');
-            if (!modal) return;
-
-            modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
-            const focusTarget = topupModalPreviousFocus instanceof HTMLElement
-                ? topupModalPreviousFocus
-                : document.getElementById('topup-submit-btn');
-            focusTarget?.focus();
-            topupModalPreviousFocus = null;
-        }
-
-        async function copyPostAccount() {
-            const accountNumber = document.getElementById('post-account-number')?.textContent.trim();
-            if (!accountNumber) return;
-
             try {
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(accountNumber);
-                } else {
-                    const temporaryInput = document.createElement('textarea');
-                    temporaryInput.value = accountNumber;
-                    temporaryInput.setAttribute('readonly', '');
-                    temporaryInput.style.position = 'fixed';
-                    temporaryInput.style.opacity = '0';
-                    document.body.appendChild(temporaryInput);
-                    temporaryInput.select();
-                    const copied = document.execCommand('copy');
-                    temporaryInput.remove();
-                    if (!copied) throw new Error('Clipboard copy failed');
-                }
-                showToast('帳號已複製，匯款前請再次核對收款資訊。');
-            } catch {
-                showToast('複製失敗，請手動選取並複製帳號。');
+                redirectToDiscord();
+            } catch (error) {
+                console.error('Discord navigation failed:', error);
+                showToast('無法開啟 Discord，請使用頁面上的客服連結手動進入。');
             }
         }
 
@@ -1400,7 +1572,7 @@
         }
 
         function getAuthRedirectUrl() {
-            if (!['http:', 'https:'].includes(window.location.protocol)) {
+            if (!isAllowedMemberOrigin()) {
                 throw new Error('請先透過 localhost 或 HTTPS 網址開啟網站，再使用電子郵件驗證功能。');
             }
             const redirectUrl = new URL(window.location.href);
@@ -1409,9 +1581,14 @@
             return redirectUrl.toString();
         }
 
+        function isAllowedMemberOrigin() {
+            return window.location.protocol === 'https:' ||
+                (window.location.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname));
+        }
+
         function ensureSupportedAuthOrigin() {
-            if (['http:', 'https:'].includes(window.location.protocol)) return true;
-            setAuthStatus('請勿直接以 file:// 開啟此頁。請使用 localhost 開發伺服器或部署後的 HTTPS 網址，並將該網址加入 Supabase Auth 的允許重新導向清單。', 'error');
+            if (isAllowedMemberOrigin()) return true;
+            setAuthStatus('請使用本機開發伺服器或正式 HTTPS 網址開啟本站，並將該網址加入 Supabase Auth 允許的重新導向清單。', 'error');
             return false;
         }
 
@@ -1446,6 +1623,21 @@
             loginForm.classList.toggle('hidden', !showNormalAuth || activeAuthTab !== 'login');
             registerForm.classList.toggle('hidden', !showNormalAuth || activeAuthTab !== 'register');
             recoveryForm.classList.toggle('hidden', !authRecoveryActive);
+
+            const recentOrderPanel = document.getElementById('order-created-panel');
+            const recentOrderNumber = document.getElementById('order-created-number');
+            let recentOrder = null;
+            try {
+                if (signedIn) recentOrder = sessionStorage.getItem(`${LAST_ORDER_STORAGE_KEY}:${currentAuthUser.id}`);
+            } catch {
+                recentOrder = null;
+            }
+            if (recentOrderPanel) recentOrderPanel.classList.toggle('hidden', !recentOrder);
+            if (recentOrderNumber) recentOrderNumber.textContent = recentOrder || '';
+
+            orderOutcomeUnknown = signedIn && Boolean(getSavedOrderRequest(currentAuthUser.id));
+            setCartCheckoutStatus(orderOutcomeUnknown ? '上次下單結果尚未確認。請保持購物車不變並重試，或先查詢本人訂單。' : '');
+            updateCartUI();
 
             const orderSearchButton = document.getElementById('orders-search-button');
             if (orderSearchButton) orderSearchButton.disabled = !signedIn;
@@ -1700,10 +1892,9 @@
             );
         }
 
-        // Status Chip Click Listener
         document.addEventListener('DOMContentLoaded', function() {
-            renderProducts();
             updateCartUI();
+            void loadCatalog();
             initializeSupabaseAuth();
 
             document.addEventListener('keydown', function(event) {
@@ -1733,13 +1924,6 @@
                     return;
                 }
 
-                const modal = document.getElementById('topup-account-modal');
-                if (!modal || modal.classList.contains('hidden')) return;
-
-                if (event.key === 'Escape') {
-                    event.preventDefault();
-                    closeTopupAccountModal();
-                }
             });
 
             const topupAmount = document.getElementById('topup-amount');
@@ -1813,8 +1997,11 @@
                     const plat = btn.dataset.plat;
                     const desc = btn.dataset.desc;
 
-                    const statusColor = status.includes('維護') ? 'text-amber-400' : 'text-emerald-400';
-                    detailText.innerHTML = `<b>${game}</b> 狀態：<span class="${statusColor} font-bold">${status}</span> (平台：${plat}) — ${desc}`;
+                    const statusLabel = document.createElement('span');
+                    statusLabel.className = `${status.includes('維護') ? 'text-amber-400' : 'text-emerald-400'} font-bold`;
+                    statusLabel.textContent = status;
+                    detailText.replaceChildren(document.createTextNode(`${game} 狀態：`), statusLabel,
+                        document.createTextNode(` (平台：${plat}) — ${desc}`));
                 });
             }
         });
