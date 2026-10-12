@@ -65,6 +65,7 @@
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="overview" aria-current="page"><span class="mr-2">◫</span>總覽</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="orders"><span class="mr-2">▤</span>訂單與授權</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="products"><span class="mr-2">▦</span>商品管理</button>
+                <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="members"><span class="mr-2">◉</span>會員管理</button>
             </nav>
             <div class="mt-auto hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-4 lg:block">
                 <p class="mb-1 text-[10px] uppercase tracking-widest text-slate-500">SECURITY</p>
@@ -160,6 +161,35 @@
                         </div>
                     </div>
                 </section>
+
+                <section id="admin-view-members" class="admin-view hidden space-y-5">
+                    <div class="flex flex-wrap items-end justify-between gap-4">
+                        <div>
+                            <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">MEMBER OPERATIONS</p>
+                            <h3 class="m-0 text-2xl font-bold text-white">會員帳號管理</h3>
+                            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">搜尋會員並查看註冊、登入及訂單摘要；可暫停或恢復新下單。暫停不會停用 Supabase Auth 登入，也不影響既有訂單。</p>
+                        </div>
+                        <a href="https://supabase.com/dashboard/project/zquzmagkcqjfjjuarhkd/auth/users" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-cyan-500/40 px-4 py-2.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40">Auth 使用者管理 ↗</a>
+                    </div>
+                    <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">建立／刪除登入帳號、重設密碼或停用 Auth 登入，請由具備專案權限的管理人員在 Supabase Authentication → Users 執行；本頁不接觸密碼，也不使用 Service Role Key。</p>
+                    <form id="admin-members-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 sm:flex-row" onsubmit="loadAdminMembers(0, event)">
+                        <label class="sr-only" for="admin-member-search">搜尋會員</label>
+                        <input id="admin-member-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋會員信箱或使用者 ID" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                        <label class="sr-only" for="admin-member-status">新下單權限</label>
+                        <select id="admin-member-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">全部會員</option><option value="active">可下單</option><option value="paused">暫停新下單</option></select>
+                        <button id="admin-members-search-button" type="submit" class="rounded-xl border border-cyan-500/40 px-5 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40 disabled:opacity-50">搜尋會員</button>
+                    </form>
+                    <p id="admin-members-status" class="text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">開啟會員管理後載入資料。</p>
+                    <div class="glass overflow-hidden rounded-2xl">
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[1050px] text-left text-xs">
+                                <thead class="border-b border-slate-800 bg-slate-950/40 text-slate-400"><tr><th class="px-4 py-3">會員信箱／ID</th><th class="px-4 py-3">註冊時間</th><th class="px-4 py-3">信箱驗證／最近登入</th><th class="px-4 py-3">訂單／已付款</th><th class="px-4 py-3">新下單</th><th class="px-4 py-3 text-right">操作</th></tr></thead>
+                                <tbody id="admin-members-body" class="divide-y divide-slate-800/80"><tr><td colspan="6" class="px-4 py-10 text-center text-slate-500">登入管理員帳號後載入會員。</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-members-prev-page" type="button" onclick="changeMemberPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-members-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-members-next-page" type="button" onclick="changeMemberPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -246,6 +276,18 @@
         </form>
     </dialog>
 
+    <dialog id="admin-member-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
+        <form id="admin-member-form" class="space-y-4 p-5 sm:p-6" onsubmit="submitMemberAccess(event)">
+            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-cyan-300">MEMBER ORDER ACCESS</p>
+            <h2 id="member-dialog-title" class="m-0 text-xl font-bold text-white">調整新下單權限</h2>
+            <p id="member-dialog-account" class="mono mb-0 break-all text-xs text-slate-400"></p>
+            <p id="member-dialog-explanation" class="mb-0 text-xs leading-relaxed text-slate-400"></p>
+            <div><label for="member-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">原因（暫停時必填，最多 500 字）</label><textarea id="member-reason" maxlength="500" rows="3" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="說明此操作的原因"></textarea></div>
+            <p id="member-dialog-status" hidden role="status" aria-live="polite" class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300"></p>
+            <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="member-dialog-cancel" type="button" onclick="closeMemberDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="member-dialog-submit" type="submit" class="rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">確認調整</button></div>
+        </form>
+    </dialog>
+
     <script>
         const ADMIN_SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
         const ADMIN_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
@@ -264,6 +306,11 @@
         let adminVisibleProducts = [];
         let editingProduct = null;
         let productSaving = false;
+        let adminMemberPage = 0;
+        let adminMemberRequestId = 0;
+        let adminVisibleMembers = [];
+        let editingMember = null;
+        let memberActionSaving = false;
         let pendingCancelOrderId = null;
         let pendingPaymentOrderId = null;
         let activeAdminView = 'overview';
@@ -271,6 +318,7 @@
         const cancelDialog = document.getElementById('admin-cancel-dialog');
         const paymentDialog = document.getElementById('admin-payment-dialog');
         const productDialog = document.getElementById('admin-product-dialog');
+        const memberDialog = document.getElementById('admin-member-dialog');
 
         try {
             if (window.supabase?.createClient) {
@@ -334,7 +382,14 @@
             if (/product version conflict/i.test(message)) return '商品已被其他管理員修改。請關閉表單、重新整理清單後再編輯。';
             if (/product not found/i.test(message)) return '找不到商品。請重新整理商品清單。';
             if (/invalid product data/i.test(message)) return '商品資料不符合限制。請確認名稱、分類、售價、圖片檔名與文字長度。';
+            if (/member version conflict/i.test(message)) return '此會員的權限已被其他管理員調整。請關閉對話框、重新整理會員清單後重試。';
+            if (/member access unchanged/i.test(message)) return '新下單權限已是目標狀態，請重新整理會員清單。';
+            if (/administrator access cannot be changed here/i.test(message)) return '管理員帳號不可在會員頁面調整新下單權限。';
+            if (/member not found/i.test(message)) return '找不到此會員。請重新整理會員清單。';
+            if (/invalid member access change/i.test(message)) return '請確認操作狀態與原因；暫停新下單時必須填寫原因（最多 500 字）。';
             if (/relation .*shop_products.* does not exist|42P01/i.test(message)) return '尚未建立商品資料表。請先執行商品資料庫腳本，再執行管理後台資料庫腳本。';
+            if (/admin_(?:list_members|set_member_order_access)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少會員管理 RPC。請先在 Supabase SQL Editor 執行 sql/supabase-members-schema.sql，再重新整理後台。';
+            if (/admin_(?:list_products|save_product)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少商品管理 RPC。請在本站連接的 Supabase 專案執行 sql/supabase-fix-product-admin-rpc.sql，再重新整理後台。';
             if (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message)) return '找不到管理 RPC。請先執行 supabase-admin-schema.sql，並確認資料表結構已建立。';
             if (/relation .*shop_admins.* does not exist/i.test(message)) return '尚未建立管理員名單。請先執行 supabase-admin-schema.sql，再把管理帳號加入 public.shop_admins。';
             if (/permission denied|not authorized|42501|admin access required/i.test(message)) return '管理權限未通過。請確認登入帳號已加入 public.shop_admins，或先在 Supabase SQL Editor 執行管理後台 SQL。';
@@ -509,12 +564,12 @@
             status.className = `text-xs leading-relaxed ${tone === 'error' ? 'text-red-300' : 'text-slate-400'}`;
         }
 
-        function renderAdminProducts(items) {
+        function renderAdminProducts(items, emptyMessage = '沒有符合條件的商品。') {
             const body = document.getElementById('admin-products-body');
             body.replaceChildren();
             if (!items.length) {
                 const row = document.createElement('tr');
-                buildTableCell(row, '沒有符合條件的商品。', 'px-4 py-10 text-center text-slate-500').colSpan = 5;
+                buildTableCell(row, emptyMessage, 'px-4 py-10 text-center text-slate-500').colSpan = 5;
                 body.appendChild(row);
                 return;
             }
@@ -613,6 +668,11 @@
             } catch (error) {
                 if (requestId !== adminProductRequestId || adminUser?.id !== userId) return false;
                 console.error('Admin product listing failed:', error);
+                adminVisibleProducts = [];
+                renderAdminProducts([], '商品清單載入失敗，請依上方訊息處理後重試。');
+                document.getElementById('admin-products-page-label').textContent = '無法載入商品';
+                document.getElementById('admin-products-prev-page').disabled = true;
+                document.getElementById('admin-products-next-page').disabled = true;
                 setProductListStatus(getAdminError(error), 'error');
                 return false;
             } finally {
@@ -625,6 +685,212 @@
 
         function changeProductPage(delta) {
             void loadAdminProducts(Math.max(0, adminProductPage + delta));
+        }
+
+        function setMemberListStatus(message, tone = 'info') {
+            const status = document.getElementById('admin-members-status');
+            status.textContent = message;
+            status.className = `text-xs leading-relaxed ${tone === 'error' ? 'text-red-300' : 'text-slate-400'}`;
+        }
+
+        function renderAdminMembers(members, emptyMessage = '沒有符合條件的會員。') {
+            const body = document.getElementById('admin-members-body');
+            body.replaceChildren();
+            if (!members.length) {
+                const row = document.createElement('tr');
+                buildTableCell(row, emptyMessage, 'px-4 py-10 text-center text-slate-500').colSpan = 6;
+                body.appendChild(row);
+                return;
+            }
+
+            members.forEach(member => {
+                const row = document.createElement('tr');
+                row.className = 'transition hover:bg-slate-900/60';
+                const accountCell = document.createElement('td');
+                accountCell.className = 'px-4 py-3';
+                const email = document.createElement('p');
+                email.className = 'm-0 max-w-64 truncate font-semibold text-white';
+                email.textContent = member.email || '未設定電子郵件';
+                email.title = member.email || '';
+                const id = document.createElement('p');
+                id.className = 'mono mb-0 mt-1 text-[10px] text-slate-500';
+                id.textContent = member.user_id;
+                accountCell.append(email, id);
+                row.appendChild(accountCell);
+                buildTableCell(row, formatDate(member.created_at), 'whitespace-nowrap px-4 py-3 text-slate-300');
+                buildTableCell(row, `${member.email_confirmed_at ? '信箱已驗證' : '信箱未驗證'}／${member.last_sign_in_at ? formatDate(member.last_sign_in_at) : '尚未登入'}`, 'px-4 py-3 text-slate-400');
+                buildTableCell(row, `${Number(member.order_count) || 0} 筆／${formatCurrency(member.paid_total)}`, 'whitespace-nowrap px-4 py-3 text-slate-300');
+
+                const stateCell = document.createElement('td');
+                stateCell.className = 'px-4 py-3';
+                const badge = document.createElement('span');
+                badge.className = member.can_order
+                    ? 'inline-flex rounded-full border border-emerald-400/30 bg-emerald-950/40 px-2.5 py-1 text-emerald-200'
+                    : 'inline-flex rounded-full border border-amber-400/30 bg-amber-950/40 px-2.5 py-1 text-amber-200';
+                badge.textContent = member.can_order ? '可下單' : '暫停新下單';
+                stateCell.appendChild(badge);
+                if (member.is_admin) {
+                    const adminLabel = document.createElement('p');
+                    adminLabel.className = 'mb-0 mt-1 text-[10px] text-cyan-300';
+                    adminLabel.textContent = '管理員';
+                    stateCell.appendChild(adminLabel);
+                }
+                row.appendChild(stateCell);
+
+                const actions = document.createElement('td');
+                actions.className = 'whitespace-nowrap px-4 py-3 text-right';
+                const ordersButton = document.createElement('button');
+                ordersButton.type = 'button';
+                ordersButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-cyan-300 hover:border-cyan-400 disabled:opacity-40';
+                ordersButton.textContent = '查看訂單';
+                ordersButton.disabled = !member.email;
+                ordersButton.addEventListener('click', () => {
+                    document.getElementById('admin-order-search').value = member.email;
+                    document.getElementById('admin-order-status').value = '';
+                    setAdminView('orders');
+                });
+                actions.appendChild(ordersButton);
+                if (!member.is_admin) {
+                    const accessButton = document.createElement('button');
+                    accessButton.type = 'button';
+                    accessButton.className = 'ml-2 rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-slate-300 hover:border-amber-400 hover:text-amber-300';
+                    accessButton.textContent = member.can_order ? '暫停新下單' : '恢復新下單';
+                    accessButton.addEventListener('click', () => openMemberDialog(member));
+                    actions.appendChild(accessButton);
+                }
+                row.appendChild(actions);
+                body.appendChild(row);
+            });
+        }
+
+        async function loadAdminMembers(page = adminMemberPage, event) {
+            event?.preventDefault();
+            if (!adminUser || !adminClient) return false;
+            adminMemberPage = Math.max(0, Number(page) || 0);
+            const requestId = ++adminMemberRequestId;
+            const userId = adminUser.id;
+            const button = document.getElementById('admin-members-search-button');
+            button.disabled = true;
+            button.setAttribute('aria-busy', 'true');
+            setMemberListStatus('正在安全載入會員…');
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_list_members', {
+                    p_search: document.getElementById('admin-member-search').value.trim() || null,
+                    p_status: document.getElementById('admin-member-status').value || null,
+                    p_limit: ADMIN_PAGE_SIZE + 1,
+                    p_offset: adminMemberPage * ADMIN_PAGE_SIZE
+                });
+                if (error) throw error;
+                if (requestId !== adminMemberRequestId || adminUser?.id !== userId) return false;
+
+                const rows = Array.isArray(data) ? data : [];
+                adminVisibleMembers = rows.slice(0, ADMIN_PAGE_SIZE);
+                renderAdminMembers(adminVisibleMembers);
+                document.getElementById('admin-members-page-label').textContent = `第 ${adminMemberPage + 1} 頁 · 本頁 ${adminVisibleMembers.length} 位`;
+                document.getElementById('admin-members-prev-page').disabled = adminMemberPage === 0;
+                document.getElementById('admin-members-next-page').disabled = rows.length <= ADMIN_PAGE_SIZE;
+                setMemberListStatus(`已載入 ${adminVisibleMembers.length} 位會員；此頁只控制新下單，不會停用登入或刪除歷史訂單。`);
+                return true;
+            } catch (error) {
+                if (requestId !== adminMemberRequestId || adminUser?.id !== userId) return false;
+                console.error('Admin member listing failed:', error);
+                adminVisibleMembers = [];
+                renderAdminMembers([], '會員清單載入失敗，請依上方訊息處理後重試。');
+                document.getElementById('admin-members-page-label').textContent = '無法載入會員';
+                document.getElementById('admin-members-prev-page').disabled = true;
+                document.getElementById('admin-members-next-page').disabled = true;
+                setMemberListStatus(getAdminError(error), 'error');
+                return false;
+            } finally {
+                if (requestId === adminMemberRequestId) {
+                    button.disabled = false;
+                    button.removeAttribute('aria-busy');
+                }
+            }
+        }
+
+        function changeMemberPage(delta) {
+            void loadAdminMembers(Math.max(0, adminMemberPage + delta));
+        }
+
+        function openMemberDialog(member) {
+            if (!adminUser || !member || member.is_admin || memberActionSaving) return;
+            editingMember = { ...member };
+            const form = document.getElementById('admin-member-form');
+            form.reset();
+            document.getElementById('member-reason').setCustomValidity('');
+            const isPausing = member.can_order;
+            document.getElementById('member-dialog-title').textContent = isPausing ? '暫停新下單' : '恢復新下單';
+            document.getElementById('member-dialog-account').textContent = `${member.email || '未設定信箱'} · ${member.user_id}`;
+            document.getElementById('member-dialog-explanation').textContent = isPausing
+                ? '確認後，此會員將無法建立新訂單；仍可登入及查看原有訂單，已成立的訂單不會被取消。'
+                : '確認後，此會員可以再次建立新訂單；先前的訂單狀態不會改變。';
+            document.getElementById('member-dialog-submit').textContent = isPausing ? '確認暫停新下單' : '確認恢復新下單';
+            document.getElementById('member-reason').required = isPausing;
+            const status = document.getElementById('member-dialog-status');
+            status.hidden = true;
+            status.textContent = '';
+            memberDialog.showModal();
+            document.getElementById('member-reason').focus();
+        }
+
+        function closeMemberDialog() {
+            if (memberActionSaving) return;
+            if (memberDialog.open) memberDialog.close();
+            editingMember = null;
+        }
+
+        async function submitMemberAccess(event) {
+            event.preventDefault();
+            if (!adminUser || !adminClient || !editingMember || memberActionSaving) return;
+            const form = document.getElementById('admin-member-form');
+            if (!form.reportValidity()) return;
+            const reason = document.getElementById('member-reason').value.trim();
+            if (editingMember.can_order && !reason) {
+                document.getElementById('member-reason').setCustomValidity('暫停新下單時請填寫原因。');
+                form.reportValidity();
+                return;
+            }
+
+            const adminId = adminUser.id;
+            const member = editingMember;
+            const canOrder = !member.can_order;
+            const saveButton = document.getElementById('member-dialog-submit');
+            const cancelButton = document.getElementById('member-dialog-cancel');
+            const status = document.getElementById('member-dialog-status');
+            memberActionSaving = true;
+            saveButton.disabled = true;
+            cancelButton.disabled = true;
+            status.hidden = false;
+            status.className = 'rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300';
+            status.textContent = '正在驗證管理權限並記錄操作…';
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_set_member_order_access', {
+                    p_user_id: member.user_id,
+                    p_can_order: canOrder,
+                    p_expected_revision: member.revision,
+                    p_reason: reason || null
+                });
+                if (error) throw error;
+                if (adminUser?.id !== adminId) return;
+                if (data?.user_id !== member.user_id || data?.can_order !== canOrder) throw new Error('會員服務回傳資料不完整，請重新整理確認結果。');
+                memberDialog.close();
+                editingMember = null;
+                const loaded = await loadAdminMembers(adminMemberPage);
+                if (loaded) setAppStatus(`會員 ${member.email || member.user_id} 已${canOrder ? '恢復' : '暫停'}新下單，操作已記錄。`, 'success');
+                else setAppStatus('權限已更新，但會員清單重新載入失敗；請重新整理確認。', 'error');
+            } catch (error) {
+                if (adminUser?.id !== adminId) return;
+                console.error('Admin member access update failed:', error);
+                status.className = 'rounded-xl border border-red-500/40 bg-red-950/30 p-3 text-xs text-red-200';
+                status.textContent = getAdminError(error);
+            } finally {
+                memberActionSaving = false;
+                saveButton.disabled = false;
+                cancelButton.disabled = false;
+            }
         }
 
         function openProductEditor(product = null) {
@@ -655,15 +921,23 @@
             editingProduct = null;
         }
 
-        function getProductPayload(product, active) {
+        function getProductPayload(product, active, fromForm = false) {
+            const values = fromForm || !product ? {
+                name: document.getElementById('product-name').value.trim(),
+                category: document.getElementById('product-category').value,
+                price: Number(document.getElementById('product-price').value),
+                tag: document.getElementById('product-tag').value.trim(),
+                description: document.getElementById('product-description').value.trim(),
+                image_file: document.getElementById('product-image-file').value.trim()
+            } : product;
             return {
                 p_product_id: product?.id ?? null,
-                p_name: product?.name ?? document.getElementById('product-name').value.trim(),
-                p_category: product?.category ?? document.getElementById('product-category').value,
-                p_price: product?.price ?? Number(document.getElementById('product-price').value),
-                p_tag: product?.tag ?? document.getElementById('product-tag').value.trim(),
-                p_description: product?.description ?? document.getElementById('product-description').value.trim(),
-                p_image_file: product?.image_file ?? document.getElementById('product-image-file').value.trim(),
+                p_name: values.name,
+                p_category: values.category,
+                p_price: values.price,
+                p_tag: values.tag,
+                p_description: values.description,
+                p_image_file: values.image_file,
                 p_active: active,
                 p_expected_revision: product?.revision ?? null
             };
@@ -683,7 +957,7 @@
 
             const userId = adminUser.id;
             const isNew = !editingProduct;
-            const payload = getProductPayload(editingProduct, document.getElementById('product-active').checked);
+            const payload = getProductPayload(editingProduct, document.getElementById('product-active').checked, true);
             const status = document.getElementById('product-editor-status');
             const saveButton = document.getElementById('product-editor-save');
             productSaving = true;
@@ -719,15 +993,16 @@
             if (!adminUser || !adminClient || productSaving) return;
             if (product.active && !window.confirm(`確定下架「${product.name}」？會員將無法再購買此商品。`)) return;
             const userId = adminUser.id;
+            const nextActive = !product.active;
             productSaving = true;
             button.disabled = true;
             button.setAttribute('aria-busy', 'true');
             try {
-                const { error } = await adminClient.rpc('admin_save_product', getProductPayload(product, !product.active));
+                const { error } = await adminClient.rpc('admin_save_product', getProductPayload(product, nextActive));
                 if (error) throw error;
                 if (adminUser?.id !== userId) return;
                 const loaded = await loadAdminProducts(adminProductPage);
-                if (loaded) setAppStatus(`商品 #${product.id} 已${product.active ? '下架' : '上架'}。`, 'success');
+                if (loaded) setAppStatus(`商品 #${product.id} 已${nextActive ? '上架' : '下架'}。`, 'success');
                 else setAppStatus(`商品 #${product.id} 已更新，但商品清單重新載入失敗。`, 'error');
             } catch (error) {
                 if (adminUser?.id !== userId) return;
@@ -885,19 +1160,27 @@
             adminOverviewRequestId += 1;
             adminDetailRequestId += 1;
             adminProductRequestId += 1;
+            adminMemberRequestId += 1;
             adminVisibleOrders = [];
             adminVisibleProducts = [];
+            adminVisibleMembers = [];
             adminProductPage = 0;
+            adminMemberPage = 0;
             editingProduct = null;
             productSaving = false;
+            editingMember = null;
+            memberActionSaving = false;
             pendingCancelOrderId = null;
             pendingPaymentOrderId = null;
             document.getElementById('admin-orders-body').replaceChildren();
             document.getElementById('overview-orders-body').replaceChildren();
             document.getElementById('detail-items-body').replaceChildren();
             document.getElementById('admin-products-body').replaceChildren();
+            document.getElementById('admin-members-body').replaceChildren();
             document.getElementById('admin-products-filter').reset();
+            document.getElementById('admin-members-filter').reset();
             document.getElementById('admin-product-form').reset();
+            document.getElementById('admin-member-form').reset();
             document.getElementById('admin-products-page-label').textContent = '第 1 頁';
             document.getElementById('admin-products-prev-page').disabled = true;
             document.getElementById('admin-products-next-page').disabled = true;
@@ -905,6 +1188,13 @@
             document.getElementById('product-editor-save').disabled = false;
             document.getElementById('product-editor-cancel').disabled = false;
             setProductListStatus('開啟商品管理後載入資料。');
+            document.getElementById('admin-members-page-label').textContent = '第 1 頁';
+            document.getElementById('admin-members-prev-page').disabled = true;
+            document.getElementById('admin-members-next-page').disabled = true;
+            document.getElementById('admin-members-search-button').disabled = false;
+            document.getElementById('member-dialog-submit').disabled = false;
+            document.getElementById('member-dialog-cancel').disabled = false;
+            setMemberListStatus('開啟會員管理後載入資料。');
             document.getElementById('detail-title').textContent = '訂單明細';
             document.getElementById('detail-subtitle').textContent = '';
             document.getElementById('detail-status').textContent = '';
@@ -913,6 +1203,7 @@
             if (cancelDialog.open) cancelDialog.close();
             if (paymentDialog.open) paymentDialog.close();
             if (productDialog.open) productDialog.close();
+            if (memberDialog.open) memberDialog.close();
         }
 
         async function submitPaymentConfirmation(event) {
@@ -994,15 +1285,16 @@
         }
 
         function setAdminView(view) {
-            activeAdminView = ['overview', 'orders', 'products'].includes(view) ? view : 'overview';
+            activeAdminView = ['overview', 'orders', 'products', 'members'].includes(view) ? view : 'overview';
             document.querySelectorAll('.admin-view').forEach(section => section.classList.toggle('hidden', section.id !== `admin-view-${activeAdminView}`));
             document.querySelectorAll('[data-admin-view]').forEach(button => {
                 if (button.dataset.adminView === activeAdminView) button.setAttribute('aria-current', 'page');
                 else button.removeAttribute('aria-current');
             });
-            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', orders: '訂單與授權', products: '商品管理' }[activeAdminView];
+            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', orders: '訂單與授權', products: '商品管理', members: '會員管理' }[activeAdminView];
             if (activeAdminView === 'orders') void loadAdminOrders(0);
             if (activeAdminView === 'products') void loadAdminProducts(0);
+            if (activeAdminView === 'members') void loadAdminMembers(0);
         }
 
         async function refreshCurrentView() {
@@ -1011,6 +1303,11 @@
                 if (activeAdminView === 'products') {
                     const loaded = await loadAdminProducts(adminProductPage);
                     if (loaded) setAppStatus('商品清單已更新。', 'success');
+                    return;
+                }
+                if (activeAdminView === 'members') {
+                    const loaded = await loadAdminMembers(adminMemberPage);
+                    if (loaded) setAppStatus('會員清單已更新。', 'success');
                     return;
                 }
                 await refreshAdminSummary();
@@ -1125,10 +1422,16 @@
             });
             document.getElementById('admin-order-status').addEventListener('change', () => void loadAdminOrders(0));
             document.getElementById('admin-product-status').addEventListener('change', () => void loadAdminProducts(0));
+            document.getElementById('admin-member-status').addEventListener('change', () => void loadAdminMembers(0));
             document.getElementById('product-price').addEventListener('input', event => event.target.setCustomValidity(''));
+            document.getElementById('member-reason').addEventListener('input', event => event.target.setCustomValidity(''));
             productDialog.addEventListener('cancel', event => {
                 if (productSaving) event.preventDefault();
                 else editingProduct = null;
+            });
+            memberDialog.addEventListener('cancel', event => {
+                if (memberActionSaving) event.preventDefault();
+                else editingMember = null;
             });
         }
 
