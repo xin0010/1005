@@ -66,6 +66,7 @@
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="orders"><span class="mr-2">▤</span>訂單與授權</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="products"><span class="mr-2">▦</span>商品管理</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="members"><span class="mr-2">◉</span>會員管理</button>
+                <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="audit"><span class="mr-2">◎</span>操作紀錄</button>
             </nav>
             <div class="mt-auto hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-4 lg:block">
                 <p class="mb-1 text-[10px] uppercase tracking-widest text-slate-500">SECURITY</p>
@@ -109,7 +110,7 @@
                 </section>
 
                 <section id="admin-view-orders" class="admin-view hidden space-y-5">
-                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">ORDER OPERATIONS</p><h3 class="m-0 text-2xl font-bold text-white">訂單與授權</h3><p class="mt-2 text-sm text-slate-400">依訂單編號、會員信箱或狀態篩選。授權卡號只會在已付款且有效時顯示。</p></div>
+                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">ORDER OPERATIONS</p><h3 class="m-0 text-2xl font-bold text-white">訂單與授權</h3><p class="mt-2 text-sm text-slate-400">依訂單編號、會員信箱或狀態篩選；已付款商品可由明細核發或撤銷授權。卡號只在已付款且有效時顯示。</p></div>
                     <form id="admin-orders-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminOrders(0, event)">
                         <label class="sr-only" for="admin-order-search">搜尋訂單</label><input id="admin-order-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋訂單編號或會員信箱" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
                         <label class="sr-only" for="admin-order-status">訂單狀態</label><select id="admin-order-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">所有狀態</option><option value="pending">待付款</option><option value="paid">已付款</option><option value="cancelled">已取消</option><option value="refunded">已退款</option></select>
@@ -167,11 +168,11 @@
                         <div>
                             <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">MEMBER OPERATIONS</p>
                             <h3 class="m-0 text-2xl font-bold text-white">會員帳號管理</h3>
-                            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">搜尋會員並查看註冊、登入及訂單摘要；可暫停或恢復新下單。經授權的角色管理員也可將信箱已驗證的會員授予後台管理員身分。</p>
+                            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">搜尋會員並查看註冊、登入及訂單摘要；可暫停或恢復新下單。經授權的角色管理員可授予或撤銷後台管理員身分。</p>
                         </div>
                         <a href="https://supabase.com/dashboard/project/zquzmagkcqjfjjuarhkd/auth/users" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-cyan-500/40 px-4 py-2.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40">Auth 使用者管理 ↗</a>
                     </div>
-                    <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">授予管理員身分會開放訂單、商品及會員管理功能，但不會授予「再新增管理員」的資格。首次角色管理員須由專案擁有者在 SQL Editor 指定。建立／刪除登入帳號與重設密碼仍須透過 Supabase Auth；本頁不接觸密碼，也不使用 Service Role Key。</p>
+                    <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">授予管理員身分會開放訂單、商品及會員管理功能，但不會授予「再新增管理員」的資格。撤銷後現有登入不會自動登出，但後續管理 API 會拒絕其存取。首次角色管理員須由專案擁有者在 SQL Editor 指定。建立／刪除登入帳號與重設密碼仍須透過 Supabase Auth；本頁不接觸密碼，也不使用 Service Role Key。</p>
                     <form id="admin-members-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 sm:flex-row" onsubmit="loadAdminMembers(0, event)">
                         <label class="sr-only" for="admin-member-search">搜尋會員</label>
                         <input id="admin-member-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋會員信箱或使用者 ID" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
@@ -190,6 +191,15 @@
                         <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-members-prev-page" type="button" onclick="changeMemberPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-members-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-members-next-page" type="button" onclick="changeMemberPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
                     </div>
                 </section>
+
+                <section id="admin-view-audit" class="admin-view hidden space-y-5">
+                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">AUDIT TRAIL</p><h3 class="m-0 text-2xl font-bold text-white">操作紀錄</h3><p class="mt-2 text-sm text-slate-400">查看管理員的收款確認、授權、會員及商品操作；紀錄不包含授權卡號明文。紀錄不可從後台刪除。</p></div>
+                    <p id="admin-audit-status" class="text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">開啟操作紀錄後載入資料。</p>
+                    <div class="glass overflow-hidden rounded-2xl">
+                        <div class="overflow-x-auto"><table class="w-full min-w-[900px] text-left text-xs"><thead class="border-b border-slate-800 bg-slate-950/40 text-slate-400"><tr><th class="px-4 py-3">時間</th><th class="px-4 py-3">操作者</th><th class="px-4 py-3">操作</th><th class="px-4 py-3">訂單</th><th class="px-4 py-3">對象／原因</th></tr></thead><tbody id="admin-audit-body" class="divide-y divide-slate-800/80"><tr><td colspan="5" class="px-4 py-10 text-center text-slate-500">登入管理員帳號後載入紀錄。</td></tr></tbody></table></div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-audit-prev-page" type="button" onclick="changeAuditPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-audit-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-audit-next-page" type="button" onclick="changeAuditPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -197,7 +207,24 @@
     <dialog id="admin-order-dialog" class="w-[calc(100%-2rem)] max-w-3xl shadow-2xl shadow-black/50">
         <div class="flex items-start justify-between gap-4 border-b border-slate-800 p-5 sm:p-6"><div><p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-cyan-300">ORDER DETAIL</p><h2 id="detail-title" class="m-0 text-lg font-bold text-white">訂單明細</h2><p id="detail-subtitle" class="mb-0 mt-1 text-xs text-slate-500"></p></div><button type="button" onclick="closeOrderDetail()" aria-label="關閉訂單明細" class="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 hover:border-cyan-400">關閉</button></div>
         <div id="detail-status" class="mx-5 mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300 sm:mx-6" role="status" aria-live="polite">正在載入…</div>
-        <div class="max-h-[65vh] overflow-auto p-5 sm:p-6"><table class="w-full min-w-[620px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="py-3 pr-3">商品</th><th class="py-3 pr-3">數量／單價</th><th class="py-3 pr-3">授權狀態</th><th class="py-3 pr-3">卡號（符合條件時）</th><th class="py-3">到期日</th></tr></thead><tbody id="detail-items-body" class="divide-y divide-slate-800"></tbody></table></div>
+        <div class="max-h-[65vh] overflow-auto p-5 sm:p-6"><table class="w-full min-w-[850px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="py-3 pr-3">商品</th><th class="py-3 pr-3">數量／單價</th><th class="py-3 pr-3">授權狀態</th><th class="py-3 pr-3">卡號（符合條件時）</th><th class="py-3 pr-3">到期日</th><th class="py-3 text-right">操作</th></tr></thead><tbody id="detail-items-body" class="divide-y divide-slate-800"></tbody></table></div>
+    </dialog>
+
+    <dialog id="admin-authorization-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
+        <form id="admin-authorization-form" class="space-y-4 p-5 sm:p-6" onsubmit="submitAuthorization(event)">
+            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-violet-300">ORDER FULFILLMENT</p>
+            <h2 id="authorization-dialog-title" class="m-0 text-xl font-bold text-white">核發授權</h2>
+            <p id="authorization-dialog-account" class="mono mb-0 break-all text-xs text-slate-400"></p>
+            <p id="authorization-dialog-explanation" class="mb-0 text-xs leading-relaxed text-slate-400"></p>
+            <div id="authorization-issue-fields" class="space-y-4">
+                <div><label for="authorization-keys" class="mb-1.5 block text-xs font-semibold text-slate-300">授權卡號（每件商品一行）</label><textarea id="authorization-keys" rows="4" maxlength="16000" autocomplete="off" spellcheck="false" class="mono w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-white outline-none focus:border-violet-400" placeholder="每行輸入一個未使用過的卡號"></textarea><p class="mb-0 mt-1 text-[11px] text-slate-500">僅接受 8–160 字英數字及 . _ : / + = -；不得重複。後台紀錄不保存卡號明文。</p></div>
+                <div><label for="authorization-expires" class="mb-1.5 block text-xs font-semibold text-slate-300">到期時間（選填，以本機時區輸入）</label><input id="authorization-expires" type="datetime-local" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-violet-400"></div>
+            </div>
+            <div><label for="authorization-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">操作原因（必填，最多 500 字）</label><textarea id="authorization-reason" required maxlength="500" rows="2" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-violet-400"></textarea></div>
+            <label class="flex items-start gap-2 text-xs text-slate-300"><input id="authorization-confirm" type="checkbox" required class="mt-0.5"><span id="authorization-confirm-label">已核對訂單已付款及卡號與商品數量</span></label>
+            <p id="authorization-dialog-status" hidden role="status" aria-live="polite" class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300"></p>
+            <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="authorization-cancel" type="button" onclick="closeAuthorizationDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="authorization-submit" type="submit" class="rounded-xl bg-violet-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-violet-300 disabled:opacity-50">確認核發</button></div>
+        </form>
     </dialog>
 
     <dialog id="admin-cancel-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
@@ -289,14 +316,14 @@
     </dialog>
 
     <dialog id="admin-role-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
-        <form id="admin-role-form" class="space-y-4 p-5 sm:p-6" onsubmit="submitAdminRoleGrant(event)">
-            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-amber-300">ADMIN ROLE GRANT</p>
-            <h2 class="m-0 text-xl font-bold text-white">授予後台管理員身分</h2>
+        <form id="admin-role-form" class="space-y-4 p-5 sm:p-6" onsubmit="submitAdminRoleChange(event)">
+            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-amber-300">ADMIN ROLE MANAGEMENT</p>
+            <h2 id="admin-role-dialog-title" class="m-0 text-xl font-bold text-white">授予後台管理員身分</h2>
             <p id="admin-role-account" class="mono mb-0 break-all text-xs text-slate-400"></p>
-            <p class="mb-0 text-xs leading-relaxed text-amber-200">此操作將賦予目標帳號後台的訂單、商品及會員管理權限。請先確認對方身分；僅授權信箱已驗證的會員，不會授予對方再次指派管理員的權限。</p>
+            <p id="admin-role-dialog-explanation" class="mb-0 text-xs leading-relaxed text-amber-200"></p>
             <div><label for="admin-role-confirm-email" class="mb-1.5 block text-xs font-semibold text-slate-300">請輸入目標會員的完整信箱</label><input id="admin-role-confirm-email" type="email" required maxlength="254" autocomplete="off" spellcheck="false" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-amber-400" placeholder="必須與上方信箱完全一致"></div>
             <div><label for="admin-role-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">授權原因（必填，最多 500 字）</label><textarea id="admin-role-reason" required maxlength="500" rows="3" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-amber-400" placeholder="例如：核准的內部營運人員"></textarea></div>
-            <label class="flex items-start gap-2 text-xs text-slate-300"><input id="admin-role-confirm-risk" type="checkbox" required class="mt-0.5">我已核對此人身分，並了解將授予完整後台管理權限</label>
+            <label class="flex items-start gap-2 text-xs text-slate-300"><input id="admin-role-confirm-risk" type="checkbox" required class="mt-0.5"><span id="admin-role-confirm-label">我已核對此人身分，並了解將授予完整後台管理權限</span></label>
             <p id="admin-role-dialog-status" hidden role="status" aria-live="polite" class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300"></p>
             <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="admin-role-cancel" type="button" onclick="closeAdminRoleDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="admin-role-submit" type="submit" class="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-300 disabled:opacity-50">確認授予管理員</button></div>
         </form>
@@ -328,6 +355,10 @@
         let canManageAdminRoles = false;
         let grantingAdminMember = null;
         let adminRoleSaving = false;
+        let selectedAuthorization = null;
+        let authorizationSaving = false;
+        let adminAuditPage = 0;
+        let adminAuditRequestId = 0;
         let pendingCancelOrderId = null;
         let pendingPaymentOrderId = null;
         let activeAdminView = 'overview';
@@ -337,6 +368,7 @@
         const productDialog = document.getElementById('admin-product-dialog');
         const memberDialog = document.getElementById('admin-member-dialog');
         const adminRoleDialog = document.getElementById('admin-role-dialog');
+        const authorizationDialog = document.getElementById('admin-authorization-dialog');
 
         try {
             if (window.supabase?.createClient) {
@@ -396,6 +428,13 @@
             if (/only pending orders can be cancelled/i.test(message)) return '此訂單已不在待付款狀態，無法取消；請重新整理訂單列表。';
             if (/only pending orders can be confirmed/i.test(message)) return '此訂單已不在待付款狀態，無法再確認收款；請重新整理。';
             if (/verified payment reference required/i.test(message)) return '請先實際核對款項，並輸入 8–80 字的有效交易參考編號。';
+            if (/authorization key already used|shop_authorization_key_claims_pkey/i.test(message)) return '此授權卡號已被核發過；請核對並更換卡號。';
+            if (/one key per item quantity required/i.test(message)) return '每件商品都需要一組卡號，請確認輸入行數與商品數量相同。';
+            if (/invalid authorization key/i.test(message)) return '授權卡號須為 8–160 字，且只能包含英數字及 . _ : / + = -。';
+            if (/invalid authorization request/i.test(message)) return '請輸入原因（1–500 字），並確認到期時間在未來。';
+            if (/only paid inactive items can be issued/i.test(message)) return '只能對已付款且未啟用授權的商品核發卡號，請重新開啟訂單。';
+            if (/only active authorizations can be revoked/i.test(message)) return '只能撤銷尚未撤銷的有效授權，請重新開啟訂單。';
+            if (/order item not found/i.test(message)) return '找不到訂單商品，請重新整理訂單。';
             if (/shop_admins_pkey/i.test(message)) return '此會員已取得管理員身分，請重新整理會員清單。';
             if (/duplicate key value|23505/i.test(message)) return '此交易參考編號已用於另一筆訂單，請核對後重新輸入。';
             if (/product version conflict/i.test(message)) return '商品已被其他管理員修改。請關閉表單、重新整理清單後再編輯。';
@@ -406,14 +445,18 @@
             if (/administrator access cannot be changed here/i.test(message)) return '管理員帳號不可在會員頁面調整新下單權限。';
             if (/member not found/i.test(message)) return '找不到此會員。請重新整理會員清單。';
             if (/invalid member access change/i.test(message)) return '請確認操作狀態與原因；暫停新下單時必須填寫原因（最多 500 字）。';
-            if (/role manager access required/i.test(message)) return '只有已在 SQL Editor 指定的角色管理員可授予後台管理員身分。';
+            if (/role manager access required/i.test(message)) return '只有已指定的角色管理員可授予或撤銷後台管理員身分。';
             if (/invalid admin role request/i.test(message)) return '請確認信箱及授權原因（1–500 字），然後重試。';
+            if (/invalid admin role revocation/i.test(message)) return '無法撤銷自己的管理權，且須確認目標帳號及填寫撤銷原因。';
+            if (/last role manager cannot be revoked/i.test(message)) return '無法撤銷最後一位角色管理員。請先由專案擁有者指定另一位角色管理員。';
+            if (/member is not an administrator/i.test(message)) return '此會員已不是管理員，請重新整理會員清單。';
             if (/verified member not found/i.test(message)) return '目標帳號不存在或信箱尚未驗證，不能授予管理員身分。';
             if (/member email mismatch/i.test(message)) return '輸入的確認信箱與目標會員不一致，請重新核對。';
             if (/member is already an administrator/i.test(message)) return '此會員已具有管理員身分，請重新整理會員清單。';
             if (/paused member cannot become administrator/i.test(message)) return '目標會員已暫停新下單。請先恢復權限並重新確認身分。';
             if (/relation .*shop_products.* does not exist|42P01/i.test(message)) return '尚未建立商品資料表。請先執行商品資料庫腳本，再執行管理後台資料庫腳本。';
-            if (/admin_(?:can_manage_roles|grant_admin_role)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少角色管理 RPC。請先執行 sql/supabase-admin-role-management.sql，並在 SQL Editor 指定首位角色管理員。';
+            if (/admin_(?:issue_authorization|revoke_authorization|list_audit_log)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少授權或稽核 RPC。請在 Supabase SQL Editor 執行 sql/supabase-admin-operations.sql。';
+            if (/admin_(?:can_manage_roles|grant_admin_role|revoke_admin_role)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少角色管理 RPC。請執行 sql/supabase-admin-role-management.sql，並確認已指定首位角色管理員。';
             if (/admin_(?:list_members|set_member_order_access)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少會員管理 RPC。請先在 Supabase SQL Editor 執行 sql/supabase-members-schema.sql，再重新整理後台。';
             if (/admin_(?:list_products|save_product)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少商品管理 RPC。請在本站連接的 Supabase 專案執行 sql/supabase-fix-product-admin-rpc.sql，再重新整理後台。';
             if (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message)) return '找不到管理 RPC。請先執行 supabase-admin-schema.sql，並確認資料表結構已建立。';
@@ -428,6 +471,15 @@
             document.getElementById('admin-app').hidden = true;
             document.getElementById('admin-login-signout').hidden = !hasSession;
             if (message) setLoginStatus(message, tone);
+        }
+
+        function handleRevokedAdminAccess(error) {
+            if (!adminUser || !/admin access required/i.test(String(error?.message || ''))) return false;
+            adminAuthCheckId += 1;
+            adminUser = null;
+            clearSensitiveAdminData();
+            showAdminLogin('此帳號已失去後台管理權限。請登出，或聯絡專案擁有者確認名單。', 'error', true);
+            return true;
         }
 
         function setMetric(id, value) {
@@ -522,8 +574,10 @@
         }
 
         async function refreshAdminSummary() {
+            const userId = adminUser?.id;
             const { data, error } = await adminClient.rpc('admin_dashboard_summary');
             if (error) throw error;
+            if (!userId || adminUser?.id !== userId) return;
             renderAdminMetrics(data || {});
         }
 
@@ -557,20 +611,27 @@
                 const { data, error } = await adminClient.rpc('admin_list_orders', {
                     p_search: search || null,
                     p_status: status,
-                    p_limit: ADMIN_PAGE_SIZE,
+                    p_limit: ADMIN_PAGE_SIZE + 1,
                     p_offset: adminPage * ADMIN_PAGE_SIZE
                 });
                 if (error) throw error;
                 if (requestId !== adminRequestId || !adminUser) return;
-                adminVisibleOrders = Array.isArray(data) ? data : [];
+                const rows = Array.isArray(data) ? data : [];
+                adminVisibleOrders = rows.slice(0, ADMIN_PAGE_SIZE);
                 fillAdminOrderTable(document.getElementById('admin-orders-body'), adminVisibleOrders);
                 document.getElementById('admin-page-label').textContent = `第 ${adminPage + 1} 頁 · 本頁 ${adminVisibleOrders.length} 筆`;
                 document.getElementById('admin-prev-page').disabled = adminPage === 0;
-                document.getElementById('admin-next-page').disabled = adminVisibleOrders.length < ADMIN_PAGE_SIZE;
+                document.getElementById('admin-next-page').disabled = rows.length <= ADMIN_PAGE_SIZE;
                 setAppStatus('');
             } catch (error) {
                 if (requestId !== adminRequestId) return;
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin order listing failed:', error);
+                adminVisibleOrders = [];
+                fillAdminOrderTable(document.getElementById('admin-orders-body'), []);
+                document.getElementById('admin-page-label').textContent = '無法載入訂單';
+                document.getElementById('admin-prev-page').disabled = true;
+                document.getElementById('admin-next-page').disabled = true;
                 setAppStatus(getAdminError(error), 'error');
             } finally {
                 if (requestId === adminRequestId) {
@@ -693,6 +754,7 @@
                 return true;
             } catch (error) {
                 if (requestId !== adminProductRequestId || adminUser?.id !== userId) return false;
+                if (handleRevokedAdminAccess(error)) return false;
                 console.error('Admin product listing failed:', error);
                 adminVisibleProducts = [];
                 renderAdminProducts([], '商品清單載入失敗，請依上方訊息處理後重試。');
@@ -792,6 +854,14 @@
                         roleButton.addEventListener('click', () => openAdminRoleDialog(member));
                         actions.appendChild(roleButton);
                     }
+                } else if (canManageAdminRoles && member.email && member.user_id !== adminUser?.id) {
+                    const revokeButton = document.createElement('button');
+                    revokeButton.type = 'button';
+                    revokeButton.className = 'ml-2 rounded-lg border border-red-500/40 px-3 py-2 text-[11px] text-red-300 hover:border-red-400 hover:bg-red-950/30';
+                    revokeButton.textContent = '撤銷管理員';
+                    revokeButton.setAttribute('aria-label', `撤銷 ${member.email} 的後台管理員身分`);
+                    revokeButton.addEventListener('click', () => openAdminRoleDialog(member, true));
+                    actions.appendChild(revokeButton);
                 }
                 row.appendChild(actions);
                 body.appendChild(row);
@@ -836,6 +906,7 @@
                 return true;
             } catch (error) {
                 if (requestId !== adminMemberRequestId || adminUser?.id !== userId) return false;
+                if (handleRevokedAdminAccess(error)) return false;
                 console.error('Admin member listing failed:', error);
                 canManageAdminRoles = false;
                 adminVisibleMembers = [];
@@ -857,15 +928,103 @@
             void loadAdminMembers(Math.max(0, adminMemberPage + delta));
         }
 
-        function openAdminRoleDialog(member) {
+        function renderAdminAudit(entries, emptyMessage = '尚無管理操作紀錄。') {
+            const body = document.getElementById('admin-audit-body');
+            body.replaceChildren();
+            if (!entries.length) {
+                const row = document.createElement('tr');
+                buildTableCell(row, emptyMessage, 'px-4 py-10 text-center text-slate-500').colSpan = 5;
+                body.appendChild(row);
+                return;
+            }
+
+            const labels = {
+                confirm_payment: '人工核對收款', cancel_pending_order: '取消待付款',
+                issue_authorization: '核發授權', revoke_authorization: '撤銷授權',
+                grant_admin_role: '授予管理員', revoke_admin_role: '撤銷管理員',
+                pause_member_orders: '暫停新下單', resume_member_orders: '恢復新下單',
+                create_product: '建立商品', update_product: '修改商品', view_order_detail: '查看訂單明細'
+            };
+            entries.forEach(entry => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-900/60';
+                buildTableCell(row, formatDate(entry.occurred_at), 'whitespace-nowrap px-4 py-3 text-slate-400');
+                buildTableCell(row, entry.actor_email || '已刪除的帳號', 'px-4 py-3 text-slate-200');
+                buildTableCell(row, labels[entry.action] || entry.action, 'whitespace-nowrap px-4 py-3 text-cyan-300');
+                buildTableCell(row, entry.order_number ? `#${entry.order_number}` : '—', 'mono px-4 py-3 text-slate-300');
+                const details = entry.details || {};
+                const parts = [];
+                if (details.email || details.user_id) parts.push(details.email || details.user_id);
+                if (details.item_id) parts.push(`商品明細 ${details.item_id}`);
+                if (details.product_id) parts.push(`商品 #${details.product_id}`);
+                if (details.key_count) parts.push(`${details.key_count} 組授權`);
+                if (details.expires_at) parts.push(`到期 ${formatDate(details.expires_at)}`);
+                if (details.reference) parts.push(`收款編號 ${details.reference}`);
+                if (details.reason) parts.push(`原因：${details.reason}`);
+                buildTableCell(row, parts.join(' · ') || '—', 'min-w-56 break-all px-4 py-3 text-slate-400');
+                body.appendChild(row);
+            });
+        }
+
+        async function loadAdminAudit(page = adminAuditPage) {
+            if (!adminUser || !adminClient) return false;
+            adminAuditPage = Math.max(0, Number(page) || 0);
+            const requestId = ++adminAuditRequestId;
+            const userId = adminUser.id;
+            const status = document.getElementById('admin-audit-status');
+            status.textContent = '正在載入管理操作紀錄…';
+            status.className = 'text-xs leading-relaxed text-slate-400';
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_list_audit_log', {
+                    p_limit: ADMIN_PAGE_SIZE + 1,
+                    p_offset: adminAuditPage * ADMIN_PAGE_SIZE
+                });
+                if (error) throw error;
+                if (requestId !== adminAuditRequestId || adminUser?.id !== userId) return false;
+                const rows = Array.isArray(data) ? data : [];
+                renderAdminAudit(rows.slice(0, ADMIN_PAGE_SIZE));
+                document.getElementById('admin-audit-page-label').textContent = `第 ${adminAuditPage + 1} 頁 · 本頁 ${Math.min(rows.length, ADMIN_PAGE_SIZE)} 筆`;
+                document.getElementById('admin-audit-prev-page').disabled = adminAuditPage === 0;
+                document.getElementById('admin-audit-next-page').disabled = rows.length <= ADMIN_PAGE_SIZE;
+                status.textContent = `已載入 ${Math.min(rows.length, ADMIN_PAGE_SIZE)} 筆操作紀錄，不包含授權卡號。`;
+                return true;
+            } catch (error) {
+                if (requestId !== adminAuditRequestId || adminUser?.id !== userId) return false;
+                if (handleRevokedAdminAccess(error)) return false;
+                console.error('Admin audit listing failed:', error);
+                renderAdminAudit([], '操作紀錄載入失敗，請依上方訊息處理。');
+                document.getElementById('admin-audit-page-label').textContent = '無法載入操作紀錄';
+                document.getElementById('admin-audit-prev-page').disabled = true;
+                document.getElementById('admin-audit-next-page').disabled = true;
+                status.className = 'text-xs leading-relaxed text-red-300';
+                status.textContent = getAdminError(error);
+                return false;
+            }
+        }
+
+        function changeAuditPage(delta) {
+            void loadAdminAudit(Math.max(0, adminAuditPage + delta));
+        }
+
+        function openAdminRoleDialog(member, revoke = false) {
             if (!adminUser || !adminClient || !canManageAdminRoles || adminRoleSaving || !member?.email ||
-                !member.email_confirmed_at || member.is_admin || !member.can_order ||
+                (revoke ? (!member.is_admin || member.user_id === adminUser.id)
+                    : (!member.email_confirmed_at || member.is_admin || !member.can_order)) ||
                 !adminVisibleMembers.some(item => item.user_id === member.user_id)) return;
-            grantingAdminMember = { user_id: member.user_id, email: member.email };
+            grantingAdminMember = { user_id: member.user_id, email: member.email, revoke };
             document.getElementById('admin-role-form').reset();
             document.getElementById('admin-role-confirm-email').setCustomValidity('');
             document.getElementById('admin-role-reason').setCustomValidity('');
             document.getElementById('admin-role-account').textContent = `${member.email} · ${member.user_id}`;
+            document.getElementById('admin-role-dialog-title').textContent = revoke ? '撤銷後台管理員身分' : '授予後台管理員身分';
+            document.getElementById('admin-role-dialog-explanation').textContent = revoke
+                ? '此操作會立即停止目標帳號之後所有後台 API 的存取；已建立的訂單及稽核紀錄不受影響，現有登入狀態不會自動登出。請先確認人員身分。'
+                : '此操作將賦予目標帳號訂單、商品及會員管理權限；僅授權信箱已驗證的會員，不會授予再次指派管理員的權限。';
+            document.getElementById('admin-role-confirm-label').textContent = revoke
+                ? '我已確認對象及撤銷後對營運作業的影響'
+                : '我已核對此人身分，並了解將授予完整後台管理權限';
+            document.getElementById('admin-role-submit').textContent = revoke ? '確認撤銷管理員' : '確認授予管理員';
             const status = document.getElementById('admin-role-dialog-status');
             status.hidden = true;
             status.textContent = '';
@@ -879,7 +1038,7 @@
             grantingAdminMember = null;
         }
 
-        async function submitAdminRoleGrant(event) {
+        async function submitAdminRoleChange(event) {
             event.preventDefault();
             if (!adminUser || !adminClient || !canManageAdminRoles || !grantingAdminMember || adminRoleSaving) return;
             const form = document.getElementById('admin-role-form');
@@ -909,28 +1068,31 @@
             cancelButton.disabled = true;
             status.hidden = false;
             status.className = 'rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300';
-            status.textContent = '正在驗證角色管理權限並寫入稽核紀錄…';
+            status.textContent = `正在驗證角色管理權限並${target.revoke ? '撤銷' : '授予'}管理員身分…`;
 
             try {
-                const { data, error } = await adminClient.rpc('admin_grant_admin_role', {
+                const { data, error } = await adminClient.rpc(target.revoke ? 'admin_revoke_admin_role' : 'admin_grant_admin_role', {
                     p_user_id: target.user_id,
                     p_expected_email: email,
                     p_reason: reason
                 });
                 if (error) throw error;
                 if (adminUser?.id !== userId) return;
-                if (data?.user_id !== target.user_id || data?.is_admin !== true) {
+                if (data?.user_id !== target.user_id || data?.is_admin !== !target.revoke) {
                     throw new Error('角色服務回傳資料不完整，請重新整理確認結果。');
                 }
                 adminRoleDialog.close();
                 grantingAdminMember = null;
                 const loaded = await loadAdminMembers(adminMemberPage);
+                if (adminUser?.id !== userId) return;
                 setAppStatus(loaded
-                    ? `${target.email} 已取得後台管理員身分；此權限不包含再次授權其他管理員。`
-                    : '管理員身分已授予，但清單重新載入失敗；請重新整理確認。', loaded ? 'success' : 'error');
+                    ? `${target.email} 的後台管理員身分已${target.revoke ? '撤銷' : '授予'}；變更已記錄。`
+                    : '角色已變更，但清單重新載入失敗；請重新整理確認。', loaded ? 'success' : 'error');
             } catch (error) {
                 if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin role grant failed:', error);
+                if (/role manager access required/i.test(String(error?.message))) canManageAdminRoles = false;
                 status.className = 'rounded-xl border border-red-500/40 bg-red-950/30 p-3 text-xs text-red-200';
                 status.textContent = getAdminError(error);
             } finally {
@@ -1009,6 +1171,7 @@
                 else setAppStatus('權限已更新，但會員清單重新載入失敗；請重新整理確認。', 'error');
             } catch (error) {
                 if (adminUser?.id !== adminId) return;
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin member access update failed:', error);
                 status.className = 'rounded-xl border border-red-500/40 bg-red-950/30 p-3 text-xs text-red-200';
                 status.textContent = getAdminError(error);
@@ -1105,6 +1268,7 @@
                 else setAppStatus(`商品 #${data.id} 已儲存，但商品清單重新載入失敗。`, 'error');
             } catch (error) {
                 if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin product save failed:', error);
                 status.className = 'rounded-xl border border-red-500/40 bg-red-950/30 p-3 text-xs text-red-200';
                 status.textContent = getAdminError(error);
@@ -1132,6 +1296,7 @@
                 else setAppStatus(`商品 #${product.id} 已更新，但商品清單重新載入失敗。`, 'error');
             } catch (error) {
                 if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin product status update failed:', error);
                 setProductListStatus(getAdminError(error), 'error');
             } finally {
@@ -1179,7 +1344,7 @@
         }
 
         async function openAdminOrderDetail(orderId) {
-            if (!adminUser || !adminClient || !orderId) return;
+            if (!adminUser || !adminClient || !orderId) return false;
             const requestId = ++adminDetailRequestId;
             const userId = adminUser.id;
             const tbody = document.getElementById('detail-items-body');
@@ -1192,17 +1357,17 @@
             try {
                 const { data, error } = await adminClient.rpc('admin_get_order_detail', { p_order_id: orderId });
                 if (error) throw error;
-                if (requestId !== adminDetailRequestId || adminUser?.id !== userId) return;
+                if (requestId !== adminDetailRequestId || adminUser?.id !== userId || !orderDialog.open) return false;
                 const items = Array.isArray(data) ? data : [];
                 if (!items.length) {
                     document.getElementById('detail-status').textContent = '沒有查到訂單明細，或此筆資料已不存在。';
-                    return;
+                    return false;
                 }
 
                 const order = items[0];
                 document.getElementById('detail-title').textContent = `訂單 #${order.order_number || ''}`;
                 document.getElementById('detail-subtitle').textContent = `${order.customer_email || '會員'} · ${formatDate(order.created_at)} · ${formatCurrency(order.total_amount)}`;
-                document.getElementById('detail-status').textContent = '僅提供管理查閱；卡號只在已付款、授權有效且未到期時回傳。訂單狀態與金鑰不可在此頁手動改寫。';
+                document.getElementById('detail-status').textContent = '已付款且待發放的商品可核發授權；已核發的商品可撤銷。卡號只在已付款且未到期時顯示，撤銷後將立即無法查閱。';
                 const labels = { pending: '待發放', active: '有效', expired: '已到期', revoked: '已撤銷' };
                 items.forEach(item => {
                     if (!item.item_id) return;
@@ -1215,7 +1380,7 @@
                     keyCell.className = 'py-3 pr-3';
                     if (order.status === 'paid' && item.authorization_status === 'active' && item.authorization_key) {
                         const key = document.createElement('span');
-                        key.className = 'mono inline-block max-w-52 select-all break-all text-cyan-300';
+                        key.className = 'mono inline-block max-w-52 select-all whitespace-pre-line break-all text-cyan-300';
                         key.textContent = item.authorization_key;
                         keyCell.appendChild(key);
                         const copy = document.createElement('button');
@@ -1235,18 +1400,170 @@
                         keyCell.textContent = '未核發或目前不可顯示';
                     }
                     row.appendChild(keyCell);
-                    buildTableCell(row, item.expires_at ? formatDate(item.expires_at) : '—', 'py-3 whitespace-nowrap text-slate-400');
+                    buildTableCell(row, item.expires_at ? formatDate(item.expires_at) : '—', 'py-3 pr-3 whitespace-nowrap text-slate-400');
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'py-3 text-right';
+                    if (order.status === 'paid' && ['pending', 'active', 'expired', 'revoked'].includes(item.authorization_status)) {
+                        const isIssuing = item.authorization_status !== 'active';
+                        const action = document.createElement('button');
+                        action.type = 'button';
+                        action.className = isIssuing
+                            ? 'whitespace-nowrap rounded-lg border border-violet-500/40 px-3 py-2 text-[11px] text-violet-200 hover:border-violet-300'
+                            : 'whitespace-nowrap rounded-lg border border-red-500/40 px-3 py-2 text-[11px] text-red-300 hover:border-red-400';
+                        action.textContent = isIssuing ? '核發授權' : '撤銷授權';
+                        action.addEventListener('click', () => openAuthorizationDialog(item, order));
+                        actionCell.appendChild(action);
+                    }
+                    row.appendChild(actionCell);
                     tbody.appendChild(row);
                 });
+                return true;
             } catch (error) {
-                if (requestId !== adminDetailRequestId || adminUser?.id !== userId) return;
+                if (requestId !== adminDetailRequestId || adminUser?.id !== userId || !orderDialog.open) return false;
+                if (handleRevokedAdminAccess(error)) return false;
                 console.error('Admin order detail failed:', error);
                 document.getElementById('detail-status').textContent = getAdminError(error);
+                return false;
             }
         }
 
         function closeOrderDetail() {
+            adminDetailRequestId += 1;
+            document.getElementById('detail-items-body').replaceChildren();
+            document.getElementById('detail-status').textContent = '';
             if (orderDialog.open) orderDialog.close();
+        }
+
+        function openAuthorizationDialog(item, order) {
+            if (!adminUser || !adminClient || authorizationSaving || !orderDialog.open ||
+                order.status !== 'paid' || !item?.item_id ||
+                !['pending', 'active', 'expired', 'revoked'].includes(item.authorization_status)) return;
+
+            const issuing = item.authorization_status !== 'active';
+            selectedAuthorization = {
+                item_id: item.item_id,
+                order_id: order.order_id,
+                order_number: order.order_number,
+                quantity: Number(item.quantity),
+                issuing
+            };
+            document.getElementById('admin-authorization-form').reset();
+            document.getElementById('authorization-keys').setCustomValidity('');
+            document.getElementById('authorization-expires').setCustomValidity('');
+            document.getElementById('authorization-reason').setCustomValidity('');
+            document.getElementById('authorization-dialog-title').textContent = issuing ? '核發商品授權' : '撤銷商品授權';
+            document.getElementById('authorization-dialog-account').textContent = `#${order.order_number} · ${item.product_name || ''} × ${item.quantity}`;
+            document.getElementById('authorization-dialog-explanation').textContent = issuing
+                ? `此商品數量為 ${item.quantity}，請輸入恰好 ${item.quantity} 組未用過的卡號。核發後只有付款會員及管理員可查看；不會自動傳送 Discord 訊息。`
+                : '撤銷後付款會員將立即看不到此授權卡號，且本頁不再保存明文；此操作不會退款，也不會復原已到期授權。';
+            document.getElementById('authorization-issue-fields').hidden = !issuing;
+            document.getElementById('authorization-keys').required = issuing;
+            document.getElementById('authorization-confirm-label').textContent = issuing
+                ? '已核對訂單已付款、商品數量及每組卡號'
+                : '已核對目標商品並了解撤銷後無法再查看卡號';
+            document.getElementById('authorization-submit').textContent = issuing ? '確認核發授權' : '確認撤銷授權';
+            const status = document.getElementById('authorization-dialog-status');
+            status.hidden = true;
+            status.textContent = '';
+            authorizationDialog.showModal();
+            document.getElementById(issuing ? 'authorization-keys' : 'authorization-reason').focus();
+        }
+
+        function closeAuthorizationDialog() {
+            if (authorizationSaving) return;
+            if (authorizationDialog.open) authorizationDialog.close();
+            document.getElementById('authorization-keys').value = '';
+            selectedAuthorization = null;
+        }
+
+        async function submitAuthorization(event) {
+            event.preventDefault();
+            if (!adminUser || !adminClient || !selectedAuthorization || authorizationSaving) return;
+            const form = document.getElementById('admin-authorization-form');
+            if (!form.reportValidity()) return;
+
+            const target = selectedAuthorization;
+            let keys = [];
+            let expiresAt = null;
+            if (target.issuing) {
+                const input = document.getElementById('authorization-keys');
+                keys = input.value.split(/\r?\n/).map(key => key.trim()).filter(Boolean);
+                if (keys.length !== target.quantity) {
+                    input.setCustomValidity(`請輸入 ${target.quantity} 組卡號，每件商品一行。`);
+                    form.reportValidity();
+                    return;
+                }
+                if (new Set(keys).size !== keys.length || keys.some(key => !/^[A-Za-z0-9][A-Za-z0-9._:/+=-]{7,159}$/.test(key))) {
+                    input.setCustomValidity('卡號不可重複，且每組須為 8–160 字合法字元。');
+                    form.reportValidity();
+                    return;
+                }
+                const expiryInput = document.getElementById('authorization-expires');
+                if (expiryInput.value) {
+                    const expiry = new Date(expiryInput.value);
+                    if (!Number.isFinite(expiry.getTime()) || expiry.getTime() <= Date.now()) {
+                        expiryInput.setCustomValidity('到期時間必須晚於現在。');
+                        form.reportValidity();
+                        return;
+                    }
+                    expiresAt = expiry.toISOString();
+                }
+            }
+
+            const reasonInput = document.getElementById('authorization-reason');
+            const reason = reasonInput.value.trim();
+            if (!reason) {
+                reasonInput.setCustomValidity('請填寫操作原因。');
+                form.reportValidity();
+                return;
+            }
+
+            const userId = adminUser.id;
+            const submit = document.getElementById('authorization-submit');
+            const cancel = document.getElementById('authorization-cancel');
+            const status = document.getElementById('authorization-dialog-status');
+            authorizationSaving = true;
+            submit.disabled = true;
+            cancel.disabled = true;
+            status.hidden = false;
+            status.className = 'rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300';
+            status.textContent = `正在${target.issuing ? '核發' : '撤銷'}授權並寫入稽核紀錄…`;
+
+            try {
+                const { data, error } = target.issuing
+                    ? await adminClient.rpc('admin_issue_authorization', {
+                        p_item_id: target.item_id, p_keys: keys, p_expires_at: expiresAt, p_reason: reason
+                    })
+                    : await adminClient.rpc('admin_revoke_authorization', {
+                        p_item_id: target.item_id, p_reason: reason
+                    });
+                if (error) throw error;
+                if (adminUser?.id !== userId) return;
+                if (data?.item_id !== target.item_id || data?.authorization_status !== (target.issuing ? 'active' : 'revoked')) {
+                    throw new Error('授權服務回傳資料不完整，請重新整理訂單確認結果。');
+                }
+                authorizationDialog.close();
+                document.getElementById('authorization-keys').value = '';
+                selectedAuthorization = null;
+                const detailLoaded = await openAdminOrderDetail(target.order_id);
+                if (adminUser?.id !== userId) return;
+                setAppStatus(detailLoaded
+                    ? `訂單 #${target.order_number} 的授權已${target.issuing ? '核發' : '撤銷'}，操作已記錄。`
+                    : '授權操作已完成，但明細重新載入失敗；請重新整理訂單確認。', detailLoaded ? 'success' : 'error');
+                void refreshAdminSummary().catch(error => setAppStatus(getAdminError(error), 'error'));
+                if (activeAdminView === 'orders') void loadAdminOrders(adminPage);
+            } catch (error) {
+                if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
+                console.error('Admin authorization update failed:', error);
+                status.className = 'rounded-xl border border-red-500/40 bg-red-950/30 p-3 text-xs text-red-200';
+                status.textContent = getAdminError(error);
+            } finally {
+                keys = [];
+                authorizationSaving = false;
+                submit.disabled = false;
+                cancel.disabled = false;
+            }
         }
 
         function openCancelDialog(orderId, orderNumber) {
@@ -1287,18 +1604,22 @@
             adminDetailRequestId += 1;
             adminProductRequestId += 1;
             adminMemberRequestId += 1;
+            adminAuditRequestId += 1;
             adminVisibleOrders = [];
             adminVisibleProducts = [];
             adminVisibleMembers = [];
             canManageAdminRoles = false;
             adminProductPage = 0;
             adminMemberPage = 0;
+            adminAuditPage = 0;
             editingProduct = null;
             productSaving = false;
             editingMember = null;
             memberActionSaving = false;
             grantingAdminMember = null;
             adminRoleSaving = false;
+            selectedAuthorization = null;
+            authorizationSaving = false;
             pendingCancelOrderId = null;
             pendingPaymentOrderId = null;
             document.getElementById('admin-orders-body').replaceChildren();
@@ -1306,11 +1627,15 @@
             document.getElementById('detail-items-body').replaceChildren();
             document.getElementById('admin-products-body').replaceChildren();
             document.getElementById('admin-members-body').replaceChildren();
+            document.getElementById('admin-audit-body').replaceChildren();
+            document.getElementById('admin-orders-filter').reset();
             document.getElementById('admin-products-filter').reset();
             document.getElementById('admin-members-filter').reset();
             document.getElementById('admin-product-form').reset();
             document.getElementById('admin-member-form').reset();
             document.getElementById('admin-role-form').reset();
+            document.getElementById('admin-authorization-form').reset();
+            document.getElementById('authorization-keys').value = '';
             document.getElementById('admin-role-account').textContent = '';
             document.getElementById('admin-role-dialog-status').textContent = '';
             document.getElementById('admin-products-page-label').textContent = '第 1 頁';
@@ -1328,7 +1653,21 @@
             document.getElementById('member-dialog-cancel').disabled = false;
             document.getElementById('admin-role-submit').disabled = false;
             document.getElementById('admin-role-cancel').disabled = false;
+            document.getElementById('authorization-submit').disabled = false;
+            document.getElementById('authorization-cancel').disabled = false;
             setMemberListStatus('開啟會員管理後載入資料。');
+            document.getElementById('admin-audit-page-label').textContent = '第 1 頁';
+            document.getElementById('admin-audit-prev-page').disabled = true;
+            document.getElementById('admin-audit-next-page').disabled = true;
+            document.getElementById('admin-audit-status').textContent = '開啟操作紀錄後載入資料。';
+            document.getElementById('admin-page-label').textContent = '第 1 頁';
+            document.getElementById('admin-prev-page').disabled = true;
+            document.getElementById('admin-next-page').disabled = true;
+            document.getElementById('admin-orders-search-button').disabled = false;
+            ['metric-total-orders', 'metric-pending-orders', 'metric-paid-orders', 'metric-paid-revenue',
+                'metric-active-authorizations', 'metric-recent-orders', 'metric-pending-authorizations']
+                .forEach(id => { document.getElementById(id).textContent = '—'; });
+            document.getElementById('overview-updated').textContent = '尚未載入';
             document.getElementById('detail-title').textContent = '訂單明細';
             document.getElementById('detail-subtitle').textContent = '';
             document.getElementById('detail-status').textContent = '';
@@ -1339,6 +1678,7 @@
             if (productDialog.open) productDialog.close();
             if (memberDialog.open) memberDialog.close();
             if (adminRoleDialog.open) adminRoleDialog.close();
+            if (authorizationDialog.open) authorizationDialog.close();
         }
 
         async function submitPaymentConfirmation(event) {
@@ -1377,6 +1717,7 @@
                 }
             } catch (error) {
                 if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin payment confirmation failed:', error);
                 status.className = 'mt-3 rounded-lg border border-red-500/30 bg-slate-950/60 p-3 text-xs text-red-200';
                 status.textContent = getAdminError(error);
@@ -1412,6 +1753,7 @@
                     setAppStatus(`訂單已取消，但重新載入資料失敗：${getAdminError(refreshError)}`, 'error');
                 }
             } catch (error) {
+                if (handleRevokedAdminAccess(error)) return;
                 console.error('Admin order cancellation failed:', error);
                 status.className = 'mt-3 rounded-lg border border-red-500/30 bg-slate-950/60 p-3 text-xs text-red-200';
                 status.textContent = getAdminError(error);
@@ -1420,16 +1762,17 @@
         }
 
         function setAdminView(view) {
-            activeAdminView = ['overview', 'orders', 'products', 'members'].includes(view) ? view : 'overview';
+            activeAdminView = ['overview', 'orders', 'products', 'members', 'audit'].includes(view) ? view : 'overview';
             document.querySelectorAll('.admin-view').forEach(section => section.classList.toggle('hidden', section.id !== `admin-view-${activeAdminView}`));
             document.querySelectorAll('[data-admin-view]').forEach(button => {
                 if (button.dataset.adminView === activeAdminView) button.setAttribute('aria-current', 'page');
                 else button.removeAttribute('aria-current');
             });
-            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', orders: '訂單與授權', products: '商品管理', members: '會員管理' }[activeAdminView];
+            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', orders: '訂單與授權', products: '商品管理', members: '會員管理', audit: '操作紀錄' }[activeAdminView];
             if (activeAdminView === 'orders') void loadAdminOrders(0);
             if (activeAdminView === 'products') void loadAdminProducts(0);
             if (activeAdminView === 'members') void loadAdminMembers(0);
+            if (activeAdminView === 'audit') void loadAdminAudit(0);
         }
 
         async function refreshCurrentView() {
@@ -1445,6 +1788,11 @@
                     if (loaded) setAppStatus('會員清單已更新。', 'success');
                     return;
                 }
+                if (activeAdminView === 'audit') {
+                    const loaded = await loadAdminAudit(adminAuditPage);
+                    if (loaded) setAppStatus('操作紀錄已更新。', 'success');
+                    return;
+                }
                 await refreshAdminSummary();
                 if (activeAdminView === 'orders') {
                     await loadAdminOrders(adminPage);
@@ -1453,6 +1801,7 @@
                     setAppStatus('資料已更新。', 'success');
                 }
             } catch (error) {
+                if (handleRevokedAdminAccess(error)) return;
                 setAppStatus(getAdminError(error), 'error');
             }
         }

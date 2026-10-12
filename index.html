@@ -1436,7 +1436,7 @@
                         && !isExpired;
                     if (canRevealKey) {
                         const keyLabel = document.createElement('span');
-                        keyLabel.className = 'inline-block select-all break-all rounded border border-cyan-500/40 bg-cyan-950 px-2.5 py-1 font-mono font-bold text-cyan-300';
+                        keyLabel.className = 'inline-block select-all whitespace-pre-line break-all rounded border border-cyan-500/40 bg-cyan-950 px-2.5 py-1 font-mono font-bold text-cyan-300';
                         keyLabel.textContent = order.authorization_key;
                         keyCell.appendChild(keyLabel);
                         if (order.expires_at) {
