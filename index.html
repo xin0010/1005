@@ -1231,6 +1231,9 @@
             if (/商品已下架|one or more products are unavailable/i.test(message)) {
                 return '有商品已下架，請重新整理頁面確認購物車。';
             }
+            if (/member ordering is paused/i.test(message)) {
+                return '此帳號的新下單權限已暫停。仍可查詢既有訂單；如需協助請聯絡客服。';
+            }
             if (/登入才能下單|authentication required|jwt/i.test(message)) {
                 return '登入狀態失效，請重新登入後重試。';
             }
@@ -1327,7 +1330,7 @@
                 completedOrder = order;
             } catch (error) {
                 console.error('Checkout failed:', error);
-                const knownFailure = /價格已變更|cart prices have changed|商品已下架|one or more products are unavailable|authentication required|登入才能下單|could not find the function|schema cache|PGRST202/i.test(String(error?.message || ''));
+                const knownFailure = /價格已變更|cart prices have changed|商品已下架|one or more products are unavailable|member ordering is paused|authentication required|登入才能下單|could not find the function|schema cache|PGRST202/i.test(String(error?.message || ''));
                 if (knownFailure) clearOrderRequest(userId, request.key);
                 else orderOutcomeUnknown = true;
                 setCartCheckoutStatus(getCheckoutErrorMessage(error), 'error');
