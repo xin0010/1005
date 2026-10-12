@@ -1550,7 +1550,9 @@
                 setAppStatus(detailLoaded
                     ? `訂單 #${target.order_number} 的授權已${target.issuing ? '核發' : '撤銷'}，操作已記錄。`
                     : '授權操作已完成，但明細重新載入失敗；請重新整理訂單確認。', detailLoaded ? 'success' : 'error');
-                void refreshAdminSummary().catch(error => setAppStatus(getAdminError(error), 'error'));
+                void refreshAdminSummary().catch(error => {
+                    if (!handleRevokedAdminAccess(error)) setAppStatus(getAdminError(error), 'error');
+                });
                 if (activeAdminView === 'orders') void loadAdminOrders(adminPage);
             } catch (error) {
                 if (adminUser?.id !== userId) return;
@@ -1832,8 +1834,10 @@
                 try {
                     await loadOverviewOrders();
                 } catch (error) {
-                    console.error('Admin overview orders failed:', error);
-                    setAppStatus(getAdminError(error), 'error');
+                    if (!handleRevokedAdminAccess(error)) {
+                        console.error('Admin overview orders failed:', error);
+                        setAppStatus(getAdminError(error), 'error');
+                    }
                 }
                 setTimeout(() => { if (adminUser?.id === user.id) setAppStatus(''); }, 4000);
             } catch (error) {
@@ -1911,6 +1915,14 @@
             document.getElementById('member-reason').addEventListener('input', event => event.target.setCustomValidity(''));
             document.getElementById('admin-role-confirm-email').addEventListener('input', event => event.target.setCustomValidity(''));
             document.getElementById('admin-role-reason').addEventListener('input', event => event.target.setCustomValidity(''));
+            document.getElementById('authorization-keys').addEventListener('input', event => event.target.setCustomValidity(''));
+            document.getElementById('authorization-expires').addEventListener('input', event => event.target.setCustomValidity(''));
+            document.getElementById('authorization-reason').addEventListener('input', event => event.target.setCustomValidity(''));
+            orderDialog.addEventListener('close', () => {
+                if (orderDialog.open) return;
+                adminDetailRequestId += 1;
+                document.getElementById('detail-items-body').replaceChildren();
+            });
             productDialog.addEventListener('cancel', event => {
                 if (productSaving) event.preventDefault();
                 else editingProduct = null;
@@ -1922,6 +1934,13 @@
             adminRoleDialog.addEventListener('cancel', event => {
                 if (adminRoleSaving) event.preventDefault();
                 else grantingAdminMember = null;
+            });
+            authorizationDialog.addEventListener('cancel', event => {
+                if (authorizationSaving) event.preventDefault();
+                else {
+                    selectedAuthorization = null;
+                    document.getElementById('authorization-keys').value = '';
+                }
             });
         }
 
