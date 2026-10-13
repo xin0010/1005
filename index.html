@@ -2,7 +2,7 @@
 <html lang="zh-TW" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AXG SHOP — 亞洲遊戲輔助經銷商 | 線上選購</title>
     <meta name="description" content="AXG SHOP 亞洲經銷商，提供線上商品選購、會員訂單查詢與 Discord 客服協助付款。">
     
@@ -62,8 +62,8 @@
 
         .title-gradient {
             background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #818cf8 100%);
-            background-clip: text;
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -72,6 +72,7 @@
             border: 1px solid rgba(6, 182, 212, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
         }
         .cyber-card:hover {
@@ -170,7 +171,7 @@
             </nav>
 
             <div class="flex items-center space-x-3">
-                <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
+                <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
                     <i class="fa-brands fa-discord text-sm"></i>
                     <span>Discord 客服</span>
                 </a>
@@ -180,8 +181,8 @@
                     <span id="cart-badge" aria-live="polite" aria-atomic="true" class="absolute -top-1 -right-1 bg-cyan-400 text-black font-extrabold font-mono text-[10px] rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-cyan-400/50">0</span>
                 </button>
                 
-                <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:text-cyan-400 border border-slate-800 cursor-pointer">
-                    <i class="fa-solid fa-bars text-lg"></i>
+                <button id="mobile-menu-button" type="button" onclick="toggleMobileMenu()" aria-label="開啟手機選單" aria-controls="mobile-menu" aria-expanded="false" class="lg:hidden p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:text-cyan-400 border border-slate-800 cursor-pointer">
+                    <i class="fa-solid fa-bars text-lg" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
@@ -194,7 +195,7 @@
             <button onclick="switchTab('wallet'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 餘額儲值</button>
             <button onclick="switchTab('trouble'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 疑難雜症 FAQ</button>
             <button onclick="switchTab('account'); toggleMobileMenu();" class="block w-full text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 會員中心 / 登入</button>
-            <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="block w-full text-left py-2 text-indigo-400 font-bold bg-transparent border-0 cursor-pointer no-underline">▶ 加入 Discord 售後群</a>
+            <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="block w-full text-left py-2 text-indigo-400 font-bold bg-transparent border-0 cursor-pointer no-underline">▶ 加入 Discord 售後群</a>
         </div>
     </header>
 
@@ -241,7 +242,7 @@
                         <i class="fa-solid fa-store"></i>
                         <span>進入輔助商城</span>
                     </button>
-                    <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="px-8 py-4 rounded-xl border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 hover:text-white hover:bg-indigo-900/60 font-mono text-sm font-bold transition-all inline-flex items-center gap-2.5 no-underline shadow-lg">
+                    <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="px-8 py-4 rounded-xl border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 hover:text-white hover:bg-indigo-900/60 font-mono text-sm font-bold transition-all inline-flex items-center gap-2.5 no-underline shadow-lg">
                         <i class="fa-brands fa-discord text-lg"></i>
                         <span>官方 Discord 社群</span>
                     </a>
@@ -528,7 +529,7 @@
                     <form id="form-login" role="tabpanel" aria-labelledby="auth-tab-login" onsubmit="handleLoginSubmit(event)">
                         <div class="mb-4">
                             <label for="login-identifier" class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
-                            <input id="login-identifier" name="email" type="email" required maxlength="254" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
+                            <input id="login-identifier" name="email" type="email" required maxlength="254" autocomplete="username" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
                         </div>
                         <div class="mb-6">
                             <label for="login-password" class="block text-xs font-bold text-slate-300 mb-1.5">密碼</label>
@@ -544,7 +545,7 @@
                     <form id="form-register" class="hidden" role="tabpanel" aria-labelledby="auth-tab-reg" onsubmit="handleRegisterSubmit(event)">
                         <div class="mb-4">
                             <label for="register-email" class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
-                            <input id="register-email" name="email" type="email" required maxlength="254" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
+                            <input id="register-email" name="email" type="email" required maxlength="254" autocomplete="email" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
                         </div>
                         <div class="mb-4">
                             <label for="register-password" class="block text-xs font-bold text-slate-300 mb-1.5">設定密碼</label>
@@ -593,7 +594,7 @@
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductModal()"></div>
         <div class="relative min-h-screen flex items-center justify-center p-4">
             <div class="relative bg-[#0d1527] border border-cyan-500/50 rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl font-mono overflow-hidden">
-                <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 bg-transparent border-0 cursor-pointer text-lg"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" onclick="closeProductModal()" aria-label="關閉商品明細" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 bg-transparent border-0 cursor-pointer text-lg"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     <img id="modal-img" src="" alt="Product" class="w-full h-56 object-cover rounded-xl border border-slate-800">
@@ -655,7 +656,7 @@
         <span id="toast-msg">Notification Message</span>
     </div>
 
-    <a href="https://discord.gg/CahMc8zNjN" target="_blank" class="fixed bottom-6 left-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 no-underline" title="Discord 真人客服">
+    <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 left-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 no-underline" title="Discord 真人客服">
         <i class="fa-brands fa-discord text-xl"></i>
     </a>
 
@@ -679,7 +680,7 @@
             <div>
                 <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">技術支援</h4>
                 <ul class="space-y-2 list-none p-0 m-0">
-                    <li><a href="https://discord.gg/CahMc8zNjN" target="_blank" class="hover:text-cyan-400 text-slate-400 no-underline">Discord 官方客服</a></li>
+                    <li><a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-400 text-slate-400 no-underline">Discord 官方客服</a></li>
                     <li><button onclick="switchTab('trouble')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">常見問題與免責聲明</button></li>
                 </ul>
             </div>
@@ -1183,7 +1184,10 @@
         }
 
         function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
+            const isOpen = !document.getElementById('mobile-menu').classList.toggle('hidden');
+            const button = document.getElementById('mobile-menu-button');
+            button.setAttribute('aria-expanded', String(isOpen));
+            button.setAttribute('aria-label', isOpen ? '關閉手機選單' : '開啟手機選單');
         }
 
         function showToast(msg) {
