@@ -107,6 +107,7 @@
             </div>
             <nav aria-label="後台導覽" class="flex gap-2 overflow-x-auto overscroll-x-contain lg:flex-col">
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="overview" aria-current="page"><span class="mr-2">◫</span>總覽</button>
+                <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="announcement"><span class="mr-2">◈</span>公告管理</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="orders"><span class="mr-2">▤</span>訂單與授權</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="products"><span class="mr-2">▦</span>商品管理</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="stock"><span class="mr-2">▧</span>卡密管理</button>
@@ -152,6 +153,34 @@
                         <div class="flex flex-wrap items-center justify-between gap-3"><div><h4 class="m-0 font-bold text-white">最近訂單</h4><p class="mt-1 text-xs text-slate-500">點選訂單可查看授權狀態。</p></div><button type="button" onclick="setAdminView('orders')" class="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs text-cyan-300 hover:bg-cyan-950/40">管理全部訂單</button></div>
                         <div class="mt-4 overflow-x-auto"><table class="w-full min-w-[760px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="px-3 py-3">時間</th><th class="px-3 py-3">訂單</th><th class="px-3 py-3">會員</th><th class="px-3 py-3">金額</th><th class="px-3 py-3">狀態</th><th class="px-3 py-3">明細</th></tr></thead><tbody id="overview-orders-body" class="divide-y divide-slate-800/80"><tr><td colspan="6" class="px-3 py-8 text-center text-slate-500">登入後載入訂單。</td></tr></tbody></table></div>
                     </div>
+                </section>
+
+                <section id="admin-view-announcement" class="admin-view hidden space-y-5">
+                    <div>
+                        <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">STOREFRONT ANNOUNCEMENT</p>
+                        <h3 class="m-0 text-2xl font-bold text-white">公告管理</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-400">修改商城頂端的「最新公告」。公告為純文字，Discord 客服連結由網站固定提供，儲存後重新載入商城即可看到更新。</p>
+                    </div>
+                    <form id="admin-announcement-form" class="glass max-w-3xl space-y-4 rounded-2xl p-4 sm:p-6" onsubmit="saveAdminAnnouncement(event)">
+                        <div>
+                            <label for="admin-announcement-content" class="mb-2 block text-sm font-semibold text-white">公告內容</label>
+                            <textarea id="admin-announcement-content" required maxlength="280" rows="3" disabled aria-describedby="admin-announcement-hint admin-announcement-count" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm leading-relaxed text-white outline-none focus:border-cyan-400" placeholder="輸入要顯示於商城頂端的公告"></textarea>
+                            <div class="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-400">
+                                <span id="admin-announcement-hint">限 1–280 字，不可換行；不要輸入卡號或密碼。</span>
+                                <span id="admin-announcement-count" aria-live="polite">0 / 280</span>
+                            </div>
+                        </div>
+                        <div class="rounded-xl border border-cyan-900/50 bg-slate-950/60 p-4">
+                            <p class="mb-2 text-xs font-bold text-cyan-300">公告預覽（尚未儲存）</p>
+                            <p id="admin-announcement-preview" class="m-0 break-words text-sm text-slate-200">載入公告後顯示預覽。</p>
+                        </div>
+                        <p id="admin-announcement-updated" class="m-0 text-xs text-slate-500"></p>
+                        <p id="admin-announcement-status" class="m-0 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">開啟公告管理後載入目前公告。</p>
+                        <div class="flex flex-wrap gap-3 border-t border-slate-800 pt-4">
+                            <button id="admin-announcement-reload" type="button" onclick="loadAdminAnnouncement()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-cyan-400">重新讀取</button>
+                            <button id="admin-announcement-save" type="submit" disabled class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50">儲存並發布公告</button>
+                        </div>
+                    </form>
                 </section>
 
                 <section id="admin-view-orders" class="admin-view hidden space-y-5">
@@ -464,6 +493,9 @@
         let authorizationStockAvailable = null;
         let adminAuditPage = 0;
         let adminAuditRequestId = 0;
+        let adminAnnouncementRequestId = 0;
+        let adminAnnouncementRevision = null;
+        let adminAnnouncementSaving = false;
         let pendingCancelOrderId = null;
         let pendingPaymentOrderId = null;
         let activeAdminView = 'overview';
@@ -509,6 +541,116 @@
             element.hidden = false;
         }
 
+        function setAnnouncementStatus(message, tone = 'info') {
+            const status = document.getElementById('admin-announcement-status');
+            status.className = `m-0 text-xs leading-relaxed ${tone === 'error' ? 'text-red-300' : tone === 'success' ? 'text-emerald-300' : 'text-slate-300'}`;
+            status.textContent = message;
+        }
+
+        function updateAnnouncementPreview() {
+            const value = document.getElementById('admin-announcement-content').value;
+            document.getElementById('admin-announcement-count').textContent = `${Array.from(value).length} / 280`;
+            document.getElementById('admin-announcement-preview').textContent = value.trim() || '公告內容預覽將顯示在這裡。';
+        }
+
+        async function loadAdminAnnouncement() {
+            if (!adminUser || !adminClient || adminAnnouncementSaving) return false;
+            const userId = adminUser.id;
+            const requestId = ++adminAnnouncementRequestId;
+            const input = document.getElementById('admin-announcement-content');
+            const reload = document.getElementById('admin-announcement-reload');
+            const save = document.getElementById('admin-announcement-save');
+            adminAnnouncementRevision = null;
+            input.disabled = true;
+            reload.disabled = true;
+            save.disabled = true;
+            setAnnouncementStatus('正在讀取目前公告…');
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_get_shop_announcement');
+                if (error) throw error;
+                if (requestId !== adminAnnouncementRequestId || adminUser?.id !== userId) return false;
+                if (!data || typeof data.content !== 'string' || !Number.isSafeInteger(data.revision) || data.revision < 1) {
+                    throw new Error('公告資料不完整，請確認已部署公告資料庫腳本。');
+                }
+                adminAnnouncementRevision = data.revision;
+                input.value = data.content;
+                input.setCustomValidity('');
+                input.disabled = false;
+                save.disabled = false;
+                updateAnnouncementPreview();
+                document.getElementById('admin-announcement-updated').textContent = data.updated_at
+                    ? `目前版本 ${data.revision} · 更新於 ${formatDate(data.updated_at)}`
+                    : `目前版本 ${data.revision}`;
+                setAnnouncementStatus('已載入公告。修改後按「儲存並發布公告」。');
+                return true;
+            } catch (error) {
+                if (requestId !== adminAnnouncementRequestId || adminUser?.id !== userId) return false;
+                if (handleRevokedAdminAccess(error)) return false;
+                console.error('Admin announcement loading failed:', error);
+                setAnnouncementStatus(getAdminError(error), 'error');
+                return false;
+            } finally {
+                if (requestId === adminAnnouncementRequestId && adminUser?.id === userId) reload.disabled = false;
+            }
+        }
+
+        async function saveAdminAnnouncement(event) {
+            event?.preventDefault();
+            if (!adminUser || !adminClient || adminAnnouncementSaving || adminAnnouncementRevision === null) return;
+            const form = document.getElementById('admin-announcement-form');
+            const input = document.getElementById('admin-announcement-content');
+            const content = input.value.trim();
+            input.setCustomValidity('');
+            if (Array.from(content).length < 1 || Array.from(content).length > 280 || /[\u0000-\u001f\u007f]/.test(input.value)) {
+                input.setCustomValidity('請輸入 1–280 字公告純文字，不可包含換行或控制字元。');
+            }
+            if (!form.reportValidity()) return;
+
+            const userId = adminUser.id;
+            const expectedRevision = adminAnnouncementRevision;
+            const requestId = ++adminAnnouncementRequestId;
+            const reload = document.getElementById('admin-announcement-reload');
+            const save = document.getElementById('admin-announcement-save');
+            adminAnnouncementSaving = true;
+            reload.disabled = true;
+            save.disabled = true;
+            input.disabled = true;
+            setAnnouncementStatus('正在儲存公告…');
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_save_shop_announcement', {
+                    p_content: content,
+                    p_expected_revision: expectedRevision
+                });
+                if (error) throw error;
+                if (requestId !== adminAnnouncementRequestId || adminUser?.id !== userId) return;
+                if (data?.content !== content || data?.revision !== expectedRevision + 1) {
+                    throw new Error('公告儲存結果無法確認，請重新讀取公告後檢查。');
+                }
+                adminAnnouncementRevision = data.revision;
+                input.value = data.content;
+                updateAnnouncementPreview();
+                document.getElementById('admin-announcement-updated').textContent = data.updated_at
+                    ? `目前版本 ${data.revision} · 更新於 ${formatDate(data.updated_at)}`
+                    : `目前版本 ${data.revision}`;
+                setAnnouncementStatus('公告已儲存並發布。重新載入商城頁面可查看最新內容。', 'success');
+            } catch (error) {
+                if (requestId !== adminAnnouncementRequestId || adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
+                console.error('Admin announcement save failed:', error);
+                adminAnnouncementRevision = null;
+                setAnnouncementStatus(getAdminError(error), 'error');
+            } finally {
+                if (requestId === adminAnnouncementRequestId && adminUser?.id === userId) {
+                    adminAnnouncementSaving = false;
+                    input.disabled = false;
+                    reload.disabled = false;
+                    save.disabled = adminAnnouncementRevision === null;
+                }
+            }
+        }
+
         function formatCurrency(amount) {
             const value = Number(amount);
             return Number.isFinite(value) ? `NT$ ${new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(value)}` : '—';
@@ -532,6 +674,12 @@
 
         function getAdminError(error) {
             const message = String(error?.message || '未知錯誤');
+            if (/announcement version conflict/i.test(message)) return '公告已由其他管理員修改。請先複製未儲存內容，再按「重新讀取」查看最新公告。';
+            if (/invalid announcement data/i.test(message)) return '公告需為 1–280 字純文字，且不可包含換行。';
+            if (/admin_(?:get|save)_shop_announcement/i.test(message) &&
+                (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) {
+                return '尚未部署公告功能。請在 Supabase SQL Editor 執行 sql/supabase-shop-announcement.sql，再重新整理後台。';
+            }
             if (/only pending orders can be cancelled/i.test(message)) return '此訂單已不在待付款狀態，無法取消；請重新整理訂單列表。';
             if (/only pending orders can be confirmed/i.test(message)) return '此訂單已不在待付款狀態，無法再確認收款；請重新整理。';
             if (/verified payment reference required/i.test(message)) return '請先實際核對款項，並輸入 8–80 字的有效交易參考編號。';
@@ -1404,7 +1552,7 @@
                 import_card_stock: '新增／匯入卡密', void_card_stock: '刪除卡密（作廢）',
                 grant_admin_role: '授予管理員', revoke_admin_role: '撤銷管理員',
                 pause_member_orders: '暫停新下單', resume_member_orders: '恢復新下單',
-                create_product: '建立商品', update_product: '修改商品', view_order_detail: '查看訂單明細'
+                create_product: '建立商品', update_product: '修改商品', update_announcement: '更新公告', view_order_detail: '查看訂單明細'
             };
             entries.forEach(entry => {
                 const row = document.createElement('tr');
@@ -2139,6 +2287,7 @@
         function clearSensitiveAdminData() {
             adminRequestId += 1;
             adminOverviewRequestId += 1;
+            adminAnnouncementRequestId += 1;
             adminDetailRequestId += 1;
             adminProductRequestId += 1;
             adminStockRequestId += 1;
@@ -2147,6 +2296,8 @@
             adminMemberRequestId += 1;
             adminAuditRequestId += 1;
             adminVisibleOrders = [];
+            adminAnnouncementRevision = null;
+            adminAnnouncementSaving = false;
             adminVisibleProducts = [];
             adminVisibleStock = [];
             adminStockProducts = [];
@@ -2178,6 +2329,15 @@
             document.getElementById('admin-members-body').replaceChildren();
             document.getElementById('admin-audit-body').replaceChildren();
             document.getElementById('admin-orders-filter').reset();
+            document.getElementById('admin-announcement-form').reset();
+            document.getElementById('admin-announcement-content').disabled = true;
+            document.getElementById('admin-announcement-content').setCustomValidity('');
+            document.getElementById('admin-announcement-save').disabled = true;
+            document.getElementById('admin-announcement-reload').disabled = false;
+            document.getElementById('admin-announcement-count').textContent = '0 / 280';
+            document.getElementById('admin-announcement-preview').textContent = '載入公告後顯示預覽。';
+            document.getElementById('admin-announcement-updated').textContent = '';
+            setAnnouncementStatus('開啟公告管理後載入目前公告。');
             document.getElementById('admin-products-filter').reset();
             document.getElementById('admin-stock-filter').reset();
             document.getElementById('admin-members-filter').reset();
@@ -2338,13 +2498,14 @@
         }
 
         function setAdminView(view) {
-            activeAdminView = ['overview', 'orders', 'products', 'stock', 'members', 'audit'].includes(view) ? view : 'overview';
+            activeAdminView = ['overview', 'announcement', 'orders', 'products', 'stock', 'members', 'audit'].includes(view) ? view : 'overview';
             document.querySelectorAll('.admin-view').forEach(section => section.classList.toggle('hidden', section.id !== `admin-view-${activeAdminView}`));
             document.querySelectorAll('[data-admin-view]').forEach(button => {
                 if (button.dataset.adminView === activeAdminView) button.setAttribute('aria-current', 'page');
                 else button.removeAttribute('aria-current');
             });
-            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', orders: '訂單與授權', products: '商品管理', stock: '卡密管理', members: '會員管理', audit: '操作紀錄' }[activeAdminView];
+            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', announcement: '公告管理', orders: '訂單與授權', products: '商品管理', stock: '卡密管理', members: '會員管理', audit: '操作紀錄' }[activeAdminView];
+            if (activeAdminView === 'announcement') void loadAdminAnnouncement();
             if (activeAdminView === 'orders') void loadAdminOrders(0);
             if (activeAdminView === 'products') void loadAdminProducts(0);
             if (activeAdminView === 'stock') void loadCardStockProducts().then(loaded => {
@@ -2357,6 +2518,10 @@
         async function refreshCurrentView() {
             if (!adminUser) return;
             try {
+                if (activeAdminView === 'announcement') {
+                    await loadAdminAnnouncement();
+                    return;
+                }
                 if (activeAdminView === 'products') {
                     const loaded = await loadAdminProducts(adminProductPage);
                     if (loaded) setAppStatus('商品清單已更新。', 'success');
@@ -2496,6 +2661,10 @@
             document.getElementById('admin-stock-product-filter').addEventListener('change', () => void loadAdminCardStock(0));
             document.getElementById('admin-stock-status-filter').addEventListener('change', () => void loadAdminCardStock(0));
             document.getElementById('admin-member-status').addEventListener('change', () => void loadAdminMembers(0));
+            document.getElementById('admin-announcement-content').addEventListener('input', event => {
+                event.target.setCustomValidity('');
+                updateAnnouncementPreview();
+            });
             document.getElementById('product-price').addEventListener('input', event => event.target.setCustomValidity(''));
             document.getElementById('member-reason').addEventListener('input', event => event.target.setCustomValidity(''));
             document.getElementById('admin-role-confirm-email').addEventListener('input', event => event.target.setCustomValidity(''));

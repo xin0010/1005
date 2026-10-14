@@ -278,7 +278,8 @@
             </div>
             <div class="overflow-hidden whitespace-nowrap w-full">
                 <div class="inline-block animate-[marquee_25s_linear_infinite] text-slate-300" role="marquee" aria-label="即時公告">
-                    🔥 歡迎來到 AXG SHOP！登入後可建立待付款訂單，請攜帶訂單編號至 <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="text-cyan-400 underline">Discord 客群</a>洽詢付款。
+                    <span id="shop-announcement-text">🔥 歡迎來到 AXG SHOP！登入後可建立待付款訂單，請攜帶訂單編號洽詢付款。</span>
+                    <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="ml-2 text-cyan-400 underline">Discord 客服 ↗</a>
                 </div>
             </div>
         </div>
@@ -801,6 +802,18 @@
         let inMemoryOrderRequest = null;
         let cartPreviousFocus = null;
         let orderLookupRequestId = 0;
+
+        async function loadShopAnnouncement() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient.rpc('get_shop_announcement');
+                if (error) throw error;
+                if (typeof data !== 'string' || !data.trim()) throw new Error('Announcement unavailable');
+                document.getElementById('shop-announcement-text').textContent = data;
+            } catch (error) {
+                console.warn('Announcement unavailable; showing the default text.', error);
+            }
+        }
 
         function updateHomeBackgroundVideo() {
             const home = document.getElementById('view-home');
@@ -2030,6 +2043,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateCartUI();
             void loadCatalog();
+            void loadShopAnnouncement();
             initializeSupabaseAuth();
 
             const homeVideo = document.getElementById('home-background-video');
