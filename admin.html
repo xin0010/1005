@@ -21,9 +21,53 @@
         .admin-grid { background-image: linear-gradient(rgba(56,189,248,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.035) 1px, transparent 1px); background-size: 32px 32px; }
         .glass { background: rgba(13,21,39,.82); border: 1px solid rgba(148,163,184,.13); backdrop-filter: blur(14px); }
         .nav-item[aria-current="page"] { color: #67e8f9; background: rgba(8,145,178,.13); border-color: rgba(34,211,238,.22); }
+        .nav-item { min-height: 44px; flex: none; white-space: nowrap; }
+        .admin-view button, #admin-app header button, dialog button { min-height: 44px; }
+        .admin-pagination { flex-wrap: wrap; }
+        .admin-pagination span { flex: 1; min-width: 6rem; text-align: center; overflow-wrap: anywhere; }
+        #admin-login-signout { min-height: 44px; }
         :focus-visible { outline: 2px solid #22d3ee; outline-offset: 3px; }
         dialog { color: inherit; background: #0d1527; border: 1px solid rgba(34,211,238,.3); border-radius: 20px; padding: 0; }
         dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(5px); }
+        #detail-subtitle { overflow-wrap: anywhere; }
+        @media (max-width: 767px) {
+            input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
+            dialog { max-height: calc(100dvh - 2rem); max-width: calc(100vw - 2rem); overflow-y: auto; }
+            table { display: block; width: 100%; min-width: 0 !important; }
+            table thead {
+                position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+                overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+            }
+            table tbody { display: block; width: 100%; }
+            table tbody tr {
+                display: block; margin: .75rem; padding: .75rem;
+                border: 1px solid rgba(148,163,184,.23); border-radius: 1rem;
+                background: rgba(15,23,42,.72);
+            }
+            table tbody td:not([colspan]) {
+                display: flex; justify-content: space-between; align-items: flex-start;
+                gap: .5rem 1rem; min-width: 0 !important; max-width: none !important;
+                padding: .55rem 0; text-align: right; white-space: normal;
+                overflow-wrap: anywhere;
+            }
+            table tbody td:not([colspan]) + td:not([colspan]) { border-top: 1px solid rgba(148,163,184,.13); }
+            table tbody td[data-label]::before {
+                content: attr(data-label); flex: none; color: #94a3b8;
+                font-weight: 600; text-align: left; white-space: nowrap;
+            }
+            table tbody td[data-label="操作"], table tbody td[data-label="明細"],
+            table tbody td[data-label="商品"], table tbody td[data-label="會員信箱／ID"],
+            table tbody td[data-label="卡號（符合條件時）"], table tbody td[data-label="對象／原因"] {
+                display: block; text-align: left;
+            }
+            table tbody td[data-label="操作"]::before, table tbody td[data-label="明細"]::before,
+            table tbody td[data-label="商品"]::before, table tbody td[data-label="會員信箱／ID"]::before,
+            table tbody td[data-label="卡號（符合條件時）"]::before,
+            table tbody td[data-label="對象／原因"]::before { display: block; margin-bottom: .4rem; }
+            table tbody td[colspan] { display: block; width: 100%; padding: 1rem 0; white-space: normal; }
+            table tbody td .truncate { max-width: none; overflow: visible; text-overflow: clip; white-space: normal; }
+            table tbody button { display: inline-flex; align-items: center; justify-content: center; }
+        }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
     </style>
 </head>
@@ -56,12 +100,12 @@
     </main>
 
     <div id="admin-app" hidden class="min-h-screen lg:flex">
-        <aside class="border-b border-slate-800 bg-[#0b1120] p-4 lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-5">
-            <div class="mb-5 flex items-center gap-3 px-2 lg:mb-10">
+        <aside class="sticky top-0 z-20 border-b border-slate-800 bg-[#0b1120] p-3 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-5">
+            <div class="hidden items-center gap-3 px-2 lg:mb-10 lg:flex">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400 font-extrabold text-slate-950">AXG</div>
                 <div><p class="mono m-0 text-[10px] uppercase tracking-[.2em] text-cyan-300">CONTROL DESK</p><p class="m-0 text-sm font-bold text-white">管理中心</p></div>
             </div>
-            <nav aria-label="後台導覽" class="flex gap-2 overflow-x-auto lg:flex-col">
+            <nav aria-label="後台導覽" class="flex gap-2 overflow-x-auto overscroll-x-contain lg:flex-col">
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="overview" aria-current="page"><span class="mr-2">◫</span>總覽</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="orders"><span class="mr-2">▤</span>訂單與授權</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="products"><span class="mr-2">▦</span>商品管理</button>
@@ -76,9 +120,9 @@
         </aside>
 
         <div class="min-w-0 flex-1 lg:ml-64">
-            <header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-800 bg-[#080d18]/90 px-4 py-3 backdrop-blur-xl sm:px-7">
-                <div><p class="mono mb-0.5 text-[10px] uppercase tracking-[.2em] text-slate-500">ADMINISTRATION</p><h2 id="admin-page-title" class="m-0 text-lg font-bold text-white">營運總覽</h2></div>
-                <div class="flex items-center gap-3">
+            <header class="z-10 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-[#080d18]/90 px-4 py-3 backdrop-blur-xl sm:px-7 lg:sticky lg:top-0">
+                <div class="min-w-0"><p class="mono mb-0.5 text-[10px] uppercase tracking-[.2em] text-slate-500">ADMINISTRATION</p><h2 id="admin-page-title" class="m-0 text-lg font-bold text-white">營運總覽</h2></div>
+                <div class="flex items-center gap-2 sm:gap-3">
                     <span id="admin-email-label" class="hidden max-w-48 truncate text-xs text-slate-400 sm:block"></span>
                     <button type="button" onclick="refreshCurrentView()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400">重新整理</button>
                     <button type="button" onclick="adminSignOut()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-red-400 hover:text-red-300">登出</button>
@@ -133,7 +177,7 @@
                         </div>
                         <button type="button" onclick="openProductEditor()" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300">＋ 新增商品</button>
                     </div>
-                    <form id="admin-products-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 sm:flex-row" onsubmit="loadAdminProducts(0, event)">
+                    <form id="admin-products-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminProducts(0, event)">
                         <label class="sr-only" for="admin-product-search">搜尋商品</label>
                         <input id="admin-product-search" type="search" maxlength="160" autocomplete="off" placeholder="搜尋商品名稱、分類或編號" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
                         <label class="sr-only" for="admin-product-status">上架狀態</label>
@@ -174,7 +218,7 @@
                         <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">已核發</p><p id="stock-metric-issued" class="mono m-0 text-2xl font-bold text-cyan-300">—</p></article>
                         <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">已作廢</p><p id="stock-metric-void" class="mono m-0 text-2xl font-bold text-slate-300">—</p></article>
                     </div>
-                    <form id="admin-stock-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 sm:flex-row" onsubmit="loadAdminCardStock(0, event)">
+                    <form id="admin-stock-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminCardStock(0, event)">
                         <label class="sr-only" for="admin-stock-product-filter">篩選商品</label>
                         <select id="admin-stock-product-filter" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">所有商品</option></select>
                         <label class="sr-only" for="admin-stock-status-filter">篩選庫存狀態</label>
@@ -198,7 +242,7 @@
                         <a href="https://supabase.com/dashboard/project/zquzmagkcqjfjjuarhkd/auth/users" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-cyan-500/40 px-4 py-2.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40">Auth 使用者管理 ↗</a>
                     </div>
                     <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">授予管理員身分會開放訂單、商品及會員管理功能，但不會授予「再新增管理員」的資格。撤銷後現有登入不會自動登出，但後續管理 API 會拒絕其存取。首次角色管理員須由專案擁有者在 SQL Editor 指定。建立／刪除登入帳號與重設密碼仍須透過 Supabase Auth；本頁不接觸密碼，也不使用 Service Role Key。</p>
-                    <form id="admin-members-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 sm:flex-row" onsubmit="loadAdminMembers(0, event)">
+                    <form id="admin-members-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminMembers(0, event)">
                         <label class="sr-only" for="admin-member-search">搜尋會員</label>
                         <input id="admin-member-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋會員信箱或使用者 ID" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
                         <label class="sr-only" for="admin-member-status">新下單權限</label>
@@ -591,6 +635,16 @@
             return cell;
         }
 
+        function appendLabeledRow(body, row) {
+            const headings = body.closest('table')?.tHead?.rows[0]?.cells;
+            Array.from(row.cells).forEach((cell, index) => {
+                if (cell.colSpan === 1 && headings?.[index]) {
+                    cell.dataset.label = headings[index].textContent.trim();
+                }
+            });
+            body.appendChild(row);
+        }
+
         function fillAdminOrderTable(body, orders, mode = 'orders') {
             body.replaceChildren();
             if (!orders.length) {
@@ -645,7 +699,7 @@
                     actionCell.appendChild(cancelButton);
                 }
                 row.appendChild(actionCell);
-                body.appendChild(row);
+                appendLabeledRow(body, row);
             });
         }
 
@@ -794,7 +848,7 @@
                 toggleButton.addEventListener('click', () => void toggleProductActive(product, toggleButton));
                 actions.append(editButton, toggleButton);
                 row.appendChild(actions);
-                body.appendChild(row);
+                appendLabeledRow(body, row);
             });
         }
 
@@ -928,7 +982,7 @@
                     actionCell.appendChild(button);
                 }
                 row.appendChild(actionCell);
-                body.appendChild(row);
+                appendLabeledRow(body, row);
             });
         }
 
@@ -1270,7 +1324,7 @@
                     actions.appendChild(revokeButton);
                 }
                 row.appendChild(actions);
-                body.appendChild(row);
+                appendLabeledRow(body, row);
             });
         }
 
@@ -1372,7 +1426,7 @@
                 if (details.reference) parts.push(`收款編號 ${details.reference}`);
                 if (details.reason) parts.push(`原因：${details.reason}`);
                 buildTableCell(row, parts.join(' · ') || '—', 'min-w-56 break-all px-4 py-3 text-slate-400');
-                body.appendChild(row);
+                appendLabeledRow(body, row);
             });
         }
 
@@ -1825,7 +1879,7 @@
                         actionCell.appendChild(action);
                     }
                     row.appendChild(actionCell);
-                    tbody.appendChild(row);
+                    appendLabeledRow(tbody, row);
                 });
                 return true;
             } catch (error) {
