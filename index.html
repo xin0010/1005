@@ -309,10 +309,10 @@
                 </h1>
                 
                 <p class="text-slate-300 max-w-2xl mx-auto font-mono text-sm sm:text-base mb-10 leading-relaxed">
-                    提供 PC 端與 iOS/Android 熱門遊戲商品。建立訂單後可至 Discord 洽詢付款與授權事宜。
+                    建立訂單後可至 Discord 洽詢付款。
                 </p>
 
-                <div class="flex flex-wrap justify-center gap-4 mb-16">
+                <div class="flex flex-wrap justify-center gap-4">
                     <button onclick="switchTab('mobile-store')" class="cyber-button inline-flex items-center gap-2.5 px-8 py-4 rounded-xl font-mono text-sm font-bold cursor-pointer border-0 shadow-lg">
                         <i class="fa-solid fa-store"></i>
                         <span>進入輔助商城</span>
@@ -321,32 +321,6 @@
                         <i class="fa-brands fa-discord text-lg"></i>
                         <span>官方 Discord 社群</span>
                     </a>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left max-w-4xl mx-auto font-mono">
-                    <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
-                        <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
-                            <i class="fa-solid fa-bolt"></i>
-                        </div>
-                        <h3 class="text-white font-bold text-sm mb-1">會員訂單查詢</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">登入後可查看本人的待付款訂單與授權處理狀態。</p>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
-                        <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
-                            <i class="fa-solid fa-shield-halved"></i>
-                        </div>
-                        <h3 class="text-white font-bold text-sm mb-1">獨家底層代碼</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">採用最新反作弊避障機制，確保玩家帳號極致穩定安全。</p>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-cyan-900/40 p-5 rounded-2xl backdrop-blur-md">
-                        <div class="w-10 h-10 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg mb-3 border border-cyan-500/30">
-                            <i class="fa-solid fa-headset"></i>
-                        </div>
-                        <h3 class="text-white font-bold text-sm mb-1">真人遠端售後</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed">提供 Discord 提供真人克服，新手輕鬆上手。</p>
-                    </div>
                 </div>
             </div>
         </section>
@@ -512,15 +486,16 @@
                 <div class="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 p-4 text-xs text-amber-200" role="note">
                     <div class="flex items-start gap-3">
                         <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
-                        <p class="m-0 leading-relaxed"><strong>重要提醒：</strong>目前未連接會員錢包或金流服務。本頁僅提供洽詢入口；跳轉 Discord 不代表已建立儲值申請、完成付款或變更餘額。</p>
+                        <p class="m-0 leading-relaxed"><strong>重要提醒：</strong>會員餘額由管理員在核對實際款項後手動調整，本站未連接自動金流。本頁僅提供洽詢入口；跳轉 Discord 不代表已建立儲值申請、完成付款或變更餘額。餘額目前不能直接支付商城訂單。</p>
                     </div>
                 </div>
 
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl space-y-6">
                     <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800" aria-live="polite">
-                        <label class="block text-xs text-slate-400 mb-1" for="user-balance">目前帳戶餘額</label>
-                        <div class="text-2xl font-extrabold text-cyan-400" id="user-balance">尚未連接</div>
-                        <p class="text-[11px] text-slate-500 mt-2 mb-0">正式餘額應由伺服器驗證後提供，請勿以瀏覽器資料作為付款或入帳依據。</p>
+                        <p class="text-xs text-slate-400 mb-1">目前帳戶餘額</p>
+                        <div class="text-2xl font-extrabold text-cyan-400" id="user-balance">請先登入查看</div>
+                        <p id="balance-status" class="text-[11px] text-slate-400 mt-2 mb-0" role="status">登入後可查詢後台記錄的本人餘額；洽詢不會自動入帳。</p>
+                        <button id="balance-refresh" type="button" onclick="loadMyBalance()" disabled class="mt-3 rounded-lg border border-cyan-500/40 bg-cyan-950/30 px-3 py-2 text-xs text-cyan-200 hover:bg-cyan-900/40 disabled:cursor-not-allowed disabled:opacity-50">重新整理餘額</button>
                     </div>
 
                     <form id="topup-form" class="space-y-5" onsubmit="processTopup(event)">
@@ -585,10 +560,6 @@
         <section id="view-account" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-md mx-auto">
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl">
-                    <div class="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 p-3 text-xs leading-relaxed text-amber-200" role="note">
-                        會員驗證由 Supabase Auth 處理。請在 Supabase 專案設定允許的網站網址、郵件驗證及重新導向網址；不要將資料庫密碼或 secret/service-role key 放進前端。
-                    </div>
-
                     <div id="auth-session-panel" class="hidden mb-5 rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-4" aria-live="polite">
                         <p class="mb-1 text-xs text-slate-400">目前登入帳號</p>
                         <p id="auth-session-email" class="mb-4 break-all text-sm font-bold text-cyan-300"></p>
@@ -802,6 +773,60 @@
         let inMemoryOrderRequest = null;
         let cartPreviousFocus = null;
         let orderLookupRequestId = 0;
+        let balanceRequestId = 0;
+
+        function resetMyBalanceDisplay() {
+            balanceRequestId += 1;
+            document.getElementById('user-balance').textContent = currentAuthUser ? '尚未讀取' : '請先登入查看';
+            document.getElementById('balance-status').textContent = currentAuthUser
+                ? '開啟儲值頁或按「重新整理餘額」即可查詢後台記錄。'
+                : '登入後可查詢後台記錄的本人餘額；洽詢不會自動入帳。';
+            const refresh = document.getElementById('balance-refresh');
+            refresh.disabled = !currentAuthUser;
+            refresh.removeAttribute('aria-busy');
+        }
+
+        async function loadMyBalance() {
+            const userId = currentAuthUser?.id;
+            if (!userId) {
+                resetMyBalanceDisplay();
+                return;
+            }
+            const requestId = ++balanceRequestId;
+            const label = document.getElementById('user-balance');
+            const status = document.getElementById('balance-status');
+            const refresh = document.getElementById('balance-refresh');
+            label.textContent = '讀取中…';
+            status.textContent = '正在安全讀取目前帳號的餘額…';
+            refresh.disabled = true;
+            refresh.setAttribute('aria-busy', 'true');
+            try {
+                if (!supabaseClient) throw new Error('Supabase unavailable');
+                const { data, error } = await supabaseClient.rpc('get_my_balance');
+                if (error) throw error;
+                if (requestId !== balanceRequestId || currentAuthUser?.id !== userId) return;
+                const value = data?.balance;
+                const balance = typeof value === 'number' ? value
+                    : (typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : NaN);
+                if (!Number.isSafeInteger(balance) || balance < 0 || balance > 100000000) {
+                    throw new Error('餘額資料不完整');
+                }
+                label.textContent = `NT$ ${new Intl.NumberFormat('zh-TW').format(balance)}`;
+                status.textContent = '此為後台記錄的本人餘額；管理員調整後可按「重新整理餘額」。Discord 洽詢不會自動入帳。';
+            } catch (error) {
+                if (requestId !== balanceRequestId || currentAuthUser?.id !== userId) return;
+                console.warn('Member balance loading failed:', error);
+                label.textContent = '暫時無法查詢';
+                status.textContent = error?.code === 'PGRST202' || /get_my_balance.*(?:does not exist|schema cache|could not find)/i.test(String(error?.message || ''))
+                    ? '餘額功能尚未部署，請聯絡管理員在 Supabase 套用餘額腳本。'
+                    : '讀取失敗，請稍後重新整理；此狀態不表示帳戶餘額為零。';
+            } finally {
+                if (requestId === balanceRequestId && currentAuthUser?.id === userId) {
+                    refresh.disabled = false;
+                    refresh.removeAttribute('aria-busy');
+                }
+            }
+        }
 
         async function loadShopAnnouncement() {
             if (!supabaseClient) return;
@@ -856,6 +881,7 @@
             if (tabId === 'orders') {
                 queryOrders();
             }
+            if (tabId === 'wallet') void loadMyBalance();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -1877,6 +1903,7 @@
                 if (data.session) {
                     currentAuthUser = data.user;
                     renderAuthView();
+                    if (!document.getElementById('view-wallet').classList.contains('hidden')) void loadMyBalance();
                     setAuthStatus('帳號已建立並登入。', 'success');
                 } else {
                     setAuthStatus('註冊申請已送出。請至電子郵件收件匣（含垃圾郵件）完成驗證後再登入。', 'success');
@@ -1961,6 +1988,7 @@
                 currentAuthUser = data.user || currentAuthUser;
                 form.reset();
                 renderAuthView();
+                if (!document.getElementById('view-wallet').classList.contains('hidden')) void loadMyBalance();
                 setAuthStatus('密碼已更新，請妥善保管新密碼。', 'success');
             } catch (error) {
                 setAuthStatus(getAuthErrorMessage(error), 'error');
@@ -1981,6 +2009,7 @@
                 currentAuthUser = null;
                 authRecoveryActive = false;
                 activeAuthTab = 'login';
+                resetMyBalanceDisplay();
                 renderAuthView();
                 setAuthStatus('已安全登出。', 'success');
             } catch (error) {
@@ -1994,7 +2023,8 @@
                 return;
             }
 
-            if (!ensureSupportedAuthOrigin()) return;
+            // 直接開啟檔案時不顯示初始警告；提交表單時仍會提示並阻止驗證。
+            if (!isAllowedMemberOrigin()) return;
 
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'PASSWORD_RECOVERY') {
@@ -2005,8 +2035,12 @@
                     activeAuthTab = 'login';
                 }
 
+                const previousUserId = currentAuthUser?.id;
                 currentAuthUser = session?.user || null;
+                if (previousUserId !== currentAuthUser?.id) resetMyBalanceDisplay();
                 renderAuthView();
+                if (currentAuthUser && !document.getElementById('view-wallet').classList.contains('hidden') &&
+                    (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) void loadMyBalance();
                 const ordersView = document.getElementById('view-orders');
                 if (currentAuthUser && ordersView && !ordersView.classList.contains('hidden') && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
                     window.setTimeout(() => {
@@ -2056,6 +2090,11 @@
                 updateHomeBackgroundVideo();
             });
             document.addEventListener('visibilitychange', updateHomeBackgroundVideo);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && currentAuthUser && !document.getElementById('view-wallet').classList.contains('hidden')) {
+                    void loadMyBalance();
+                }
+            });
             window.matchMedia?.('(prefers-reduced-motion: reduce)')?.addEventListener?.('change', updateHomeBackgroundVideo);
             navigator.connection?.addEventListener?.('change', updateHomeBackgroundVideo);
             updateHomeBackgroundVideo();
