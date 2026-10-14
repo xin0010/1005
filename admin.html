@@ -270,7 +270,7 @@
                         </div>
                         <a href="https://supabase.com/dashboard/project/zquzmagkcqjfjjuarhkd/auth/users" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-cyan-500/40 px-4 py-2.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40">Auth 使用者管理 ↗</a>
                     </div>
-                    <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">加值僅在實際核對款項並輸入未使用的收款編號後由管理員手動執行；Discord 洽詢不會入帳，餘額也不會自動支付訂單。授予管理員身分會開放訂單、商品及會員管理，但不會授予再次新增管理員的資格。建立／刪除帳號與重設密碼仍由 Supabase Auth 處理，本頁不接觸密碼或 Service Role Key。</p>
+                    <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">加值僅在核對實際收款並輸入未使用的收款編號後由管理員手動執行；Discord 洽詢不會入帳。會員可選擇餘額付款，由資料庫一次扣款並標記訂單已付款，發卡仍需管理員處理。授予管理員身分會開放訂單、商品及會員管理，但不會授予再次新增管理員的資格。建立／刪除帳號與重設密碼仍由 Supabase Auth 處理，本頁不接觸密碼或 Service Role Key。</p>
                     <form id="admin-members-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminMembers(0, event)">
                         <label class="sr-only" for="admin-member-search">搜尋會員</label>
                         <input id="admin-member-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋會員信箱或使用者 ID" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
@@ -304,6 +304,7 @@
 
     <dialog id="admin-order-dialog" class="w-[calc(100%-2rem)] max-w-3xl shadow-2xl shadow-black/50">
         <div class="flex items-start justify-between gap-4 border-b border-slate-800 p-5 sm:p-6"><div><p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-cyan-300">ORDER DETAIL</p><h2 id="detail-title" class="m-0 text-lg font-bold text-white">訂單明細</h2><p id="detail-subtitle" class="mb-0 mt-1 text-xs text-slate-500"></p></div><button type="button" onclick="closeOrderDetail()" aria-label="關閉訂單明細" class="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 hover:border-cyan-400">關閉</button></div>
+        <p id="detail-payment-source" class="mx-5 mb-0 mt-4 text-xs text-cyan-200 sm:mx-6" role="status" aria-live="polite"></p>
         <div id="detail-status" class="mx-5 mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300 sm:mx-6" role="status" aria-live="polite">正在載入…</div>
         <div class="max-h-[65vh] overflow-auto p-5 sm:p-6"><table class="w-full min-w-[850px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="py-3 pr-3">商品</th><th class="py-3 pr-3">數量／單價</th><th class="py-3 pr-3">授權狀態</th><th class="py-3 pr-3">卡號（符合條件時）</th><th class="py-3 pr-3">到期日</th><th class="py-3 text-right">操作</th></tr></thead><tbody id="detail-items-body" class="divide-y divide-slate-800"></tbody></table></div>
     </dialog>
@@ -445,7 +446,7 @@
             <h2 class="m-0 text-xl font-bold text-white">調整會員餘額</h2>
             <p id="balance-dialog-account" class="mono mb-0 break-all text-xs text-slate-400"></p>
             <p id="balance-dialog-current" class="mb-0 text-sm font-bold text-cyan-300"></p>
-            <p class="mb-0 text-xs leading-relaxed text-amber-200">只在外部實際核對收款後加值；操作會留存紀錄。Discord 洽詢及建立訂單不會入帳，也不能用餘額結帳。</p>
+            <p class="mb-0 text-xs leading-relaxed text-amber-200">只在外部實際核對收款後加值；操作會留存紀錄。Discord 洽詢及建立訂單不會入帳；會員選擇餘額付款時才會扣款。</p>
             <div><label for="balance-direction" class="mb-1.5 block text-xs font-semibold text-slate-300">調整方式</label><select id="balance-direction" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"><option value="credit">加值（需核對實際收款）</option><option value="debit">扣減（人工更正）</option></select></div>
             <div><label for="balance-amount" class="mb-1.5 block text-xs font-semibold text-slate-300">調整金額（NT$ 1–1,000,000 整數）</label><input id="balance-amount" type="number" min="1" max="1000000" step="1" required inputmode="numeric" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"></div>
             <p id="balance-dialog-result" class="mb-0 text-xs text-emerald-200" aria-live="polite">預估調整後餘額：—</p>
@@ -1582,7 +1583,7 @@
                     ? `已載入會員，但無法讀取餘額或調整：${getAdminError(balanceError)}`
                     : roleError
                         ? `已載入 ${adminVisibleMembers.length} 位會員，但無法確認角色管理權限：${getAdminError(roleError)}`
-                        : `已載入 ${adminVisibleMembers.length} 位會員；餘額由管理員手動調整，不會自動支付訂單。`,
+                        : `已載入 ${adminVisibleMembers.length} 位會員；餘額由管理員手動加值，會員選擇時可用餘額付款。`,
                 balanceError || roleError ? 'error' : 'info');
                 return true;
             } catch (error) {
@@ -2193,6 +2194,7 @@
             tbody.replaceChildren();
             document.getElementById('detail-title').textContent = '訂單明細';
             document.getElementById('detail-subtitle').textContent = '';
+            document.getElementById('detail-payment-source').textContent = '';
             document.getElementById('detail-status').textContent = '正在載入訂單授權明細…';
             if (!orderDialog.open) orderDialog.showModal();
 
@@ -2209,6 +2211,24 @@
                 const order = items[0];
                 document.getElementById('detail-title').textContent = `訂單 #${order.order_number || ''}`;
                 document.getElementById('detail-subtitle').textContent = `${order.customer_email || '會員'} · ${formatDate(order.created_at)} · ${formatCurrency(order.total_amount)}`;
+                if (order.status === 'paid') {
+                    try {
+                        const { data: payment, error: paymentError } = await adminClient.rpc('admin_get_balance_order_payment', {
+                            p_order_id: orderId
+                        });
+                        if (paymentError) throw paymentError;
+                        if (requestId !== adminDetailRequestId || adminUser?.id !== userId || !orderDialog.open) return false;
+                        if (typeof payment?.paid_with_balance !== 'boolean') throw new Error('付款來源資料不完整');
+                        document.getElementById('detail-payment-source').textContent = payment.paid_with_balance
+                            ? `付款來源：會員餘額扣款 ${formatCurrency(payment.amount)}（餘額 ${formatCurrency(payment.balance_before)} → ${formatCurrency(payment.balance_after)}）`
+                            : '付款來源：非會員餘額；請依實際收款紀錄核對。';
+                    } catch (error) {
+                        if (requestId !== adminDetailRequestId || adminUser?.id !== userId || !orderDialog.open) return false;
+                        if (handleRevokedAdminAccess(error)) return false;
+                        if (error?.code !== 'PGRST202' && !/schema cache|could not find the function/i.test(String(error?.message || ''))) throw error;
+                        document.getElementById('detail-payment-source').textContent = '無法確認付款來源：請先在 Supabase 部署最新餘額腳本。';
+                    }
+                }
                 document.getElementById('detail-status').textContent = '已付款且待發放的商品可核發授權；已核發的商品可撤銷。卡號只在已付款且未到期時顯示，撤銷後將立即無法查閱。';
                 const labels = { pending: '待發放', active: '有效', expired: '已到期', revoked: '已撤銷' };
                 items.forEach(item => {
@@ -2273,6 +2293,7 @@
             adminDetailRequestId += 1;
             document.getElementById('detail-items-body').replaceChildren();
             document.getElementById('detail-status').textContent = '';
+            document.getElementById('detail-payment-source').textContent = '';
             if (orderDialog.open) orderDialog.close();
         }
 
@@ -2649,6 +2670,7 @@
             document.getElementById('overview-updated').textContent = '尚未載入';
             document.getElementById('detail-title').textContent = '訂單明細';
             document.getElementById('detail-subtitle').textContent = '';
+            document.getElementById('detail-payment-source').textContent = '';
             document.getElementById('detail-status').textContent = '';
             document.getElementById('admin-email-label').textContent = '';
             if (orderDialog.open) orderDialog.close();

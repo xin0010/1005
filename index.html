@@ -151,6 +151,7 @@
         .t1st-chip { min-height: 44px; }
         .filter-tab-btn { flex: none; min-height: 44px; }
         .cart-panel { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+        #order-discord-link.hidden { display: none; }
 
         @media (max-width: 639px) {
             input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
@@ -309,7 +310,7 @@
                 </h1>
                 
                 <p class="text-slate-300 max-w-2xl mx-auto font-mono text-sm sm:text-base mb-10 leading-relaxed">
-                    建立訂單後可至 Discord 洽詢付款。
+                    建立訂單後可用會員餘額付款，或至 Discord 洽詢付款。
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4">
@@ -329,7 +330,7 @@
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-8 font-mono">
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide mb-3">AXG SHOP 授權商城</h2>
-                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">選擇所需的遊戲輔助或數位商品，登入後建立訂單並至 Discord 聯繫客服洽詢付款。</p>
+                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">登入後可選擇使用會員餘額立即付款，或建立待付款訂單至 Discord 洽詢。</p>
                 </div>
 
                 <p id="catalog-status" role="status" aria-live="polite" class="mb-6 text-center font-mono text-xs text-slate-400">正在載入商品與即時價格…</p>
@@ -398,9 +399,9 @@
                 </div>
 
                 <div id="order-created-panel" class="hidden mb-6 rounded-2xl border border-indigo-500/40 bg-indigo-950/30 p-5 text-sm text-indigo-100" role="status" aria-live="polite">
-                    <p class="mb-2 font-bold">待付款訂單已建立</p>
+                    <p id="order-created-title" class="mb-2 font-bold">待付款訂單已建立</p>
                     <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-cyan-300"></strong></p>
-                    <p class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
+                    <p id="order-created-description" class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
                     <a id="order-discord-link" href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-indigo-400/50 px-4 py-2 text-indigo-200 hover:bg-indigo-900/40">前往 Discord 洽詢付款</a>
                 </div>
 
@@ -483,13 +484,6 @@
                     <p class="text-xs text-slate-400">選擇預計金額後前往 Discord 詢問客服；此頁不會建立儲值訂單。</p>
                 </div>
 
-                <div class="mb-5 rounded-xl border border-amber-500/40 bg-amber-950/30 p-4 text-xs text-amber-200" role="note">
-                    <div class="flex items-start gap-3">
-                        <i class="fa-solid fa-triangle-exclamation mt-0.5" aria-hidden="true"></i>
-                        <p class="m-0 leading-relaxed"><strong>重要提醒：</strong>會員餘額由管理員在核對實際款項後手動調整，本站未連接自動金流。本頁僅提供洽詢入口；跳轉 Discord 不代表已建立儲值申請、完成付款或變更餘額。餘額目前不能直接支付商城訂單。</p>
-                    </div>
-                </div>
-
                 <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl space-y-6">
                     <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800" aria-live="polite">
                         <p class="text-xs text-slate-400 mb-1">目前帳戶餘額</p>
@@ -546,7 +540,7 @@
 
                     <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
                         <div class="font-bold text-cyan-400 mb-2">Q2: 建立訂單後如何確認付款與取得卡號？</div>
-                        <p class="text-xs text-slate-300 leading-relaxed">請在 Discord 提供訂單編號並依客服指示確認付款。付款與發卡仍需處理，登入後可至「卡號查詢」查看本人訂單狀態。</p>
+                        <p class="text-xs text-slate-300 leading-relaxed">選擇餘額付款後會立即扣款並顯示已付款；若選擇 Discord，請提供訂單編號並由客服確認收款。發卡仍需管理員處理，登入後可在「卡號查詢」查看狀態。</p>
                     </div>
 
                     <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
@@ -685,6 +679,11 @@
                         <span class="text-slate-300 text-sm">總計金額：</span>
                         <span id="cart-total" class="text-cyan-400 font-bold text-2xl">NT$ 0</span>
                     </div>
+                    <fieldset id="cart-payment-methods" class="mb-3 space-y-2 border-0 p-0 text-xs text-slate-200">
+                        <legend class="mb-2 font-bold text-cyan-300">付款方式</legend>
+                        <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord" checked onchange="updateCartUI()"><span>Discord 洽詢付款（建立待付款訂單）</span></label>
+                        <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="balance" onchange="updateCartUI()"><span>會員餘額扣款（足額時立即付款）</span></label>
+                    </fieldset>
                     <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。</p>
                     <p id="cart-checkout-status" role="status" aria-live="polite" class="hidden mb-3 rounded-lg border border-amber-500/30 bg-amber-950/30 p-3 text-xs text-amber-200"></p>
                     <button id="cart-abandon-request" type="button" onclick="abandonOrderRequest()" class="hidden mb-3 min-h-11 w-full rounded-lg border border-slate-600 p-2 text-xs text-slate-300 hover:border-cyan-400">已查詢訂單，放棄本次重試並修改購物車</button>
@@ -924,8 +923,15 @@
             return `${ORDER_REQUEST_STORAGE_KEY}:${userId}`;
         }
 
+        function getCartPaymentMethod() {
+            return document.querySelector('input[name="cart-payment-method"]:checked')?.value === 'balance'
+                ? 'balance' : 'discord';
+        }
+
         function getCartFingerprint() {
-            return JSON.stringify(cart.map(item => [item.id, item.quantity]).sort((a, b) => a[0] - b[0]));
+            const items = JSON.stringify(cart.map(item => [item.id, item.quantity]).sort((a, b) => a[0] - b[0]));
+            // Preserve the old Discord fingerprint so in-flight orders can still be retried after deployment.
+            return getCartPaymentMethod() === 'balance' ? `${items}:balance` : items;
         }
 
         function newOrderRequestId() {
@@ -1180,6 +1186,13 @@
             if (cartToggleButton) cartToggleButton.setAttribute('aria-label', `檢視購物車，共 ${itemCount} 件商品`);
             if (totalEl) totalEl.textContent = `NT$ ${formatter.format(total)}`;
             if (clearButton) clearButton.disabled = cart.length === 0 || isCreatingOrder || orderOutcomeUnknown;
+            const payingWithBalance = getCartPaymentMethod() === 'balance';
+            document.querySelectorAll('input[name="cart-payment-method"]').forEach(input => {
+                input.disabled = isCreatingOrder || orderOutcomeUnknown;
+            });
+            document.getElementById('cart-checkout-note').textContent = payingWithBalance
+                ? '將從目前會員餘額一次扣除訂單全額；不足時不會建立訂單或扣款。付款成功後待管理員核發授權，不需前往 Discord。'
+                : '先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。';
             if (checkoutButton) {
                 checkoutButton.disabled = cart.length === 0 || !catalogLoaded || isCreatingOrder;
                 checkoutButton.classList.toggle('cursor-not-allowed', checkoutButton.disabled);
@@ -1187,7 +1200,11 @@
                 checkoutButton.classList.toggle('cursor-pointer', !checkoutButton.disabled);
                 checkoutButton.setAttribute('aria-busy', String(isCreatingOrder));
                 const label = checkoutButton.querySelector('span');
-                if (label) label.textContent = isCreatingOrder ? '正在建立待付款訂單…' : (orderOutcomeUnknown ? '重試確認訂單並前往 Discord' : '建立訂單並前往 Discord');
+                const icon = checkoutButton.querySelector('i');
+                if (icon) icon.className = payingWithBalance ? 'fa-solid fa-wallet' : 'fa-brands fa-discord';
+                if (label) label.textContent = isCreatingOrder ? '正在處理訂單…'
+                    : orderOutcomeUnknown ? '重試確認同一筆訂單'
+                        : payingWithBalance ? '使用餘額付款並建立訂單' : '建立訂單並前往 Discord';
             }
             if (!container) {
                 if (catalogLoaded) saveCart();
@@ -1374,6 +1391,12 @@
 
         function getCheckoutErrorMessage(error) {
             const message = String(error?.message || '未知錯誤');
+            if (/insufficient member balance/i.test(message)) {
+                return '會員餘額不足，沒有建立訂單或扣款；請先儲值或選擇 Discord 洽詢付款。';
+            }
+            if (/only pending orders can be paid with balance|order balance payment state conflict/i.test(message)) {
+                return '原訂單已非待付款，請先到卡號查詢確認狀態，勿重複付款。';
+            }
             if (/價格已變更|cart prices have changed/i.test(message)) {
                 return '價格已變更，請重新整理頁面確認最新金額後再送出。';
             }
@@ -1386,12 +1409,24 @@
             if (/登入才能下單|authentication required|jwt/i.test(message)) {
                 return '登入狀態失效，請重新登入後重試。';
             }
-            if (/could not find the function|schema cache|PGRST202|create_my_order.*does not exist/i.test(message)) {
-                return '下單功能尚未在 Supabase 啟用，請先執行訂單資料庫腳本。';
+            if (/could not find the function|schema cache|PGRST202|does not exist/i.test(message)) {
+                return getCartPaymentMethod() === 'balance'
+                    ? '餘額付款尚未啟用，請管理員先部署餘額資料庫腳本。'
+                    : '下單功能尚未在 Supabase 啟用，請先執行訂單資料庫腳本。';
             }
             return /failed to fetch|networkerror|load failed/i.test(message)
-                ? '連線中斷，訂單可能已成立。請勿修改購物車；重試會查詢同一筆訂單。'
-                : `無法確認訂單是否成立：${message}。請勿重複付款，重試將使用同一請求。`;
+                ? '連線中斷，訂單或扣款可能已完成。請勿修改購物車或付款方式；重試會查詢同一筆訂單。'
+                : `無法確認訂單或付款結果：${message}。請勿重複付款，重試將使用同一請求。`;
+        }
+
+        function showCreatedOrder(orderNumber, paidWithBalance) {
+            document.getElementById('order-created-number').textContent = orderNumber;
+            document.getElementById('order-created-title').textContent = paidWithBalance ? '餘額付款已完成' : '待付款訂單已建立';
+            document.getElementById('order-created-description').textContent = paidWithBalance
+                ? '已從會員餘額扣款，待管理員核發授權後可在本頁查詢卡號；不需再向客服付款。'
+                : '請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。';
+            document.getElementById('order-discord-link').classList.toggle('hidden', paidWithBalance);
+            document.getElementById('order-created-panel').classList.remove('hidden');
         }
 
         async function checkout() {
@@ -1411,7 +1446,7 @@
             if (!currentAuthUser) {
                 toggleCart(false);
                 switchTab('account');
-                setAuthStatus('請先登入會員，再送出購物車並前往 Discord 洽詢付款。');
+                setAuthStatus('請先登入會員，再選擇付款方式並送出訂單。');
                 return;
             }
             if (!supabaseClient) {
@@ -1420,6 +1455,7 @@
             }
 
             const userId = currentAuthUser.id;
+            const payingWithBalance = getCartPaymentMethod() === 'balance';
             let request;
             try {
                 request = getOrCreateOrderRequest(userId);
@@ -1430,10 +1466,10 @@
 
             isCreatingOrder = true;
             updateCartUI();
-            setCartCheckoutStatus('正在核對商品價格並建立待付款訂單…');
+            setCartCheckoutStatus(payingWithBalance ? '正在核對價格與餘額並完成付款…' : '正在核對商品價格並建立待付款訂單…');
             let completedOrder = null;
             try {
-                const { data, error } = await supabaseClient.rpc('create_my_order', {
+                const { data, error } = await supabaseClient.rpc(payingWithBalance ? 'create_my_balance_order' : 'create_my_order', {
                     p_items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
                     p_expected_total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
                     p_request_id: request.key
@@ -1447,11 +1483,17 @@
 
                 const order = Array.isArray(data) ? data[0] : data;
                 if (!order?.order_id || typeof order.order_number !== 'string' ||
-                    !Number.isSafeInteger(order.total_amount)) {
+                    !Number.isSafeInteger(order.total_amount) ||
+                    (payingWithBalance && order.order_status === 'paid' &&
+                        (order.balance_after == null || !Number.isSafeInteger(Number(order.balance_after)) ||
+                            Number(order.balance_after) < 0))) {
                     throw new Error('訂單服務回傳資料不完整');
                 }
 
-                if (order.order_status !== 'pending') {
+                if (payingWithBalance && order.order_status === 'pending') {
+                    throw new Error('餘額付款未完成，請查詢訂單後再重試');
+                }
+                if (order.order_status !== (payingWithBalance ? 'paid' : 'pending')) {
                     clearOrderRequest(userId, request.key);
                     if (order.order_status === 'paid') cart = [];
                     updateCartUI();
@@ -1462,24 +1504,32 @@
                 }
 
                 try {
-                    sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${userId}`, order.order_number);
+                    sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${userId}`, JSON.stringify({
+                        number: order.order_number, paidWithBalance
+                    }));
                 } catch {
                 }
                 clearOrderRequest(userId, request.key);
                 cart = [];
                 updateCartUI();
-                const orderNumber = document.getElementById('order-created-number');
-                if (orderNumber) orderNumber.textContent = order.order_number;
-                document.getElementById('order-created-panel')?.classList.remove('hidden');
+                showCreatedOrder(order.order_number, payingWithBalance);
                 const searchInput = document.getElementById('order-search-input');
                 if (searchInput) searchInput.value = order.order_number;
                 toggleCart(false);
                 switchTab('orders');
-                setOrderQueryStatus(`訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 告知客服訂單編號。`);
-                completedOrder = order;
+                if (payingWithBalance) {
+                    await queryOrders();
+                    if (currentAuthUser?.id === userId) {
+                        setOrderQueryStatus(`訂單 ${order.order_number} 已使用餘額支付，等待管理員核發授權。`, 'success');
+                        void loadMyBalance();
+                    }
+                } else {
+                    setOrderQueryStatus(`訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 告知客服訂單編號。`);
+                    completedOrder = order;
+                }
             } catch (error) {
                 console.error('Checkout failed:', error);
-                const knownFailure = /價格已變更|cart prices have changed|商品已下架|one or more products are unavailable|member ordering is paused|authentication required|登入才能下單|could not find the function|schema cache|PGRST202/i.test(String(error?.message || ''));
+                const knownFailure = /價格已變更|cart prices have changed|商品已下架|one or more products are unavailable|member ordering is paused|authentication required|登入才能下單|insufficient member balance|could not find the function|schema cache|PGRST202/i.test(String(error?.message || ''));
                 if (knownFailure) clearOrderRequest(userId, request.key);
                 else orderOutcomeUnknown = true;
                 setCartCheckoutStatus(getCheckoutErrorMessage(error), 'error');
@@ -1538,6 +1588,7 @@
                 authorization: { pending: '待發放', active: '有效', expired: '已到期', revoked: '已撤銷' }
             };
             const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+            const pendingPaymentActions = new Set();
 
             if (!orders.length) {
                 clearOrderRows('查無符合條件的訂單。');
@@ -1626,12 +1677,72 @@
                         discordLink.textContent = 'Discord 洽詢付款';
                         discordLink.setAttribute('aria-label', `訂單 ${order.order_number || ''} 前往 Discord 洽詢付款`);
                         actionCell.appendChild(discordLink);
+                        if (order.order_id && !pendingPaymentActions.has(order.order_id)) {
+                            pendingPaymentActions.add(order.order_id);
+                            const balanceButton = document.createElement('button');
+                            balanceButton.type = 'button';
+                            balanceButton.className = 'ml-2 whitespace-nowrap rounded border border-cyan-500/40 bg-cyan-950/40 px-3 py-1 text-cyan-200 hover:bg-cyan-900/50';
+                            balanceButton.textContent = '使用餘額付款';
+                            balanceButton.setAttribute('aria-label', `訂單 ${order.order_number || ''} 使用餘額付款`);
+                            balanceButton.addEventListener('click', () => void payPendingOrderWithBalance(order, balanceButton));
+                            actionCell.appendChild(balanceButton);
+                        }
                     } else {
                         actionCell.textContent = '—';
                     }
                     tr.appendChild(actionCell);
                     tbody.appendChild(tr);
             });
+        }
+
+        async function payPendingOrderWithBalance(order, button) {
+            const userId = currentAuthUser?.id;
+            if (button.disabled || !userId || !supabaseClient || !order?.order_id || order.order_status !== 'pending') return;
+            if (!isAllowedMemberOrigin()) {
+                setOrderQueryStatus('餘額付款請使用正式 HTTPS 網站或 localhost。', 'error');
+                return;
+            }
+            const amount = Number(order.total_amount);
+            if (!Number.isSafeInteger(amount) || amount <= 0 ||
+                !window.confirm(`確認使用會員餘額支付訂單 ${order.order_number}，扣除 NT$ ${amount.toLocaleString('zh-TW')}？`)) return;
+
+            button.disabled = true;
+            button.setAttribute('aria-busy', 'true');
+            setOrderQueryStatus('正在由資料庫核對餘額並付款…');
+            try {
+                const { data, error } = await supabaseClient.rpc('pay_my_order_with_balance', { p_order_id: order.order_id });
+                if (error) throw error;
+                if (currentAuthUser?.id !== userId) return;
+                if (data?.order_id !== order.order_id || data.order_status !== 'paid' ||
+                    Number(data.total_amount) !== amount || data.balance_after == null ||
+                    !Number.isSafeInteger(Number(data.balance_after))) {
+                    throw new Error('付款結果資料不完整');
+                }
+                try {
+                    sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${userId}`, JSON.stringify({
+                        number: data.order_number, paidWithBalance: true
+                    }));
+                } catch {
+                }
+                showCreatedOrder(data.order_number, true);
+                document.getElementById('order-search-input').value = data.order_number;
+                await queryOrders();
+                if (currentAuthUser?.id !== userId) return;
+                setOrderQueryStatus(`訂單 ${data.order_number} 已使用餘額支付；請勿再次付款，待管理員核發授權。`, 'success');
+                void loadMyBalance();
+            } catch (error) {
+                if (currentAuthUser?.id !== userId) return;
+                console.error('Balance order payment failed:', error);
+                const message = String(error?.message || '');
+                setOrderQueryStatus(/insufficient member balance/i.test(message)
+                    ? '會員餘額不足，這筆訂單仍待付款且沒有扣款；可至儲值頁洽詢或使用 Discord 付款。'
+                    : /PGRST202|schema cache|could not find the function/i.test(message)
+                        ? '餘額付款功能尚未部署，請聯絡管理員套用餘額資料庫腳本；訂單仍待付款。'
+                        : '付款結果無法確認，請先重新查詢這筆訂單；若仍待付款，可用同一訂單重試，請勿另建新訂單。', 'error');
+            } finally {
+                button.disabled = false;
+                button.removeAttribute('aria-busy');
+            }
         }
 
         async function queryOrders(event) {
@@ -1799,17 +1910,31 @@
             recoveryForm.classList.toggle('hidden', !authRecoveryActive);
 
             const recentOrderPanel = document.getElementById('order-created-panel');
-            const recentOrderNumber = document.getElementById('order-created-number');
             let recentOrder = null;
             try {
-                if (signedIn) recentOrder = sessionStorage.getItem(`${LAST_ORDER_STORAGE_KEY}:${currentAuthUser.id}`);
+                if (signedIn) {
+                    const stored = sessionStorage.getItem(`${LAST_ORDER_STORAGE_KEY}:${currentAuthUser.id}`);
+                    if (stored) {
+                        try {
+                            recentOrder = JSON.parse(stored);
+                        } catch {
+                            recentOrder = { number: stored, paidWithBalance: false };
+                        }
+                    }
+                }
             } catch {
                 recentOrder = null;
             }
-            if (recentOrderPanel) recentOrderPanel.classList.toggle('hidden', !recentOrder);
-            if (recentOrderNumber) recentOrderNumber.textContent = recentOrder || '';
+            if (recentOrderPanel) recentOrderPanel.classList.toggle('hidden', !recentOrder?.number);
+            if (recentOrder?.number) showCreatedOrder(recentOrder.number, recentOrder.paidWithBalance === true);
 
-            orderOutcomeUnknown = signedIn && Boolean(getSavedOrderRequest(currentAuthUser.id));
+            const savedRequest = signedIn ? getSavedOrderRequest(currentAuthUser.id) : null;
+            if (savedRequest) {
+                const method = savedRequest.fingerprint.endsWith(':balance') ? 'balance' : 'discord';
+                const radio = document.querySelector(`input[name="cart-payment-method"][value="${method}"]`);
+                if (radio) radio.checked = true;
+            }
+            orderOutcomeUnknown = Boolean(savedRequest);
             setCartCheckoutStatus(orderOutcomeUnknown ? '上次下單結果尚未確認。請保持購物車不變並重試，或先查詢本人訂單。' : '');
             updateCartUI();
 
