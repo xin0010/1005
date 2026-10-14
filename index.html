@@ -811,7 +811,7 @@
                     throw new Error('餘額資料不完整');
                 }
                 label.textContent = `NT$ ${new Intl.NumberFormat('zh-TW').format(balance)}`;
-                status.textContent = '此為後台記錄的本人餘額；管理員調整後可按「重新整理餘額」。Discord 洽詢不會自動入帳。';
+                status.textContent = '此為本人可用餘額；管理員加值或餘額付款後可按「重新整理餘額」。Discord 洽詢不會自動入帳。';
             } catch (error) {
                 if (requestId !== balanceRequestId || currentAuthUser?.id !== userId) return;
                 console.warn('Member balance loading failed:', error);
