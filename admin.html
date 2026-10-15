@@ -108,6 +108,7 @@
             <nav aria-label="後台導覽" class="flex gap-2 overflow-x-auto overscroll-x-contain lg:flex-col">
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="overview" aria-current="page"><span class="mr-2">◫</span>總覽</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="announcement"><span class="mr-2">◈</span>公告管理</button>
+                <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="game-info"><span class="mr-2">◇</span>遊戲資訊</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="orders"><span class="mr-2">▤</span>訂單與授權</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="products"><span class="mr-2">▦</span>商品管理</button>
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="stock"><span class="mr-2">▧</span>卡密管理</button>
@@ -179,6 +180,24 @@
                         <div class="flex flex-wrap gap-3 border-t border-slate-800 pt-4">
                             <button id="admin-announcement-reload" type="button" onclick="loadAdminAnnouncement()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-cyan-400">重新讀取</button>
                             <button id="admin-announcement-save" type="submit" disabled class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50">儲存並發布公告</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section id="admin-view-game-info" class="admin-view hidden space-y-5">
+                    <div>
+                        <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">GAME & PLATFORM DISPLAY</p>
+                        <h3 class="m-0 text-2xl font-bold text-white">遊戲與平台資訊</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-400">管理商城商品目錄上方的展示標籤；可新增、刪除、調整順序或暫時隱藏。此處僅供展示，不會變更商品上架狀態或售價。最多 12 筆，圖片僅能選用網站已提供的檔案。</p>
+                    </div>
+                    <form id="admin-game-info-form" class="glass max-w-4xl space-y-4 rounded-2xl p-4 sm:p-6" onsubmit="saveAdminGameInfo(event)">
+                        <p id="admin-game-info-updated" class="m-0 text-xs text-slate-500"></p>
+                        <p id="admin-game-info-status" class="m-0 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">開啟遊戲資訊後載入目前內容。</p>
+                        <div id="admin-game-info-list" class="space-y-4"></div>
+                        <div class="flex flex-wrap gap-3 border-t border-slate-800 pt-4">
+                            <button id="admin-game-info-add" type="button" onclick="addAdminGameInfo()" disabled class="rounded-xl border border-cyan-500/50 px-4 py-2.5 text-sm text-cyan-300 hover:bg-cyan-950/40 disabled:cursor-not-allowed disabled:opacity-50">＋ 新增遊戲</button>
+                            <button id="admin-game-info-reload" type="button" onclick="loadAdminGameInfo()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-cyan-400">重新讀取</button>
+                            <button id="admin-game-info-save" type="submit" disabled class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50">儲存並發布至商城</button>
                         </div>
                     </form>
                 </section>
@@ -518,6 +537,13 @@
         let adminAnnouncementRequestId = 0;
         let adminAnnouncementRevision = null;
         let adminAnnouncementSaving = false;
+        let adminGameInfoRequestId = 0;
+        let adminGameInfoRevision = null;
+        let adminGameInfoSaving = false;
+        const ADMIN_GAME_IMAGES = {
+            'PUBGM-700x700.png': 'PUBG', 'freefire.png': 'Free Fire',
+            'moba.png': '傳說對決', 'logo-700x700.png': 'AXG SHOP'
+        };
         let pendingCancelOrderId = null;
         let pendingPaymentOrderId = null;
         let activeAdminView = 'overview';
@@ -674,6 +700,253 @@
             }
         }
 
+        function setGameInfoStatus(message, tone = 'info') {
+            const status = document.getElementById('admin-game-info-status');
+            status.className = `m-0 text-xs leading-relaxed ${tone === 'error' ? 'text-red-300' : tone === 'success' ? 'text-emerald-300' : 'text-slate-300'}`;
+            status.textContent = message;
+        }
+
+        function validGameInfoItem(item) {
+            if (!item || typeof item !== 'object' || Array.isArray(item) ||
+                Object.keys(item).length !== 6 || typeof item.visible !== 'boolean' ||
+                !Object.hasOwn(ADMIN_GAME_IMAGES, item.image)) return false;
+            return [['name', 60], ['status', 60], ['platform', 60], ['description', 240]].every(([key, max]) =>
+                typeof item[key] === 'string' && Array.from(item[key]).length >= 1 &&
+                Array.from(item[key]).length <= max && item[key] === item[key].trim() &&
+                !/[\u0000-\u001f\u007f-\u009f]/.test(item[key]));
+        }
+
+        function gameInfoDraft() {
+            return Array.from(document.querySelectorAll('#admin-game-info-list [data-game-card]'), card => ({
+                name: card.querySelector('[data-game-field="name"]').value,
+                status: card.querySelector('[data-game-field="status"]').value,
+                platform: card.querySelector('[data-game-field="platform"]').value,
+                description: card.querySelector('[data-game-field="description"]').value,
+                image: card.querySelector('[data-game-field="image"]').value,
+                visible: card.querySelector('[data-game-field="visible"]').checked
+            }));
+        }
+
+        function setGameInfoEditable(editable) {
+            const cards = document.querySelectorAll('#admin-game-info-list [data-game-card]');
+            cards.forEach((card, index) => {
+                card.querySelectorAll('input, textarea, select').forEach(input => { input.disabled = !editable; });
+                card.querySelectorAll('[data-game-action]').forEach(button => {
+                    button.disabled = !editable ||
+                        (button.dataset.gameAction === 'up' && index === 0) ||
+                        (button.dataset.gameAction === 'down' && index === cards.length - 1);
+                });
+            });
+            document.getElementById('admin-game-info-add').disabled = !editable || cards.length >= 12;
+            document.getElementById('admin-game-info-save').disabled = !editable;
+        }
+
+        function renderAdminGameInfo(items) {
+            const list = document.getElementById('admin-game-info-list');
+            list.replaceChildren();
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'rounded-xl border border-slate-700 bg-slate-950/50 p-4';
+                card.dataset.gameCard = '';
+                const header = document.createElement('div');
+                header.className = 'mb-4 flex flex-wrap items-center justify-between gap-2';
+                const title = document.createElement('strong');
+                title.className = 'text-sm text-cyan-300';
+                title.textContent = `第 ${index + 1} 筆 · ${item.name || '新遊戲'}`;
+                header.appendChild(title);
+                const actions = document.createElement('div');
+                actions.className = 'flex flex-wrap gap-2';
+                for (const [action, text] of [['up', '上移'], ['down', '下移'], ['remove', '刪除']]) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.dataset.gameAction = action;
+                    button.textContent = text;
+                    button.setAttribute('aria-label', `${text}第 ${index + 1} 筆遊戲`);
+                    button.className = 'rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400';
+                    actions.appendChild(button);
+                }
+                header.appendChild(actions);
+                card.appendChild(header);
+
+                const fields = document.createElement('div');
+                fields.className = 'grid gap-3 sm:grid-cols-2';
+                for (const [key, label, max, multiline] of [
+                    ['name', '遊戲名稱', 60, false], ['platform', '平台', 60, false],
+                    ['status', '顯示狀態', 60, false], ['description', '展示說明', 240, true]
+                ]) {
+                    const wrapper = document.createElement('label');
+                    wrapper.className = `block text-xs font-semibold text-slate-300 ${multiline ? 'sm:col-span-2' : ''}`;
+                    const caption = document.createElement('span');
+                    caption.className = 'mb-1.5 block';
+                    caption.textContent = `${label}（最多 ${max} 字）`;
+                    const input = document.createElement(multiline ? 'textarea' : 'input');
+                    if (!multiline) input.type = 'text';
+                    else input.rows = 2;
+                    input.dataset.gameField = key;
+                    input.value = item[key];
+                    input.required = true;
+                    input.maxLength = max;
+                    input.className = 'w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm font-normal text-white outline-none focus:border-cyan-400';
+                    wrapper.append(caption, input);
+                    fields.appendChild(wrapper);
+                }
+                const imageLabel = document.createElement('label');
+                imageLabel.className = 'block text-xs font-semibold text-slate-300';
+                const imageCaption = document.createElement('span');
+                imageCaption.className = 'mb-1.5 block';
+                imageCaption.textContent = '展示圖片';
+                const image = document.createElement('select');
+                image.dataset.gameField = 'image';
+                image.className = 'w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm font-normal text-white outline-none focus:border-cyan-400';
+                for (const [filename, label] of Object.entries(ADMIN_GAME_IMAGES)) image.add(new Option(`${label} (${filename})`, filename));
+                image.value = item.image;
+                imageLabel.append(imageCaption, image);
+                fields.appendChild(imageLabel);
+                const visibleLabel = document.createElement('label');
+                visibleLabel.className = 'flex items-center gap-3 self-center text-sm text-slate-200';
+                const visible = document.createElement('input');
+                visible.type = 'checkbox';
+                visible.dataset.gameField = 'visible';
+                visible.checked = item.visible;
+                visible.className = 'h-5 w-5 accent-cyan-400';
+                visibleLabel.append(visible, document.createTextNode('在商城顯示此遊戲'));
+                fields.appendChild(visibleLabel);
+                card.appendChild(fields);
+                list.appendChild(card);
+            });
+            setGameInfoEditable(adminGameInfoRevision !== null && !adminGameInfoSaving);
+        }
+
+        function addAdminGameInfo() {
+            if (!adminUser || adminGameInfoRevision === null || adminGameInfoSaving) return;
+            const items = gameInfoDraft();
+            if (items.length >= 12) return;
+            items.push({ name: '', platform: '', status: '請洽客服確認', description: '', image: 'logo-700x700.png', visible: true });
+            renderAdminGameInfo(items);
+            document.querySelector('#admin-game-info-list [data-game-card]:last-child [data-game-field="name"]').focus();
+            setGameInfoStatus('新增內容尚未儲存，完成後請按「儲存並發布至商城」。');
+        }
+
+        function handleAdminGameInfoAction(event) {
+            const button = event.target.closest('[data-game-action]');
+            if (!button || !adminUser || adminGameInfoRevision === null || adminGameInfoSaving) return;
+            const cards = Array.from(document.querySelectorAll('#admin-game-info-list [data-game-card]'));
+            const index = cards.indexOf(button.closest('[data-game-card]'));
+            if (index < 0) return;
+            const items = gameInfoDraft();
+            if (button.dataset.gameAction === 'remove') items.splice(index, 1);
+            else {
+                const other = index + (button.dataset.gameAction === 'up' ? -1 : 1);
+                if (other < 0 || other >= items.length) return;
+                [items[index], items[other]] = [items[other], items[index]];
+            }
+            renderAdminGameInfo(items);
+            setGameInfoStatus('順序或內容尚未儲存，確認後請按「儲存並發布至商城」。');
+        }
+
+        async function loadAdminGameInfo() {
+            if (!adminUser || !adminClient || adminGameInfoSaving) return false;
+            const userId = adminUser.id;
+            const requestId = ++adminGameInfoRequestId;
+            adminGameInfoRevision = null;
+            document.getElementById('admin-game-info-list').replaceChildren();
+            document.getElementById('admin-game-info-add').disabled = true;
+            document.getElementById('admin-game-info-save').disabled = true;
+            const reload = document.getElementById('admin-game-info-reload');
+            reload.disabled = true;
+            setGameInfoStatus('正在讀取商城遊戲資訊…');
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_get_shop_game_info');
+                if (error) throw error;
+                if (requestId !== adminGameInfoRequestId || adminUser?.id !== userId) return false;
+                if (!data || !Number.isSafeInteger(data.revision) || data.revision < 1 ||
+                    !Array.isArray(data.items) || data.items.length > 12 || !data.items.every(validGameInfoItem)) {
+                    throw new Error('遊戲資訊資料不完整，請確認已部署遊戲資訊資料庫腳本。');
+                }
+                adminGameInfoRevision = data.revision;
+                renderAdminGameInfo(data.items);
+                document.getElementById('admin-game-info-updated').textContent = data.updated_at
+                    ? `目前版本 ${data.revision} · 更新於 ${formatDate(data.updated_at)}`
+                    : `目前版本 ${data.revision}`;
+                setGameInfoStatus('已載入遊戲資訊。變更須按「儲存並發布至商城」才會生效。');
+                return true;
+            } catch (error) {
+                if (requestId !== adminGameInfoRequestId || adminUser?.id !== userId) return false;
+                if (handleRevokedAdminAccess(error)) return false;
+                console.error('Admin game info loading failed:', error);
+                document.getElementById('admin-game-info-updated').textContent = '';
+                setGameInfoStatus(getAdminError(error), 'error');
+                return false;
+            } finally {
+                if (requestId === adminGameInfoRequestId && adminUser?.id === userId) reload.disabled = false;
+            }
+        }
+
+        async function saveAdminGameInfo(event) {
+            event?.preventDefault();
+            if (!adminUser || !adminClient || adminGameInfoSaving || adminGameInfoRevision === null) return;
+            const form = document.getElementById('admin-game-info-form');
+            const items = gameInfoDraft();
+            for (const card of form.querySelectorAll('[data-game-card]')) {
+                for (const input of card.querySelectorAll('input[data-game-field]:not([type="checkbox"]), textarea[data-game-field]')) {
+                    const value = input.value;
+                    input.setCustomValidity(/[^\S ]|[\u0000-\u001f\u007f-\u009f]/.test(value) || !value.trim()
+                        ? '請輸入不含換行或控制字元的文字。' : '');
+                }
+            }
+            if (items.length > 12 || !form.reportValidity()) return;
+            const normalized = items.map(item => ({ ...item,
+                name: item.name.trim(), status: item.status.trim(),
+                platform: item.platform.trim(), description: item.description.trim()
+            }));
+            if (!normalized.every(validGameInfoItem)) {
+                setGameInfoStatus('遊戲資料有誤，請確認名稱、平台、狀態、說明與圖片。', 'error');
+                return;
+            }
+
+            const userId = adminUser.id;
+            const expectedRevision = adminGameInfoRevision;
+            const requestId = ++adminGameInfoRequestId;
+            adminGameInfoSaving = true;
+            setGameInfoEditable(false);
+            const reload = document.getElementById('admin-game-info-reload');
+            reload.disabled = true;
+            setGameInfoStatus('正在儲存並發布遊戲資訊…');
+
+            try {
+                const { data, error } = await adminClient.rpc('admin_save_shop_game_info', {
+                    p_items: normalized, p_expected_revision: expectedRevision
+                });
+                if (error) throw error;
+                if (requestId !== adminGameInfoRequestId || adminUser?.id !== userId) return;
+                const values = items => items.map(item => [item.name, item.status, item.platform, item.description, item.image, item.visible]);
+                if (data?.revision !== expectedRevision + 1 || !Array.isArray(data.items) ||
+                    !data.items.every(validGameInfoItem) || JSON.stringify(values(data.items)) !== JSON.stringify(values(normalized))) {
+                    throw new Error('遊戲資訊儲存結果無法確認，請重新讀取後檢查，不要直接重送。');
+                }
+                adminGameInfoRevision = data.revision;
+                adminGameInfoSaving = false;
+                renderAdminGameInfo(data.items);
+                document.getElementById('admin-game-info-updated').textContent = data.updated_at
+                    ? `目前版本 ${data.revision} · 更新於 ${formatDate(data.updated_at)}`
+                    : `目前版本 ${data.revision}`;
+                setGameInfoStatus('遊戲資訊已發布。重新載入商城頁面可查看最新內容。', 'success');
+            } catch (error) {
+                if (requestId !== adminGameInfoRequestId || adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
+                console.error('Admin game info save failed:', error);
+                adminGameInfoRevision = null;
+                setGameInfoStatus(getAdminError(error), 'error');
+            } finally {
+                if (requestId === adminGameInfoRequestId && adminUser?.id === userId) {
+                    adminGameInfoSaving = false;
+                    setGameInfoEditable(adminGameInfoRevision !== null);
+                    reload.disabled = false;
+                }
+            }
+        }
+
         function formatCurrency(amount) {
             const value = Number(amount);
             return Number.isFinite(value) ? `NT$ ${new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(value)}` : '—';
@@ -697,6 +970,12 @@
 
         function getAdminError(error) {
             const message = String(error?.message || '未知錯誤');
+            if (/game info version conflict/i.test(message)) return '遊戲資訊已由其他管理員修改。請先複製未儲存內容，再按「重新讀取」查看最新版本。';
+            if (/invalid game info data/i.test(message)) return '遊戲資訊不符合限制。請確認文字長度、圖片選項及最多 12 筆。';
+            if (/admin_(?:get|save)_shop_game_info/i.test(message) &&
+                (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) {
+                return '尚未部署遊戲資訊功能。請在 Supabase SQL Editor 執行 sql/supabase-shop-game-info.sql，再重新整理後台。';
+            }
             if (/announcement version conflict/i.test(message)) return '公告已由其他管理員修改。請先複製未儲存內容，再按「重新讀取」查看最新公告。';
             if (/invalid announcement data/i.test(message)) return '公告需為 1–280 字純文字，且不可包含換行。';
             if (/admin_(?:get|save)_shop_announcement/i.test(message) &&
@@ -2539,6 +2818,7 @@
             adminRequestId += 1;
             adminOverviewRequestId += 1;
             adminAnnouncementRequestId += 1;
+            adminGameInfoRequestId += 1;
             adminDetailRequestId += 1;
             adminProductRequestId += 1;
             adminStockRequestId += 1;
@@ -2549,6 +2829,8 @@
             adminVisibleOrders = [];
             adminAnnouncementRevision = null;
             adminAnnouncementSaving = false;
+            adminGameInfoRevision = null;
+            adminGameInfoSaving = false;
             adminVisibleProducts = [];
             adminVisibleStock = [];
             adminStockProducts = [];
@@ -2592,6 +2874,12 @@
             document.getElementById('admin-announcement-preview').textContent = '載入公告後顯示預覽。';
             document.getElementById('admin-announcement-updated').textContent = '';
             setAnnouncementStatus('開啟公告管理後載入目前公告。');
+            document.getElementById('admin-game-info-list').replaceChildren();
+            document.getElementById('admin-game-info-updated').textContent = '';
+            document.getElementById('admin-game-info-add').disabled = true;
+            document.getElementById('admin-game-info-save').disabled = true;
+            document.getElementById('admin-game-info-reload').disabled = false;
+            setGameInfoStatus('開啟遊戲資訊後載入目前內容。');
             document.getElementById('admin-products-filter').reset();
             document.getElementById('admin-stock-filter').reset();
             document.getElementById('admin-members-filter').reset();
@@ -2766,14 +3054,15 @@
         }
 
         function setAdminView(view) {
-            activeAdminView = ['overview', 'announcement', 'orders', 'products', 'stock', 'members', 'audit'].includes(view) ? view : 'overview';
+            activeAdminView = ['overview', 'announcement', 'game-info', 'orders', 'products', 'stock', 'members', 'audit'].includes(view) ? view : 'overview';
             document.querySelectorAll('.admin-view').forEach(section => section.classList.toggle('hidden', section.id !== `admin-view-${activeAdminView}`));
             document.querySelectorAll('[data-admin-view]').forEach(button => {
                 if (button.dataset.adminView === activeAdminView) button.setAttribute('aria-current', 'page');
                 else button.removeAttribute('aria-current');
             });
-            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', announcement: '公告管理', orders: '訂單與授權', products: '商品管理', stock: '卡密管理', members: '會員管理', audit: '操作紀錄' }[activeAdminView];
+            document.getElementById('admin-page-title').textContent = { overview: '營運總覽', announcement: '公告管理', 'game-info': '遊戲與平台資訊', orders: '訂單與授權', products: '商品管理', stock: '卡密管理', members: '會員管理', audit: '操作紀錄' }[activeAdminView];
             if (activeAdminView === 'announcement') void loadAdminAnnouncement();
+            if (activeAdminView === 'game-info') void loadAdminGameInfo();
             if (activeAdminView === 'orders') void loadAdminOrders(0);
             if (activeAdminView === 'products') void loadAdminProducts(0);
             if (activeAdminView === 'stock') void loadCardStockProducts().then(loaded => {
@@ -2788,6 +3077,10 @@
             try {
                 if (activeAdminView === 'announcement') {
                     await loadAdminAnnouncement();
+                    return;
+                }
+                if (activeAdminView === 'game-info') {
+                    await loadAdminGameInfo();
                     return;
                 }
                 if (activeAdminView === 'products') {
@@ -2932,6 +3225,10 @@
             document.getElementById('admin-announcement-content').addEventListener('input', event => {
                 event.target.setCustomValidity('');
                 updateAnnouncementPreview();
+            });
+            document.getElementById('admin-game-info-list').addEventListener('click', handleAdminGameInfoAction);
+            document.getElementById('admin-game-info-list').addEventListener('input', event => {
+                if (event.target.matches('[data-game-field]')) event.target.setCustomValidity('');
             });
             document.getElementById('product-price').addEventListener('input', event => event.target.setCustomValidity(''));
             document.getElementById('member-reason').addEventListener('input', event => event.target.setCustomValidity(''));

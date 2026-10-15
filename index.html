@@ -839,6 +839,59 @@
             }
         }
 
+        async function loadShopGameInfo() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient.rpc('get_shop_game_info');
+                if (error) throw error;
+                const images = new Set(['PUBGM-700x700.png', 'freefire.png', 'moba.png', 'logo-700x700.png']);
+                const validItem = item => item && typeof item === 'object' && !Array.isArray(item) &&
+                    Object.keys(item).length === 6 && typeof item.visible === 'boolean' && images.has(item.image) &&
+                    [['name', 60], ['platform', 60], ['status', 60], ['description', 240]].every(([field, max]) =>
+                        typeof item[field] === 'string' && item[field].trim() === item[field] &&
+                        Array.from(item[field]).length >= 1 && Array.from(item[field]).length <= max &&
+                        !/[\u0000-\u001f\u007f-\u009f]/.test(item[field]));
+                if (!Array.isArray(data) || data.length > 12 || !data.every(validItem)) throw new Error('Game info unavailable');
+
+                const bar = document.getElementById('status-chips-bar');
+                const detail = document.getElementById('status-detail-text');
+                const chips = data.filter(item => item.visible).map(item => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = `t1st-chip border-0 ${/維護|暫停|異常/.test(item.status) ? 'warn' : ''}`;
+                    button.dataset.game = item.name;
+                    button.dataset.status = item.status;
+                    button.dataset.plat = item.platform;
+                    button.dataset.desc = item.description;
+                    button.setAttribute('aria-pressed', 'false');
+                    const image = document.createElement('img');
+                    image.src = item.image;
+                    image.alt = '';
+                    image.className = 'w-5 h-5 rounded-full object-cover';
+                    const dot = document.createElement('span');
+                    dot.className = 't1st-dot';
+                    const name = document.createElement('span');
+                    name.textContent = item.name;
+                    const platform = document.createElement('span');
+                    platform.className = 'text-[10px] opacity-70';
+                    platform.textContent = `[${item.platform}]`;
+                    button.append(image, dot, name, platform);
+                    return button;
+                });
+                if (!chips.length) {
+                    const empty = document.createElement('span');
+                    empty.className = 'text-xs text-slate-400';
+                    empty.textContent = '目前沒有公開展示的遊戲資訊。';
+                    chips.push(empty);
+                }
+                bar.replaceChildren(...chips);
+                detail.textContent = data.some(item => item.visible)
+                    ? '點選上方遊戲可檢視展示資訊。' : '目前沒有公開展示的遊戲資訊。';
+            } catch (error) {
+                console.warn('Game info unavailable; keeping the current display.', error);
+            }
+        }
+
         function updateHomeBackgroundVideo() {
             const home = document.getElementById('view-home');
             const video = document.getElementById('home-background-video');
@@ -2203,6 +2256,7 @@
             updateCartUI();
             void loadCatalog();
             void loadShopAnnouncement();
+            void loadShopGameInfo();
             initializeSupabaseAuth();
 
             const homeVideo = document.getElementById('home-background-video');
@@ -2318,9 +2372,13 @@
             if (bar && detailText) {
                 bar.addEventListener('click', function(e) {
                     const btn = e.target.closest('.t1st-chip');
-                    if (!btn) return;
-                    bar.querySelectorAll('.t1st-chip').forEach(b => b.classList.remove('is-on'));
+                    if (!btn || !bar.contains(btn)) return;
+                    bar.querySelectorAll('.t1st-chip').forEach(b => {
+                        b.classList.remove('is-on');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
                     btn.classList.add('is-on');
+                    btn.setAttribute('aria-pressed', 'true');
 
                     const game = btn.dataset.game;
                     const status = btn.dataset.status;
@@ -2328,7 +2386,7 @@
                     const desc = btn.dataset.desc;
 
                     const statusLabel = document.createElement('span');
-                    statusLabel.className = `${status.includes('維護') ? 'text-amber-400' : 'text-emerald-400'} font-bold`;
+                    statusLabel.className = `${/維護|暫停|異常/.test(status) ? 'text-amber-400' : 'text-emerald-400'} font-bold`;
                     statusLabel.textContent = status;
                     detailText.replaceChildren(document.createTextNode(`${game} 狀態：`), statusLabel,
                         document.createTextNode(` (平台：${plat}) — ${desc}`));
