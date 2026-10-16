@@ -13,15 +13,28 @@
             theme: {
                 extend: {
                     colors: {
-                        cyber: {
-                            dark: '#060913',
-                            card: '#0d1527',
-                            border: 'rgba(6, 182, 212, 0.25)',
-                            cyan: '#06b6d4',
-                            cyanHover: '#22d3ee',
-                            accent: '#38bdf8',
-                            purple: '#a855f7',
-                            muted: '#94a3b8'
+                        brand: {
+                            200: '#fbe4f2',
+                            300: '#f8c6e9',
+                            400: '#f1b8e1',
+                            500: '#c73e94',
+                            600: '#7925d9',
+                            900: '#522642',
+                            950: '#392036'
+                        },
+                        gold: {
+                            300: '#ffe1a9',
+                            400: '#f4c678'
+                        },
+                        slate: {
+                            200: '#eee9ed',
+                            300: '#e2dce0',
+                            400: '#bcb5bb',
+                            500: '#928a91',
+                            600: '#776f77',
+                            700: '#554b54',
+                            800: '#3c353c',
+                            900: '#262126'
                         }
                     },
                     fontFamily: {
@@ -38,14 +51,20 @@
     
     <style>
         :root {
-            --primary-glow: rgba(6, 182, 212, 0.35);
-            --accent-glow: rgba(56, 189, 248, 0.25);
+            --surface-main: #1b1b1b;
+            --surface-card: #262126;
+            --brand-purple: #7925d9;
+            --brand-pink: #c73e94;
+            --brand-gold: #f4c678;
+            --brand-gradient: linear-gradient(100deg, var(--brand-purple), var(--brand-pink) 52%, var(--brand-gold));
+            --primary-glow: rgba(199, 62, 148, 0.35);
+            --accent-glow: rgba(244, 198, 120, 0.25);
         }
 
         *, ::before, ::after { box-sizing: border-box; }
 
         body {
-            background-color: #060913;
+            background-color: var(--surface-main);
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
@@ -55,15 +74,15 @@
 
         .cyber-bg-grid {
             background-image: 
-                linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+                linear-gradient(to right, rgba(199, 62, 148, 0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(199, 62, 148, 0.035) 1px, transparent 1px);
             background-size: 32px 32px;
         }
 
         .home-hero {
             isolation: isolate;
             overflow: hidden;
-            background: radial-gradient(ellipse at 50% 30%, #153455 0%, #0b182d 48%, #060913 85%);
+            background: radial-gradient(ellipse at 50% 30%, #3b253c 0%, #261e28 48%, var(--surface-main) 85%);
         }
         .home-background-video {
             position: absolute;
@@ -81,7 +100,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(6, 9, 19, 0.62), rgba(6, 9, 19, 0.68) 50%, #060913);
+            background: linear-gradient(180deg, rgba(27, 21, 28, 0.65), rgba(27, 21, 28, 0.7) 50%, var(--surface-main));
             pointer-events: none;
         }
         .home-hero > .home-hero-content { position: relative; z-index: 1; }
@@ -91,61 +110,162 @@
         }
 
         .title-gradient {
-            background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #818cf8 100%);
+            background: var(--brand-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .cyber-card {
-            background: linear-gradient(135deg, rgba(13, 21, 39, 0.9) 0%, rgba(6, 9, 19, 0.95) 100%);
-            border: 1px solid rgba(6, 182, 212, 0.2);
+            background: linear-gradient(135deg, rgba(44, 34, 43, 0.96) 0%, rgba(32, 29, 32, 0.96) 100%);
+            border: 1px solid rgba(199, 62, 148, 0.28);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
         }
         .cyber-card:hover {
-            border-color: rgba(6, 182, 212, 0.7);
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.25);
+            border-color: rgba(241, 184, 225, 0.7);
+            box-shadow: 0 0 30px var(--primary-glow);
             transform: translateY(-4px);
         }
 
         .cyber-button {
-            background: linear-gradient(90deg, rgba(6, 182, 212, 0.15) 0%, rgba(56, 189, 248, 0.25) 100%);
-            border: 1px solid rgba(6, 182, 212, 0.4);
-            color: #22d3ee;
+            background: var(--brand-gradient);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(27, 27, 27, 0.65);
             transition: all 0.25s ease;
         }
-        .cyber-button:hover {
-            background: rgba(6, 182, 212, 0.3);
-            border-color: #06b6d4;
-            color: #ffffff;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+        .cyber-button:hover:not(:disabled) {
+            filter: brightness(1.1);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        .cyber-button:disabled {
+            filter: saturate(0.65);
         }
 
         input, select, textarea {
-            background: #0f172a !important;
+            background: var(--surface-card) !important;
             color: #fff !important;
-            border: 1px solid rgba(6, 182, 212, 0.3) !important;
+            border: 1px solid rgba(241, 184, 225, 0.4) !important;
             border-radius: 10px !important;
             transition: all 0.2s ease;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #06b6d4 !important;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3) !important;
+            border-color: #efa5d6 !important;
+            box-shadow: 0 0 0 3px rgba(202, 73, 172, 0.25) !important;
             outline: none !important;
+        }
+        input[type="radio"], input[type="checkbox"] { accent-color: var(--brand-pink); }
+
+        button:focus-visible, a:focus-visible {
+            outline: 2px solid var(--brand-gold);
+            outline-offset: 3px;
+        }
+
+        /* 導覽與頁尾共用會員頁的配色；只有公告列在我的帳號頁隱藏。 */
+        body.account-view-active #shop-announcement-banner { display: none; }
+        .shop-footer {
+            background: linear-gradient(rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.5)),
+                linear-gradient(110deg, #4e27a4, #986b97 53%, #d4b772);
+            border: 0;
+            color: #fff;
+        }
+        .shop-footer .text-slate-400,
+        .shop-footer .text-slate-500 { color: #f5edf9; }
+
+        #view-account {
+            flex: 1 0 auto;
+            min-height: 33rem;
+            padding: 1.5rem 1.5rem 3rem;
+            background: #1b1b1b;
+            color: #f6f6f6;
+            font-family: 'Inter', sans-serif;
+        }
+        #view-account .hidden { display: none !important; }
+        .account-heading { margin: 0 auto 3rem; text-align: center; }
+        .account-heading h2 { margin: 0 0 .45rem; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 800; line-height: 1.25; }
+        .account-breadcrumb { font-size: .8rem; font-weight: 700; color: #f3f3f3; }
+        .account-breadcrumb button { padding: .25rem; border: 0; background: transparent; color: #bdbdbd; cursor: pointer; }
+        .account-breadcrumb button:hover { color: #fff; text-decoration: underline; }
+        .account-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4rem; max-width: 50rem; margin: 0 auto; }
+        .account-column { min-width: 0; }
+        .account-column h3 { margin: 0 0 1.1rem; font-size: 1.35rem; font-weight: 800; line-height: 1.3; }
+        .account-register { position: relative; }
+        .account-register::before { content: ''; position: absolute; top: 0; bottom: 0; left: -2rem; width: 1px; background: #393939; }
+        .account-register-promo { text-align: center; }
+        .account-register-promo p { margin: 0 auto 1rem; max-width: 24rem; color: #d0d0d0; font-size: .85rem; line-height: 1.65; text-align: left; }
+        .account-form { margin: 0; }
+        .account-field { margin-bottom: 1rem; }
+        .account-field label { display: block; margin-bottom: .4rem; color: #f4f4f4; font-size: .85rem; font-weight: 700; }
+        .account-required { color: #fb6b98; }
+        #view-account .account-form input:not([type="checkbox"]) {
+            width: 100%; min-height: 2.75rem; padding: .6rem 1rem;
+            border: 2px solid #e8e8e8 !important; border-radius: 999px !important;
+            background: #1b1b1b !important; color: #fff !important;
+            font-size: .9rem;
+        }
+        #view-account .account-form input::placeholder { color: #a7a7a7; }
+        #view-account .account-form input:focus-visible {
+            border-color: #efa5d6 !important;
+            box-shadow: 0 0 0 3px rgba(202, 73, 172, .3) !important;
+        }
+        .account-password { position: relative; }
+        #view-account .account-password input { padding-right: 4.5rem !important; }
+        .account-password-toggle {
+            position: absolute; top: 50%; right: .4rem; transform: translateY(-50%);
+            min-width: 3.75rem; min-height: 2.5rem; border: 0; border-radius: 999px;
+            background: transparent; color: #ddd; font-size: .8rem; font-weight: 700; cursor: pointer;
+        }
+        .account-password-toggle:hover { color: #fff; }
+        .account-submit {
+            display: block; width: 100%; min-height: 2.85rem; margin-top: 1.5rem;
+            padding: .65rem 1.25rem; border: 0; border-radius: 999px;
+            background: var(--brand-gradient);
+            color: #fff; font-size: .85rem; font-weight: 800; cursor: pointer;
+            transition: filter .2s ease, transform .2s ease;
+        }
+        .account-submit:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+        .account-submit:disabled { opacity: .65; cursor: wait; }
+        .account-register-cta {
+            min-height: 2.75rem; padding: .55rem 1.5rem; border: 0; border-radius: 999px;
+            background: #fff; color: #1b1b1b; font-size: .85rem; font-weight: 800; cursor: pointer;
+        }
+        .account-register-cta:hover { background: #f2e9f7; }
+        .account-text-button {
+            min-height: 2.75rem; padding: .5rem 0; border: 0; background: transparent;
+            color: #f1f1f1; font-size: .8rem; font-weight: 700; cursor: pointer;
+        }
+        .account-text-button:hover { text-decoration: underline; }
+        #view-account button:focus-visible { outline: 3px solid #f1b8e1; outline-offset: 3px; }
+        .account-field-hint { margin: .4rem 0 0; color: #c6c6c6; font-size: .75rem; line-height: 1.5; }
+        .account-session, .account-recovery, #auth-status { max-width: 50rem; margin: 0 auto 1.5rem; }
+        .account-session, .account-recovery { padding: 1.5rem; border: 1px solid #484848; border-radius: 1rem; background: #242424; }
+        .account-session p { margin: 0 0 .6rem; }
+        .account-session-email { overflow-wrap: anywhere; font-weight: 700; color: #fff; }
+        #auth-status { padding: 1rem; border-radius: .75rem; font-size: .85rem; line-height: 1.5; }
+        .account-recovery { max-width: 26rem; }
+        @media (max-width: 767px) {
+            #view-account { padding: 2rem 1.25rem 3rem; }
+            .account-heading { margin-bottom: 2rem; }
+            .account-layout { max-width: 30rem; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+            .account-register::before { top: -1.25rem; bottom: auto; left: 0; right: 0; width: auto; height: 1px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .account-submit { transition: none; }
+            .account-submit:hover:not(:disabled) { transform: none; }
         }
 
         .t1st-chip {
             display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(38, 33, 38, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 999px; color: #cbd5e1; font-size: 13px; font-weight: 600;
+            border-radius: 999px; color: #e2dce0; font-size: 13px; font-weight: 600;
             padding: 6px 14px; cursor: pointer; transition: all 0.2s ease;
         }
-        .t1st-chip:hover { border-color: rgba(6, 182, 212, 0.6); color: #fff; }
-        .t1st-chip.is-on { border-color: #06b6d4; background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+        .t1st-chip:hover { border-color: rgba(241, 184, 225, 0.65); color: #fff; }
+        .t1st-chip.is-on { border-color: #f1b8e1; background: rgba(199, 62, 148, 0.18); color: #fbe4f2; }
         .t1st-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; flex: none; box-shadow: 0 0 8px #10b981; }
         .t1st-chip.warn .t1st-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
         .t1st-chip { min-height: 44px; }
@@ -155,6 +275,7 @@
 
         @media (max-width: 639px) {
             input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
+            #view-account .account-form input:not([type="checkbox"]) { font-size: 16px; }
             #toast {
                 bottom: calc(5rem + env(safe-area-inset-bottom));
                 left: 1rem; right: 1rem; overflow-wrap: anywhere;
@@ -167,8 +288,8 @@
             .mobile-order-table tbody { display: block; width: 100%; }
             .mobile-order-table tbody tr {
                 display: block; margin-bottom: .75rem; padding: .75rem;
-                border: 1px solid rgba(6, 182, 212, .25); border-radius: 1rem;
-                background: rgba(15, 23, 42, .8);
+                border: 1px solid rgba(199, 62, 148, .35); border-radius: 1rem;
+                background: rgba(38, 33, 38, .85);
             }
             .mobile-order-table tbody tr:last-child { margin-bottom: 0; }
             .mobile-order-table tbody td:not([colspan]) {
@@ -178,7 +299,7 @@
             }
             .mobile-order-table tbody td:not([colspan]) + td { border-top: 1px solid rgba(148, 163, 184, .12); }
             .mobile-order-table tbody td[data-label]::before {
-                content: attr(data-label); flex: none; color: #94a3b8;
+                content: attr(data-label); flex: none; color: #bcb5bb;
                 font-weight: 600; text-align: left; white-space: nowrap;
             }
             .mobile-order-table tbody td[data-label="授權卡號"],
@@ -192,54 +313,53 @@
         }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #060913; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        ::-webkit-scrollbar-track { background: #1b1b1b; }
+        ::-webkit-scrollbar-thumb { background: #554b54; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #c73e94; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-black cyber-bg-grid">
+<body class="min-h-screen flex flex-col selection:bg-brand-600 selection:text-white cyber-bg-grid">
 
-<header class="sticky top-0 z-50 bg-[#060913]/90 backdrop-blur-xl border-b border-cyan-900/40 shadow-2xl">
+<header class="sticky top-0 z-50 bg-[#191919]/95 backdrop-blur-xl border-b border-brand-900/60 shadow-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <button type="button" class="flex min-w-0 items-center gap-2 sm:gap-3 cursor-pointer group border-0 bg-transparent p-0 text-left" onclick="switchTab('home')" aria-label="返回 AXG SHOP 首頁">
-            <div class="w-10 h-10 flex-none rounded-xl overflow-hidden shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-transform flex items-center justify-center bg-[#060913]">
+            <div class="w-10 h-10 flex-none rounded-xl overflow-hidden shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform flex items-center justify-center bg-[#1b1b1b]">
                 <img src="logo.jpg" alt="AXG Logo" class="w-full h-full object-cover">
             </div>
             <div class="min-w-0">
-                <span class="block whitespace-nowrap font-mono font-extrabold text-lg sm:text-xl tracking-wider text-cyan-400">AXG<span class="text-white"> SHOP</span></span>
-                <span class="block text-[9px] font-mono text-cyan-500/80 -mt-1 tracking-widest uppercase">輔助官網</span>
+                <span class="block whitespace-nowrap font-mono font-extrabold text-lg sm:text-xl tracking-wider text-brand-400">AXG<span class="text-white"> SHOP</span></span>
+                <span class="block text-[9px] font-mono text-brand-300 -mt-1 tracking-widest uppercase">輔助官網</span>
             </div>
         </button>
             <nav class="hidden lg:flex items-center space-x-1 text-sm font-medium font-mono text-slate-300">
-                <button onclick="switchTab('home')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">首頁</button>
+                <button onclick="switchTab('home')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">首頁</button>
                 
                 <div class="relative group py-2">
-                    <button class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors inline-flex items-center gap-1.5 bg-transparent border-0 cursor-pointer">
+                    <button class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors inline-flex items-center gap-1.5 bg-transparent border-0 cursor-pointer">
                         <span>輔助分類</span>
                         <i class="fa-solid fa-chevron-down text-xs opacity-70 group-hover:rotate-180 transition-transform"></i>
                     </button>
-                    <div class="absolute left-0 mt-1 w-60 bg-[#0d1527] border border-cyan-900/60 rounded-xl shadow-2xl py-2 hidden group-hover:block z-50 backdrop-blur-xl">
-                        <button onclick="switchTab('mobile-store'); filterProducts('valorant');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-crosshairs text-cyan-400 w-4"></i> VALORANT 特戰英豪
+                    <div class="absolute left-0 mt-1 w-60 bg-[#262126] border border-brand-900/60 rounded-xl shadow-2xl py-2 hidden group-hover:block z-50 backdrop-blur-xl">
+                        <button onclick="switchTab('mobile-store'); filterProducts('valorant');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-crosshairs text-brand-400 w-4"></i> VALORANT 特戰英豪
                         </button>
-                        <button onclick="switchTab('mobile-store'); filterProducts('pubg');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-gun text-cyan-400 w-4"></i> PUBG 絕地求生
+                        <button onclick="switchTab('mobile-store'); filterProducts('pubg');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-gun text-brand-400 w-4"></i> PUBG 絕地求生
                         </button>
-                        <button onclick="switchTab('mobile-store'); filterProducts('mobile');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-mobile-screen text-cyan-400 w-4"></i> 熱門手遊輔助 (FF/傳說)
+                        <button onclick="switchTab('mobile-store'); filterProducts('mobile');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-mobile-screen text-brand-400 w-4"></i> 熱門手遊輔助 (FF/傳說)
                         </button>
-                        <button onclick="switchTab('mobile-store'); filterProducts('account');" class="w-full text-left px-4 py-2.5 hover:bg-cyan-950/60 hover:text-cyan-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-key text-cyan-400 w-4"></i>P12 證書
+                        <button onclick="switchTab('mobile-store'); filterProducts('account');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
+                            <i class="fa-solid fa-key text-brand-400 w-4"></i>P12 證書
                         </button>
                     </div>
                 </div>
 
-                <button onclick="switchTab('mobile-store')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">全部商城</button>
-                <button onclick="switchTab('orders')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">卡號查詢</button>
-                <button onclick="switchTab('downloads')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">下載專區</button>
-                <button onclick="switchTab('wallet')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">餘額儲值</button>
-                <button onclick="switchTab('trouble')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">疑難雜症</button>
-                <button onclick="switchTab('account')" class="nav-btn px-3 py-2 rounded-lg hover:text-cyan-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">會員中心</button>
+                <button onclick="switchTab('mobile-store')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">全部商城</button>
+                <button onclick="switchTab('orders')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">卡號查詢</button>
+                <button onclick="switchTab('downloads')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">下載專區</button>
+                <button onclick="switchTab('wallet')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">餘額儲值</button>
+                <button onclick="switchTab('trouble')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">疑難雜症</button>
             </nav>
 
             <div class="flex flex-none items-center gap-2 sm:gap-3">
@@ -247,40 +367,41 @@
                     <i class="fa-brands fa-discord text-sm"></i>
                     <span>Discord 客服</span>
                 </a>
+                <button id="header-account-button" type="button" onclick="switchTab('account')" class="hidden sm:inline-flex min-h-11 items-center whitespace-nowrap bg-transparent border-0 px-2 text-xs font-bold text-white hover:text-brand-300 cursor-pointer">登入 / 註冊</button>
                 
-                <button id="cart-toggle-button" type="button" onclick="toggleCart(true)" aria-controls="cart-drawer" aria-expanded="false" class="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 border border-cyan-900/60 hover:border-cyan-400 transition-all text-slate-300 hover:text-cyan-400 cursor-pointer" aria-label="檢視購物車">
+                <button id="cart-toggle-button" type="button" onclick="toggleCart(true)" aria-controls="cart-drawer" aria-expanded="false" class="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 border border-brand-900/60 hover:border-brand-400 transition-all text-slate-300 hover:text-brand-400 cursor-pointer" aria-label="檢視購物車">
                     <i class="fa-solid fa-cart-shopping text-base"></i>
-                    <span id="cart-badge" aria-live="polite" aria-atomic="true" class="absolute -top-1 -right-1 bg-cyan-400 text-black font-extrabold font-mono text-[10px] rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-cyan-400/50">0</span>
+                    <span id="cart-badge" aria-live="polite" aria-atomic="true" class="absolute -top-1 -right-1 bg-brand-400 text-black font-extrabold font-mono text-[10px] rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-brand-500/50">0</span>
                 </button>
                 
-                <button id="mobile-menu-button" type="button" onclick="toggleMobileMenu()" aria-label="開啟手機選單" aria-controls="mobile-menu" aria-expanded="false" class="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-slate-300 hover:text-cyan-400 border border-slate-800 cursor-pointer">
+                <button id="mobile-menu-button" type="button" onclick="toggleMobileMenu()" aria-label="開啟手機選單" aria-controls="mobile-menu" aria-expanded="false" class="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-slate-300 hover:text-brand-400 border border-slate-800 cursor-pointer">
                     <i class="fa-solid fa-bars text-lg" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
 
-        <div id="mobile-menu" class="lg:hidden hidden absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto bg-[#0d1527] border-b border-cyan-900/50 px-5 py-3 font-mono text-sm shadow-2xl">
-            <button onclick="switchTab('home')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 首頁</button>
-            <button onclick="switchTab('mobile-store')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 輔助授權商城</button>
-            <button onclick="switchTab('orders')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 卡號與訂單查詢</button>
-            <button onclick="switchTab('downloads')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 下載專區</button>
-            <button onclick="switchTab('wallet')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 餘額儲值</button>
-            <button onclick="switchTab('trouble')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 疑難雜症 FAQ</button>
-            <button onclick="switchTab('account')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-cyan-400 bg-transparent border-0 cursor-pointer">▶ 會員中心 / 登入</button>
+        <div id="mobile-menu" class="lg:hidden hidden absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto bg-[#262126] border-b border-brand-900/50 px-5 py-3 font-mono text-sm shadow-2xl">
+            <button onclick="switchTab('home')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 首頁</button>
+            <button onclick="switchTab('mobile-store')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 輔助授權商城</button>
+            <button onclick="switchTab('orders')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 卡號與訂單查詢</button>
+            <button onclick="switchTab('downloads')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 下載專區</button>
+            <button onclick="switchTab('wallet')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 餘額儲值</button>
+            <button onclick="switchTab('trouble')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 疑難雜症 FAQ</button>
+            <button onclick="switchTab('account')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 會員中心 / 登入</button>
             <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="flex min-h-11 items-center text-left py-2 text-indigo-400 font-bold no-underline">▶ 加入 Discord 售後群</a>
         </div>
     </header>
 
-    <div class="bg-cyan-950/60 border-b border-cyan-900/40 py-2 px-4 overflow-hidden relative z-40 font-mono text-xs backdrop-blur-md">
+    <div id="shop-announcement-banner" class="bg-brand-950/60 border-b border-brand-900/40 py-2 px-4 overflow-hidden relative z-40 font-mono text-xs backdrop-blur-md">
         <div class="max-w-7xl mx-auto flex items-center">
-            <div class="flex items-center gap-2 text-cyan-400 font-bold whitespace-nowrap mr-4 bg-cyan-950/90 px-3 py-1 rounded-lg border border-cyan-500/30">
-                <i class="fa-solid fa-bullhorn text-cyan-400 animate-bounce" aria-hidden="true"></i>
+            <div class="flex items-center gap-2 text-brand-400 font-bold whitespace-nowrap mr-4 bg-brand-950/90 px-3 py-1 rounded-lg border border-brand-500/30">
+                <i class="fa-solid fa-bullhorn text-brand-400 animate-bounce" aria-hidden="true"></i>
                 <span>最新公告：</span>
             </div>
             <div class="overflow-hidden whitespace-nowrap w-full">
                 <div class="inline-block animate-[marquee_25s_linear_infinite] text-slate-300" role="marquee" aria-label="即時公告">
                     <span id="shop-announcement-text">🔥 歡迎來到 AXG SHOP！登入後可建立待付款訂單，請攜帶訂單編號洽詢付款。</span>
-                    <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="ml-2 text-cyan-400 underline">Discord 客服 ↗</a>
+                    <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="ml-2 text-brand-400 underline">Discord 客服 ↗</a>
                 </div>
             </div>
         </div>
@@ -299,7 +420,7 @@
                 <source data-src="Video%20Project%201.mp4" type="video/mp4">
             </video>
             <div class="home-hero-content max-w-5xl mx-auto text-center">
-                <div class="inline-flex items-center gap-2 mb-6 font-mono text-xs text-cyan-400 px-4 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse">
+                <div class="inline-flex items-center gap-2 mb-6 font-mono text-xs text-brand-400 px-4 py-1.5 rounded-full bg-brand-950/80 border border-brand-500/40 backdrop-blur-md shadow-[0_0_20px_rgba(199,62,148,0.3)] animate-pulse">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span>AXG SHOP 線上選購</span>
                 </div>
@@ -335,9 +456,9 @@
 
                 <p id="catalog-status" role="status" aria-live="polite" class="mb-6 text-center font-mono text-xs text-slate-400">正在載入商品與即時價格…</p>
 
-                <div class="mb-10 bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-2xl font-mono">
+                <div class="mb-10 bg-[#262126] border border-brand-900/60 rounded-2xl p-5 shadow-2xl font-mono">
                     <div class="flex items-center justify-between mb-3">
-                        <div class="text-xs text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-2">
+                        <div class="text-xs text-brand-400 font-bold uppercase tracking-wider flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                             <span>遊戲與平台資訊</span>
                         </div>
@@ -374,11 +495,11 @@
 
                 <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-8 font-mono">
                     <div class="flex min-w-0 flex-nowrap gap-2 w-full overflow-x-auto pb-2 md:flex-1" id="filter-tabs" role="group" aria-label="篩選商品分類">
-                        <button onclick="filterProducts('all')" data-category="all" aria-pressed="true" class="filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer">全部商品</button>
-                        <button onclick="filterProducts('valorant')" data-category="valorant" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">特戰英豪</button>
-                        <button onclick="filterProducts('pubg')" data-category="pubg" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">絕地求生</button>
-                        <button onclick="filterProducts('mobile')" data-category="mobile" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">熱門手遊</button>
-                        <button onclick="filterProducts('account')" data-category="account" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer">帳號與憑證</button>
+                        <button onclick="filterProducts('all')" data-category="all" aria-pressed="true" class="filter-tab-btn px-4 py-2 rounded-xl bg-brand-950 border border-brand-500/60 text-brand-400 font-bold text-xs cursor-pointer">全部商品</button>
+                        <button onclick="filterProducts('valorant')" data-category="valorant" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">特戰英豪</button>
+                        <button onclick="filterProducts('pubg')" data-category="pubg" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">絕地求生</button>
+                        <button onclick="filterProducts('mobile')" data-category="mobile" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">熱門手遊</button>
+                        <button onclick="filterProducts('account')" data-category="account" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">帳號與憑證</button>
                     </div>
 
                     <div class="relative w-full md:w-64">
@@ -394,18 +515,18 @@
         <section id="view-orders" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">訂單與授權卡號查詢</h2>
+                    <h2 class="text-2xl font-bold text-white border-l-4 border-brand-400 pl-3 mb-2">訂單與授權卡號查詢</h2>
                     <p class="text-xs text-slate-400">登入後僅能查詢目前會員帳號所屬的訂單；可用訂單編號篩選。為保護卡號，不能透過公開信箱或電話查詢。</p>
                 </div>
 
-                <div id="order-created-panel" class="hidden mb-6 rounded-2xl border border-indigo-500/40 bg-indigo-950/30 p-5 text-sm text-indigo-100" role="status" aria-live="polite">
+                <div id="order-created-panel" class="hidden mb-6 rounded-2xl border border-brand-500/40 bg-brand-950/30 p-5 text-sm text-brand-200" role="status" aria-live="polite">
                     <p id="order-created-title" class="mb-2 font-bold">待付款訂單已建立</p>
-                    <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-cyan-300"></strong></p>
+                    <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-gold-300"></strong></p>
                     <p id="order-created-description" class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
                     <a id="order-discord-link" href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-indigo-400/50 px-4 py-2 text-indigo-200 hover:bg-indigo-900/40">前往 Discord 洽詢付款</a>
                 </div>
 
-                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
+                <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
                     <form id="order-search-form" class="flex flex-col sm:flex-row gap-3 mb-3" onsubmit="queryOrders(event)">
                         <label for="order-search-input" class="sr-only">訂單編號</label>
                         <input type="search" id="order-search-input" name="orderNumber" maxlength="80" autocomplete="off" placeholder="訂單編號（選填，例如 AXG-20261011）" aria-describedby="order-search-hint" class="w-full min-w-0 flex-1 px-4 py-3 text-sm">
@@ -419,7 +540,7 @@
 
                     <div class="sm:overflow-x-auto">
                         <table class="mobile-order-table w-full text-left text-xs text-slate-300">
-                            <thead class="border-b border-cyan-900/60 text-cyan-400 uppercase">
+                            <thead class="border-b border-brand-900/60 text-brand-400 uppercase">
                                 <tr>
                                     <th class="pb-3 px-2">成立時間</th>
                                     <th class="pb-3 px-2">訂單編號</th>
@@ -443,13 +564,13 @@
 
         <section id="view-downloads" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-4xl mx-auto">
-                <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">輔助程式下載專區</h2>
+                <h2 class="text-2xl font-bold text-white border-l-4 border-brand-400 pl-3 mb-6">輔助程式下載專區</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+                    <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
                         <div>
                             <div class="flex justify-between items-start mb-3">
-                                <h3 class="text-cyan-400 font-bold text-base">AXG </h3>
+                                <h3 class="text-brand-400 font-bold text-base">AXG </h3>
                                 <span class="bg-emerald-950 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30">v4.8.2 最新版</span>
                             </div>
                             <p class="text-xs text-slate-400 mb-6 leading-relaxed">。</p>
@@ -460,10 +581,10 @@
                         </button>
                     </div>
 
-                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+                    <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
                         <div>
                             <div class="flex justify-between items-start mb-3">
-                                <h3 class="text-cyan-400 font-bold text-base">iOS / </h3>
+                                <h3 class="text-brand-400 font-bold text-base">iOS / </h3>
                                 <span class="bg-emerald-950 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30">v2.1 免電腦</span>
                             </div>
                             <p class="text-xs text-slate-400 mb-6 leading-relaxed">專為手遊輔助設計，支援 P12 證書自動簽名與雲端版本一鍵導入更新。</p>
@@ -480,16 +601,16 @@
         <section id="view-wallet" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-2xl mx-auto">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-2">儲值洽詢</h2>
+                    <h2 class="text-2xl font-bold text-white border-l-4 border-brand-400 pl-3 mb-2">儲值洽詢</h2>
                     <p class="text-xs text-slate-400">選擇預計金額後前往 Discord 詢問客服；此頁不會建立儲值訂單。</p>
                 </div>
 
-                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl space-y-6">
+                <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-6 shadow-2xl space-y-6">
                     <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800" aria-live="polite">
                         <p class="text-xs text-slate-400 mb-1">目前帳戶餘額</p>
-                        <div class="text-2xl font-extrabold text-cyan-400" id="user-balance">請先登入查看</div>
+                        <div class="text-2xl font-extrabold text-gold-300" id="user-balance">請先登入查看</div>
                         <p id="balance-status" class="text-[11px] text-slate-400 mt-2 mb-0" role="status">登入後可查詢後台記錄的本人餘額；洽詢不會自動入帳。</p>
-                        <button id="balance-refresh" type="button" onclick="loadMyBalance()" disabled class="mt-3 rounded-lg border border-cyan-500/40 bg-cyan-950/30 px-3 py-2 text-xs text-cyan-200 hover:bg-cyan-900/40 disabled:cursor-not-allowed disabled:opacity-50">重新整理餘額</button>
+                        <button id="balance-refresh" type="button" onclick="loadMyBalance()" disabled class="mt-3 rounded-lg border border-brand-500/40 bg-brand-950/30 px-3 py-2 text-xs text-brand-200 hover:bg-brand-900/40 disabled:cursor-not-allowed disabled:opacity-50">重新整理餘額</button>
                     </div>
 
                     <form id="topup-form" class="space-y-5" onsubmit="processTopup(event)">
@@ -498,10 +619,10 @@
                             <input type="number" id="topup-amount" name="amount" value="1000" min="100" max="50000" step="100" required inputmode="numeric" aria-describedby="topup-amount-hint" class="w-full px-4 py-3 text-sm">
                             <p id="topup-amount-hint" class="text-[11px] text-slate-500 mt-2 mb-0">每筆 NT$ 100–50,000，以 NT$ 100 為單位。</p>
                             <div class="flex flex-wrap gap-2 mt-3" aria-label="常用儲值金額">
-                                <button type="button" data-topup-amount="500" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 500</button>
-                                <button type="button" data-topup-amount="1000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 1,000</button>
-                                <button type="button" data-topup-amount="2000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 2,000</button>
-                                <button type="button" data-topup-amount="5000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs cursor-pointer">NT$ 5,000</button>
+                                <button type="button" data-topup-amount="500" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-brand-400 hover:text-brand-300 text-xs cursor-pointer">NT$ 500</button>
+                                <button type="button" data-topup-amount="1000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-brand-400 hover:text-brand-300 text-xs cursor-pointer">NT$ 1,000</button>
+                                <button type="button" data-topup-amount="2000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-brand-400 hover:text-brand-300 text-xs cursor-pointer">NT$ 2,000</button>
+                                <button type="button" data-topup-amount="5000" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:border-brand-400 hover:text-brand-300 text-xs cursor-pointer">NT$ 5,000</button>
                             </div>
                         </div>
 
@@ -513,8 +634,8 @@
                             <p id="topup-method-hint" class="text-[11px] text-slate-500 mt-2 mb-0">網站不會送出金額或驗證入帳；請自行與客服確認付款方式。</p>
                         </div>
 
-                        <div id="topup-summary" class="hidden rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-4" aria-live="polite" aria-atomic="true">
-                            <h3 class="text-sm font-bold text-cyan-300 mb-3">儲值資料摘要</h3>
+                        <div id="topup-summary" class="hidden rounded-xl border border-brand-500/30 bg-brand-950/30 p-4" aria-live="polite" aria-atomic="true">
+                            <h3 class="text-sm font-bold text-brand-300 mb-3">儲值資料摘要</h3>
                             <dl class="space-y-2 text-xs">
                                 <div class="flex justify-between gap-4"><dt class="text-slate-400">儲值金額</dt><dd id="topup-summary-amount" class="m-0 text-white font-bold"></dd></div>
                                 <div class="flex justify-between gap-4"><dt class="text-slate-400">聯絡方式</dt><dd id="topup-summary-method" class="m-0 text-right text-white"></dd></div>
@@ -530,102 +651,115 @@
 
         <section id="view-trouble" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-3xl mx-auto">
-                <h2 class="text-2xl font-bold text-white border-l-4 border-cyan-400 pl-3 mb-6">疑難雜症與常見問題 (FAQ)</h2>
+                <h2 class="text-2xl font-bold text-white border-l-4 border-brand-400 pl-3 mb-6">疑難雜症與常見問題 (FAQ)</h2>
                 
                 <div class="space-y-4">
-                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
-                        <div class="font-bold text-cyan-400 mb-2">Q1: 下載輔助主程式後被 Windows Defender 攔截怎麼辦？</div>
+                    <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-5 shadow-xl">
+                        <div class="font-bold text-brand-400 mb-2">Q1: 下載輔助主程式後被 Windows Defender 攔截怎麼辦？</div>
                         <p class="text-xs text-slate-300 leading-relaxed">請勿關閉防毒軟體。先確認下載來源與檔案安全性；若持續被攔截，請聯繫客服取得進一步協助。</p>
                     </div>
 
-                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
-                        <div class="font-bold text-cyan-400 mb-2">Q2: 建立訂單後如何確認付款與取得卡號？</div>
+                    <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-5 shadow-xl">
+                        <div class="font-bold text-brand-400 mb-2">Q2: 建立訂單後如何確認付款與取得卡號？</div>
                         <p class="text-xs text-slate-300 leading-relaxed">選擇餘額付款後會立即扣款並顯示已付款；若選擇 Discord，請提供訂單編號並由客服確認收款。發卡仍需管理員處理，登入後可在「卡號查詢」查看狀態。</p>
                     </div>
 
-                    <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-5 shadow-xl">
-                        <div class="font-bold text-cyan-400 mb-2">Q3: 遇到技術問題或無法注入該如何處理？</div>
+                    <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-5 shadow-xl">
+                        <div class="font-bold text-brand-400 mb-2">Q3: 遇到技術問題或無法注入該如何處理？</div>
                         <p class="text-xs text-slate-300 leading-relaxed">請直接點擊頁面右下角的 Discord 浮動圖示，加入我們的官方售後群組，開立工單將由技術人員一對一為您解決。</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="view-account" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
-            <div class="max-w-md mx-auto">
-                <div class="bg-[#0d1527] border border-cyan-900/60 rounded-2xl p-6 shadow-2xl">
-                    <div id="auth-session-panel" class="hidden mb-5 rounded-xl border border-cyan-500/30 bg-cyan-950/30 p-4" aria-live="polite">
-                        <p class="mb-1 text-xs text-slate-400">目前登入帳號</p>
-                        <p id="auth-session-email" class="mb-4 break-all text-sm font-bold text-cyan-300"></p>
-                        <button type="button" onclick="signOutMember()" class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:border-cyan-400 cursor-pointer">登出</button>
-                    </div>
-                    <p id="auth-status" class="hidden mb-4 rounded-lg border border-slate-700 bg-slate-900/80 p-3 text-xs leading-relaxed" role="status" aria-live="polite"></p>
+        <section id="view-account" class="hidden" aria-labelledby="account-title">
+            <div class="account-heading">
+                <h2 id="account-title">我的帳號</h2>
+                <nav class="account-breadcrumb" aria-label="目前位置">
+                    <button type="button" onclick="switchTab('home')">首頁</button> / <span aria-current="page">我的帳號</span>
+                </nav>
+            </div>
+            <div id="auth-session-panel" class="account-session hidden" aria-live="polite">
+                <p>目前登入帳號</p>
+                <p id="auth-session-email" class="account-session-email"></p>
+                <button type="button" onclick="signOutMember()" class="account-register-cta">登出</button>
+            </div>
+            <p id="auth-status" class="hidden" role="status" aria-live="polite"></p>
 
-                    <div id="auth-tabs" class="flex border-b border-slate-800 mb-6" role="tablist" aria-label="會員驗證方式">
-                        <button type="button" onclick="switchAuthTab('login')" id="auth-tab-login" role="tab" aria-controls="form-login" aria-selected="true" class="flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer">會員登入</button>
-                        <button type="button" onclick="switchAuthTab('register')" id="auth-tab-reg" role="tab" aria-controls="form-register" aria-selected="false" tabindex="-1" class="flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer">帳號註冊</button>
-                    </div>
-
-                    <form id="form-login" role="tabpanel" aria-labelledby="auth-tab-login" onsubmit="handleLoginSubmit(event)">
-                        <div class="mb-4">
-                            <label for="login-identifier" class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
-                            <input id="login-identifier" name="email" type="email" required maxlength="254" autocomplete="username" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
+            <div id="auth-layout" class="account-layout">
+                <div class="account-column account-login">
+                    <h3 id="account-login-title">登入</h3>
+                    <form id="form-login" class="account-form" aria-labelledby="account-login-title" onsubmit="handleLoginSubmit(event)">
+                        <div class="account-field">
+                            <label for="login-identifier">電子郵件 <span class="account-required" aria-hidden="true">*</span></label>
+                            <input id="login-identifier" name="email" type="email" required maxlength="254" autocomplete="username" spellcheck="false" placeholder="name@example.com">
                         </div>
-                        <div class="mb-6">
-                            <label for="login-password" class="block text-xs font-bold text-slate-300 mb-1.5">密碼</label>
-                            <div class="relative">
-                                <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="請輸入密碼" class="w-full px-4 py-3 pr-16 text-sm">
-                                <button type="button" data-password-toggle="login-password" aria-label="顯示密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
+                        <div class="account-field">
+                            <label for="login-password">密碼 <span class="account-required" aria-hidden="true">*</span></label>
+                            <div class="account-password">
+                                <input id="login-password" name="password" type="password" required autocomplete="current-password" placeholder="請輸入密碼">
+                                <button type="button" data-password-toggle="login-password" aria-label="顯示密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
                             </div>
                         </div>
-                        <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">登入系統</button>
-                        <button type="button" onclick="sendPasswordReset()" class="mt-4 w-full bg-transparent border-0 text-center text-xs text-cyan-300 hover:text-cyan-200 underline cursor-pointer">忘記密碼？寄送重設連結</button>
-                    </form>
-
-                    <form id="form-register" class="hidden" role="tabpanel" aria-labelledby="auth-tab-reg" onsubmit="handleRegisterSubmit(event)">
-                        <div class="mb-4">
-                            <label for="register-email" class="block text-xs font-bold text-slate-300 mb-1.5">電子郵件</label>
-                            <input id="register-email" name="email" type="email" required maxlength="254" autocomplete="email" spellcheck="false" placeholder="name@example.com" class="w-full px-4 py-3 text-sm">
-                        </div>
-                        <div class="mb-4">
-                            <label for="register-password" class="block text-xs font-bold text-slate-300 mb-1.5">設定密碼</label>
-                            <div class="relative">
-                                <input id="register-password" name="new-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="register-password-hint register-password-strength" placeholder="至少 12 個字元" class="w-full px-4 py-3 pr-16 text-sm">
-                                <button type="button" data-password-toggle="register-password" aria-label="顯示密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
-                            </div>
-                            <p id="register-password-hint" class="text-[11px] text-slate-500 mt-2 mb-0">建議使用容易記住的長密語；不要求特定大小寫或符號組合。</p>
-                            <p id="register-password-strength" class="text-[11px] text-slate-400 mt-1 mb-0" aria-live="polite">密碼長度狀態：尚未輸入</p>
-                        </div>
-                        <div class="mb-6">
-                            <label for="register-password-confirm" class="block text-xs font-bold text-slate-300 mb-1.5">再次輸入密碼</label>
-                            <div class="relative">
-                                <input id="register-password-confirm" name="confirm-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入相同密碼" class="w-full px-4 py-3 pr-16 text-sm">
-                                <button type="button" data-password-toggle="register-password-confirm" aria-label="顯示確認密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
-                            </div>
-                        </div>
-                        <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">建立新帳號</button>
-                    </form>
-
-                    <form id="form-reset-password" class="hidden" role="region" aria-labelledby="recovery-form-title" onsubmit="handlePasswordRecoverySubmit(event)">
-                        <h3 id="recovery-form-title" class="mb-4 text-lg font-bold text-white">設定新密碼</h3>
-                        <div class="mb-4">
-                            <label for="recovery-password" class="block text-xs font-bold text-slate-300 mb-1.5">新密碼</label>
-                            <div class="relative">
-                                <input id="recovery-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="至少 12 個字元" class="w-full px-4 py-3 pr-16 text-sm">
-                                <button type="button" data-password-toggle="recovery-password" aria-label="顯示新密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
-                            </div>
-                        </div>
-                        <div class="mb-6">
-                            <label for="recovery-password-confirm" class="block text-xs font-bold text-slate-300 mb-1.5">再次輸入新密碼</label>
-                            <div class="relative">
-                                <input id="recovery-password-confirm" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入相同密碼" class="w-full px-4 py-3 pr-16 text-sm">
-                                <button type="button" data-password-toggle="recovery-password-confirm" aria-label="顯示確認密碼" aria-pressed="false" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1.5 text-[11px] text-cyan-300 hover:bg-slate-800 cursor-pointer bg-transparent border-0">顯示</button>
-                            </div>
-                        </div>
-                        <button type="submit" class="cyber-button w-full py-3.5 rounded-xl font-bold text-sm cursor-pointer border-0 shadow-lg">更新密碼</button>
+                        <button type="submit" class="account-submit">登入</button>
+                        <button type="button" onclick="sendPasswordReset()" class="account-text-button">忘記密碼？</button>
                     </form>
                 </div>
+
+                <div class="account-column account-register">
+                    <div id="auth-register-promo" class="account-register-promo">
+                        <h3>註冊</h3>
+                        <p>註冊本站帳號後，您可以查看自己的訂單與授權資料、使用會員餘額付款，並更快速地完成購買流程。</p>
+                        <button id="auth-register-open" type="button" onclick="switchAuthTab('register')" aria-controls="form-register" aria-expanded="false" class="account-register-cta">註冊</button>
+                    </div>
+                    <div id="auth-register-fields" class="hidden">
+                        <h3 id="account-register-title">建立帳號</h3>
+                        <form id="form-register" class="account-form hidden" aria-labelledby="account-register-title" onsubmit="handleRegisterSubmit(event)">
+                            <div class="account-field">
+                                <label for="register-email">電子郵件 <span class="account-required" aria-hidden="true">*</span></label>
+                                <input id="register-email" name="email" type="email" required maxlength="254" autocomplete="email" spellcheck="false" placeholder="name@example.com">
+                            </div>
+                            <div class="account-field">
+                                <label for="register-password">設定密碼 <span class="account-required" aria-hidden="true">*</span></label>
+                                <div class="account-password">
+                                    <input id="register-password" name="new-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="register-password-hint register-password-strength" placeholder="至少 12 個字元">
+                                    <button type="button" data-password-toggle="register-password" aria-label="顯示密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                                </div>
+                                <p id="register-password-hint" class="account-field-hint">建議使用容易記住的長密語；不要求特定大小寫或符號組合。</p>
+                                <p id="register-password-strength" class="account-field-hint" aria-live="polite">密碼長度狀態：尚未輸入</p>
+                            </div>
+                            <div class="account-field">
+                                <label for="register-password-confirm">再次輸入密碼 <span class="account-required" aria-hidden="true">*</span></label>
+                                <div class="account-password">
+                                    <input id="register-password-confirm" name="confirm-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入相同密碼">
+                                    <button type="button" data-password-toggle="register-password-confirm" aria-label="顯示確認密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="account-submit">建立新帳號</button>
+                        </form>
+                        <button type="button" onclick="switchAuthTab('login')" class="account-text-button">返回登入</button>
+                    </div>
+                </div>
             </div>
+
+            <form id="form-reset-password" class="account-form account-recovery hidden" role="region" aria-labelledby="recovery-form-title" onsubmit="handlePasswordRecoverySubmit(event)">
+                <h3 id="recovery-form-title">設定新密碼</h3>
+                <div class="account-field">
+                    <label for="recovery-password">新密碼 <span class="account-required" aria-hidden="true">*</span></label>
+                    <div class="account-password">
+                        <input id="recovery-password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="至少 12 個字元">
+                        <button type="button" data-password-toggle="recovery-password" aria-label="顯示新密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                    </div>
+                </div>
+                <div class="account-field">
+                    <label for="recovery-password-confirm">再次輸入新密碼 <span class="account-required" aria-hidden="true">*</span></label>
+                    <div class="account-password">
+                        <input id="recovery-password-confirm" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入相同密碼">
+                        <button type="button" data-password-toggle="recovery-password-confirm" aria-label="顯示確認密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                    </div>
+                </div>
+                <button type="submit" class="account-submit">更新密碼</button>
+            </form>
         </section>
 
     </main>
@@ -633,15 +767,15 @@
     <div id="product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductModal()"></div>
         <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div class="relative bg-[#0d1527] border border-cyan-500/50 rounded-2xl max-w-2xl w-full p-4 sm:p-8 shadow-2xl font-mono overflow-hidden">
+            <div class="relative bg-[#262126] border border-brand-500/50 rounded-2xl max-w-2xl w-full p-4 sm:p-8 shadow-2xl font-mono overflow-hidden">
                 <button type="button" onclick="closeProductModal()" aria-label="關閉商品明細" class="absolute top-2 right-2 flex h-11 w-11 items-center justify-center text-slate-400 hover:text-white bg-slate-900/80 rounded-lg border-0 cursor-pointer text-lg"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     <img id="modal-img" src="" alt="Product" class="w-full h-40 sm:h-56 object-cover rounded-xl border border-slate-800">
                     <div>
-                        <span id="modal-category" class="inline-block px-2.5 py-1 rounded bg-cyan-950 text-cyan-400 text-[10px] font-bold border border-cyan-500/40 mb-2">CATEGORY</span>
+                        <span id="modal-category" class="inline-block px-2.5 py-1 rounded bg-brand-950 text-brand-400 text-[10px] font-bold border border-brand-500/40 mb-2">CATEGORY</span>
                         <h3 id="modal-title" class="text-xl font-bold text-white mb-2 leading-tight">Product Title</h3>
-                        <div id="modal-price" class="text-2xl font-extrabold text-cyan-400 mb-4">NT$ 0</div>
+                        <div id="modal-price" class="text-2xl font-extrabold text-gold-300 mb-4">NT$ 0</div>
                         <p id="modal-desc" class="text-xs text-slate-300 leading-relaxed mb-6">Description goes here...</p>
                         
                         <div class="flex gap-3">
@@ -659,10 +793,10 @@
     <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="toggleCart(false)" aria-hidden="true"></div>
         <div class="absolute inset-y-0 right-0 flex w-full justify-end sm:pl-10">
-            <div class="cart-panel w-full sm:max-w-md min-h-0 bg-[#0d1527] border-l border-cyan-900/60 p-4 sm:p-6 flex flex-col shadow-2xl font-mono">
+            <div class="cart-panel w-full sm:max-w-md min-h-0 bg-[#262126] border-l border-brand-900/60 p-4 sm:p-6 flex flex-col shadow-2xl font-mono">
                 <div class="min-h-0 flex flex-1 flex-col">
-                    <div class="flex items-center justify-between gap-3 pb-4 border-b border-cyan-900/40">
-                        <h3 id="cart-title" class="min-w-0 text-base sm:text-lg font-bold text-cyan-400 flex items-center gap-2">
+                    <div class="flex items-center justify-between gap-3 pb-4 border-b border-brand-900/40">
+                        <h3 id="cart-title" class="min-w-0 text-base sm:text-lg font-bold text-brand-400 flex items-center gap-2">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span>購物車與訂單明細</span>
                         </h3>
@@ -674,19 +808,19 @@
                     <div id="cart-items-container" aria-live="polite" aria-label="購物車商品明細" class="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1"></div>
                 </div>
 
-                <div class="max-h-[55dvh] flex-none overflow-y-auto overscroll-contain pt-4 border-t border-cyan-900/40">
+                <div class="max-h-[55dvh] flex-none overflow-y-auto overscroll-contain pt-4 border-t border-brand-900/40">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-slate-300 text-sm">總計金額：</span>
-                        <span id="cart-total" class="text-cyan-400 font-bold text-2xl">NT$ 0</span>
+                        <span id="cart-total" class="text-gold-300 font-bold text-2xl">NT$ 0</span>
                     </div>
                     <fieldset id="cart-payment-methods" class="mb-3 space-y-2 border-0 p-0 text-xs text-slate-200">
-                        <legend class="mb-2 font-bold text-cyan-300">付款方式</legend>
+                        <legend class="mb-2 font-bold text-brand-300">付款方式</legend>
                         <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord" checked onchange="updateCartUI()"><span>Discord 洽詢付款（建立待付款訂單）</span></label>
                         <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="balance" onchange="updateCartUI()"><span>會員餘額扣款（足額時立即付款）</span></label>
                     </fieldset>
                     <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。</p>
                     <p id="cart-checkout-status" role="status" aria-live="polite" class="hidden mb-3 rounded-lg border border-amber-500/30 bg-amber-950/30 p-3 text-xs text-amber-200"></p>
-                    <button id="cart-abandon-request" type="button" onclick="abandonOrderRequest()" class="hidden mb-3 min-h-11 w-full rounded-lg border border-slate-600 p-2 text-xs text-slate-300 hover:border-cyan-400">已查詢訂單，放棄本次重試並修改購物車</button>
+                    <button id="cart-abandon-request" type="button" onclick="abandonOrderRequest()" class="hidden mb-3 min-h-11 w-full rounded-lg border border-slate-600 p-2 text-xs text-slate-300 hover:border-brand-400">已查詢訂單，放棄本次重試並修改購物車</button>
                     <button id="cart-checkout-button" type="button" onclick="checkout()" disabled class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-not-allowed border-0 shadow-lg opacity-50 flex items-center justify-center gap-2">
                         <i class="fa-brands fa-discord"></i>
                         <span>建立訂單並前往 Discord</span>
@@ -696,8 +830,8 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#0d1527] border border-cyan-400 text-white px-6 py-3.5 rounded-xl shadow-[0_0_25px_rgba(6,182,212,0.4)] flex items-center gap-3 font-mono text-xs">
-        <i class="fa-solid fa-circle-check text-cyan-400 text-base"></i>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-[#262126] border border-brand-400 text-white px-6 py-3.5 rounded-xl shadow-[0_0_25px_rgba(199,62,148,0.4)] flex items-center gap-3 font-mono text-xs">
+        <i class="fa-solid fa-circle-check text-brand-400 text-base"></i>
         <span id="toast-msg">Notification Message</span>
     </div>
 
@@ -705,32 +839,32 @@
         <i class="fa-brands fa-discord text-xl"></i>
     </a>
 
-    <footer class="bg-[#04060d] text-slate-400 py-12 border-t border-cyan-950 mt-auto font-mono text-xs">
+    <footer class="shop-footer text-slate-400 py-12 mt-auto font-mono text-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
                 <div class="flex items-center space-x-3 mb-3">
-                    <div class="w-8 h-8 rounded-lg bg-cyan-400 flex items-center justify-center text-black font-extrabold">AXG</div>
+                    <div class="w-8 h-8 rounded-lg bg-brand-400 flex items-center justify-center text-black font-extrabold">AXG</div>
                     <span class="font-bold text-white text-base">AXG SHOP</span>
                 </div>
                 <p class="text-slate-500 leading-relaxed">遊戲輔助與數位商品選購・會員訂單查詢與客服服務。</p>
             </div>
             <div>
-                <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">快速選單</h4>
+                <h4 class="text-white font-bold mb-3 border-l-2 border-brand-400 pl-2">快速選單</h4>
                 <ul class="space-y-2 list-none p-0 m-0">
-                    <li><button onclick="switchTab('mobile-store')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">輔助商城</button></li>
-                    <li><button onclick="switchTab('orders')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">卡號查詢</button></li>
-                    <li><button onclick="switchTab('downloads')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">下載專區</button></li>
+                    <li><button onclick="switchTab('mobile-store')" class="hover:text-brand-200 bg-transparent border-0 cursor-pointer p-0 text-slate-400">輔助商城</button></li>
+                    <li><button onclick="switchTab('orders')" class="hover:text-brand-200 bg-transparent border-0 cursor-pointer p-0 text-slate-400">卡號查詢</button></li>
+                    <li><button onclick="switchTab('downloads')" class="hover:text-brand-200 bg-transparent border-0 cursor-pointer p-0 text-slate-400">下載專區</button></li>
                 </ul>
             </div>
             <div>
-                <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">技術支援</h4>
+                <h4 class="text-white font-bold mb-3 border-l-2 border-brand-400 pl-2">技術支援</h4>
                 <ul class="space-y-2 list-none p-0 m-0">
-                    <li><a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-400 text-slate-400 no-underline">Discord 官方客服</a></li>
-                    <li><button onclick="switchTab('trouble')" class="hover:text-cyan-400 bg-transparent border-0 cursor-pointer p-0 text-slate-400">常見問題與免責聲明</button></li>
+                    <li><a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="hover:text-brand-200 text-slate-400 no-underline">Discord 官方客服</a></li>
+                    <li><button onclick="switchTab('trouble')" class="hover:text-brand-200 bg-transparent border-0 cursor-pointer p-0 text-slate-400">常見問題與免責聲明</button></li>
                 </ul>
             </div>
             <div>
-                <h4 class="text-white font-bold mb-3 border-l-2 border-cyan-400 pl-2">安全加密</h4>
+                <h4 class="text-white font-bold mb-3 border-l-2 border-brand-400 pl-2">安全加密</h4>
                 <p class="text-slate-500 leading-relaxed">登入後僅能查詢個人訂單；請使用 HTTPS 網站以保護資料。<br>&copy; 2026 AXG SHOP. All rights reserved.</p>
             </div>
         </div>
@@ -923,6 +1057,7 @@
                 const el = document.getElementById(`view-${v}`);
                 if (el) el.classList.toggle('hidden', v !== tabId);
             });
+            document.body.classList.toggle('account-view-active', tabId === 'account');
             if (!document.getElementById('mobile-menu')?.classList.contains('hidden')) toggleMobileMenu(false);
             updateHomeBackgroundVideo();
 
@@ -1131,13 +1266,13 @@
                     <div>
                         <div class="relative overflow-hidden rounded-xl mb-3.5 bg-slate-900 group cursor-pointer" onclick="openProductModal(${p.id})">
                             <img src="${p.img}" alt="${escapeHtml(p.name)}" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300">
-                            <span class="absolute top-2.5 right-2.5 bg-cyan-950/90 border border-cyan-400 text-cyan-300 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md backdrop-blur-md">${escapeHtml(p.tag)}</span>
+                            <span class="absolute top-2.5 right-2.5 bg-brand-950/90 border border-brand-400 text-brand-300 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md backdrop-blur-md">${escapeHtml(p.tag)}</span>
                         </div>
-                        <h3 class="text-white font-mono font-bold text-sm mb-2 line-clamp-2 hover:text-cyan-400 cursor-pointer transition-colors" onclick="openProductModal(${p.id})">${escapeHtml(p.name)}</h3>
-                        <div class="text-cyan-400 font-mono font-extrabold text-lg mb-4">NT$ ${p.price.toLocaleString()}</div>
+                        <h3 class="text-white font-mono font-bold text-sm mb-2 line-clamp-2 hover:text-brand-400 cursor-pointer transition-colors" onclick="openProductModal(${p.id})">${escapeHtml(p.name)}</h3>
+                        <div class="text-gold-300 font-mono font-extrabold text-lg mb-4">NT$ ${p.price.toLocaleString()}</div>
                     </div>
                     <div class="flex gap-2 font-mono">
-                        <button type="button" onclick="openProductModal(${p.id})" class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-slate-300 border border-slate-700 hover:border-cyan-400 text-xs cursor-pointer" aria-label="查看 ${escapeHtml(p.name)} 詳情">
+                        <button type="button" onclick="openProductModal(${p.id})" class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-slate-300 border border-slate-700 hover:border-brand-400 text-xs cursor-pointer" aria-label="查看 ${escapeHtml(p.name)} 詳情">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                         <button type="button" onclick="addToCart(${p.id})" class="cyber-button min-h-11 flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer border-0">
@@ -1160,8 +1295,8 @@
                 const selected = btn.dataset.category === cat;
                 btn.setAttribute('aria-pressed', String(selected));
                 btn.className = selected
-                    ? 'filter-tab-btn px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-500/60 text-cyan-400 font-bold text-xs cursor-pointer'
-                    : 'filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-cyan-500/50 text-xs cursor-pointer';
+                    ? 'filter-tab-btn px-4 py-2 rounded-xl bg-brand-950 border border-brand-500/60 text-brand-400 font-bold text-xs cursor-pointer'
+                    : 'filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer';
             });
             searchProducts();
         }
@@ -1301,7 +1436,7 @@
                     const controls = document.createElement('div');
                     controls.className = 'flex flex-wrap items-center justify-between gap-3';
                     const quantityControl = document.createElement('div');
-                    quantityControl.className = 'inline-flex items-center rounded-lg border border-slate-700 bg-[#060913]';
+                    quantityControl.className = 'inline-flex items-center rounded-lg border border-slate-700 bg-[#1b1b1b]';
 
                     const decreaseButton = document.createElement('button');
                     decreaseButton.type = 'button';
@@ -1329,7 +1464,7 @@
                     controls.appendChild(quantityControl);
 
                     const subtotal = document.createElement('p');
-                    subtotal.className = 'm-0 text-right text-sm font-bold text-cyan-300';
+                    subtotal.className = 'm-0 text-right text-sm font-bold text-gold-300';
                     subtotal.textContent = `小計 NT$ ${formatter.format(item.price * item.quantity)}`;
                     controls.appendChild(subtotal);
                     article.appendChild(controls);
@@ -1669,7 +1804,7 @@
                     addCell('商品／數量', order.product_name ? `${order.product_name} × ${quantity}` : '商品明細尚未建立');
                     const unitPrice = order.unit_price == null ? Number.NaN : Number(order.unit_price);
                     const lineTotal = Number.isSafeInteger(unitPrice) && unitPrice >= 0 ? unitPrice * quantity : Number(order.total_amount);
-                    addCell('小計', Number.isSafeInteger(lineTotal) && lineTotal >= 0 ? `NT$ ${formatter.format(lineTotal)}` : '—', 'py-4 px-2 text-cyan-400 font-bold whitespace-nowrap');
+                    addCell('小計', Number.isSafeInteger(lineTotal) && lineTotal >= 0 ? `NT$ ${formatter.format(lineTotal)}` : '—', 'py-4 px-2 text-gold-300 font-bold whitespace-nowrap');
 
                     const orderStatus = statusLabels.order[order.order_status] || '處理中';
                     const expiresAt = order.expires_at ? new Date(order.expires_at) : null;
@@ -1691,7 +1826,7 @@
                         && !isExpired;
                     if (canRevealKey) {
                         const keyLabel = document.createElement('span');
-                        keyLabel.className = 'inline-block select-all whitespace-pre-line break-all rounded border border-cyan-500/40 bg-cyan-950 px-2.5 py-1 font-mono font-bold text-cyan-300';
+                        keyLabel.className = 'inline-block select-all whitespace-pre-line break-all rounded border border-brand-500/40 bg-brand-950 px-2.5 py-1 font-mono font-bold text-brand-300';
                         keyLabel.textContent = order.authorization_key;
                         keyCell.appendChild(keyLabel);
                         if (order.expires_at) {
@@ -1716,7 +1851,7 @@
                     if (canRevealKey) {
                         const copyButton = document.createElement('button');
                         copyButton.type = 'button';
-                        copyButton.className = 'rounded border border-slate-700 bg-slate-800 px-3 py-1 text-cyan-400 hover:bg-cyan-900 cursor-pointer';
+                        copyButton.className = 'rounded border border-slate-700 bg-slate-800 px-3 py-1 text-brand-400 hover:bg-brand-900 cursor-pointer';
                         copyButton.textContent = '複製';
                         copyButton.setAttribute('aria-label', `複製 ${order.order_number || '訂單'} 的授權卡號`);
                         copyButton.addEventListener('click', () => copyToClipboard(order.authorization_key));
@@ -1734,7 +1869,7 @@
                             pendingPaymentActions.add(order.order_id);
                             const balanceButton = document.createElement('button');
                             balanceButton.type = 'button';
-                            balanceButton.className = 'ml-2 whitespace-nowrap rounded border border-cyan-500/40 bg-cyan-950/40 px-3 py-1 text-cyan-200 hover:bg-cyan-900/50';
+                            balanceButton.className = 'ml-2 whitespace-nowrap rounded border border-brand-500/40 bg-brand-950/40 px-3 py-1 text-brand-200 hover:bg-brand-900/50';
                             balanceButton.textContent = '使用餘額付款';
                             balanceButton.setAttribute('aria-label', `訂單 ${order.order_number || ''} 使用餘額付款`);
                             balanceButton.addEventListener('click', () => void payPendingOrderWithBalance(order, balanceButton));
@@ -1887,26 +2022,10 @@
         }
 
         function switchAuthTab(type) {
-            const loginForm = document.getElementById('form-login');
-            const regForm = document.getElementById('form-register');
-            const tabLogin = document.getElementById('auth-tab-login');
-            const tabReg = document.getElementById('auth-tab-reg');
-            if (!loginForm || !regForm || !tabLogin || !tabReg) return;
             if (currentAuthUser || authRecoveryActive) return;
-
             activeAuthTab = type === 'register' ? 'register' : 'login';
-            const showLogin = activeAuthTab === 'login';
-            tabLogin.setAttribute('aria-selected', String(showLogin));
-            tabReg.setAttribute('aria-selected', String(!showLogin));
-            tabLogin.tabIndex = showLogin ? 0 : -1;
-            tabReg.tabIndex = showLogin ? -1 : 0;
-            tabLogin.className = showLogin
-                ? 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer'
-                : 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer';
-            tabReg.className = showLogin
-                ? 'flex-1 py-3 text-center font-bold text-slate-500 bg-transparent border-0 cursor-pointer'
-                : 'flex-1 py-3 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 bg-transparent border-t-0 border-x-0 cursor-pointer';
             renderAuthView();
+            document.getElementById(activeAuthTab === 'register' ? 'register-email' : 'login-identifier')?.focus();
         }
 
         function getAuthRedirectUrl() {
@@ -1935,7 +2054,7 @@
             if (!status) return;
 
             const toneClasses = {
-                info: 'border-cyan-500/30 bg-cyan-950/30 text-cyan-200',
+                info: 'border-brand-500/30 bg-brand-950/30 text-brand-200',
                 success: 'border-emerald-500/30 bg-emerald-950/30 text-emerald-200',
                 error: 'border-red-500/30 bg-red-950/30 text-red-200'
             };
@@ -1947,19 +2066,28 @@
         function renderAuthView() {
             const sessionPanel = document.getElementById('auth-session-panel');
             const sessionEmail = document.getElementById('auth-session-email');
-            const tabs = document.getElementById('auth-tabs');
+            const authLayout = document.getElementById('auth-layout');
+            const registerPromo = document.getElementById('auth-register-promo');
+            const registerFields = document.getElementById('auth-register-fields');
+            const registerOpen = document.getElementById('auth-register-open');
             const loginForm = document.getElementById('form-login');
             const registerForm = document.getElementById('form-register');
             const recoveryForm = document.getElementById('form-reset-password');
-            if (!sessionPanel || !tabs || !loginForm || !registerForm || !recoveryForm) return;
+            if (!sessionPanel || !authLayout || !registerPromo || !registerFields || !registerOpen ||
+                !loginForm || !registerForm || !recoveryForm) return;
 
             const signedIn = Boolean(currentAuthUser);
             const showNormalAuth = !signedIn && !authRecoveryActive;
+            const showRegistration = showNormalAuth && activeAuthTab === 'register';
             sessionPanel.classList.toggle('hidden', !signedIn || authRecoveryActive);
             if (sessionEmail) sessionEmail.textContent = currentAuthUser?.email || '';
-            tabs.classList.toggle('hidden', !showNormalAuth);
-            loginForm.classList.toggle('hidden', !showNormalAuth || activeAuthTab !== 'login');
-            registerForm.classList.toggle('hidden', !showNormalAuth || activeAuthTab !== 'register');
+            document.getElementById('header-account-button').textContent = signedIn ? '我的帳號' : '登入 / 註冊';
+            authLayout.classList.toggle('hidden', !showNormalAuth);
+            loginForm.classList.toggle('hidden', !showNormalAuth);
+            registerPromo.classList.toggle('hidden', showRegistration);
+            registerFields.classList.toggle('hidden', !showRegistration);
+            registerOpen.setAttribute('aria-expanded', String(showRegistration));
+            registerForm.classList.toggle('hidden', !showRegistration);
             recoveryForm.classList.toggle('hidden', !authRecoveryActive);
 
             const recentOrderPanel = document.getElementById('order-created-panel');
@@ -2355,18 +2483,6 @@
                 document.getElementById(id)?.addEventListener('input', updateRecoveryPasswordValidation);
             });
 
-            const authTabList = document.querySelector('[role="tablist"][aria-label="會員驗證方式"]');
-            authTabList?.addEventListener('keydown', function(event) {
-                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-                event.preventDefault();
-                const nextTab = event.key === 'Home' || event.key === 'ArrowLeft'
-                    ? document.getElementById('auth-tab-login')
-                    : document.getElementById('auth-tab-reg');
-                const nextType = nextTab?.id === 'auth-tab-reg' ? 'register' : 'login';
-                switchAuthTab(nextType);
-                nextTab?.focus();
-            });
-            
             const bar = document.getElementById('status-chips-bar');
             const detailText = document.getElementById('status-detail-text');
             if (bar && detailText) {

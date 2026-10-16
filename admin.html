@@ -81,7 +81,7 @@
                     <h1 class="m-0 text-xl font-bold text-white">管理後台登入</h1>
                 </div>
             </div>
-            <p class="mb-5 text-sm leading-relaxed text-slate-400">請使用已加入 Supabase 管理員名單的帳號。登入後仍會由資料庫端再次驗證管理權限。</p>
+            <p class="mb-5 text-sm leading-relaxed text-slate-400">請使用已加入管理員名單的帳號。密碼登入後，須完成驗證器的六位數驗證碼；資料庫會再次確認管理權限與第二步驗證。</p>
             <form id="admin-login-form" class="space-y-4" onsubmit="adminSignIn(event)">
                 <div>
                     <label for="admin-email" class="mb-2 block text-xs font-semibold text-slate-300">管理員電子郵件</label>
@@ -91,8 +91,28 @@
                     <label for="admin-password" class="mb-2 block text-xs font-semibold text-slate-300">密碼</label>
                     <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="輸入管理員密碼">
                 </div>
-                <button id="admin-login-button" type="submit" class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-wait disabled:opacity-60">登入並驗證管理權限</button>
+                <button id="admin-login-button" type="submit" class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-wait disabled:opacity-60">登入並進行兩步驗證</button>
             </form>
+            <section id="admin-mfa-panel" hidden class="mt-5 rounded-2xl border border-cyan-400/30 bg-slate-950/70 p-4" aria-labelledby="admin-mfa-title">
+                <h2 id="admin-mfa-title" class="mt-0 text-base font-bold text-white">驗證器兩步驗證</h2>
+                <p id="admin-mfa-description" class="text-xs leading-relaxed text-slate-300"></p>
+                <div id="admin-mfa-setup" hidden>
+                    <button id="admin-mfa-enroll-button" type="button" onclick="adminStartMfaEnrollment()" class="mt-3 w-full rounded-xl border border-cyan-400 px-4 py-3 text-sm font-semibold text-cyan-200 hover:bg-cyan-400/10 disabled:opacity-50">設定驗證器</button>
+                    <div id="admin-mfa-enrollment" hidden class="mt-4 space-y-3">
+                        <p class="m-0 text-xs leading-relaxed text-amber-200">請在私密環境掃描或輸入金鑰；金鑰只在本次設定時顯示，請勿截圖或分享。</p>
+                        <img id="admin-mfa-qr" hidden alt="驗證器設定 QR Code" class="mx-auto h-48 w-48 rounded-lg bg-white p-2">
+                        <p class="m-0 text-xs text-slate-400">無法掃描時，於驗證器 App 手動輸入此金鑰：</p>
+                        <p id="admin-mfa-secret" class="mono break-all rounded-lg bg-slate-900 p-3 text-xs text-cyan-200"></p>
+                        <button id="admin-mfa-cancel" type="button" onclick="adminCancelMfaEnrollment()" class="w-full rounded-xl border border-slate-600 px-4 py-2.5 text-xs text-slate-300 hover:border-red-400 disabled:opacity-50">取消並刪除未完成的設定</button>
+                    </div>
+                </div>
+                <form id="admin-mfa-verify-form" hidden class="mt-4 space-y-3" onsubmit="adminVerifyMfa(event)">
+                    <label for="admin-mfa-code" class="block text-xs font-semibold text-slate-300">驗證器顯示的六位數代碼</label>
+                    <input id="admin-mfa-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-center text-lg tracking-[.4em] text-white outline-none focus:border-cyan-400" placeholder="000000">
+                    <button id="admin-mfa-verify-button" type="submit" class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">驗證並開啟後台</button>
+                </form>
+                <p id="admin-mfa-status" hidden class="mt-3 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite"></p>
+            </section>
             <p id="admin-login-status" class="mt-4 rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">正在初始化安全連線…</p>
             <button id="admin-login-signout" type="button" onclick="adminSignOut()" hidden class="mt-3 w-full rounded-xl border border-slate-700 px-4 py-2.5 text-xs text-slate-300 hover:border-cyan-400">登出目前帳號</button>
             <p class="mt-6 border-t border-slate-800 pt-4 text-[11px] leading-relaxed text-slate-500">此頁不包含管理員密碼或 Service Role Key。僅限 HTTPS 網域使用；請勿把本頁當作公開使用者頁面。</p>
@@ -498,6 +518,11 @@
         const ADMIN_PRODUCT_CATEGORIES = { valorant: '特戰英豪', pubg: '絕地求生', mobile: '熱門手遊', account: '帳號與憑證' };
         let adminClient = null;
         let adminUser = null;
+        let adminMfaUser = null;
+        let adminMfaFactorId = null;
+        let adminMfaEnrollmentId = null;
+        let adminMfaEpoch = 0;
+        let adminSigningOut = false;
         let adminPage = 0;
         let adminVisibleOrders = [];
         let adminRequestId = 0;
@@ -561,7 +586,10 @@
         try {
             if (window.supabase?.createClient) {
                 adminClient = window.supabase.createClient(ADMIN_SUPABASE_URL, ADMIN_SUPABASE_PUBLISHABLE_KEY, {
-                    auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+                    auth: {
+                        autoRefreshToken: true, persistSession: true, detectSessionInUrl: false,
+                        storage: window.sessionStorage, storageKey: 'axg-shop-admin-session'
+                    }
                 });
             }
         } catch (error) {
@@ -729,8 +757,13 @@
 
         function setGameInfoEditable(editable) {
             const cards = document.querySelectorAll('#admin-game-info-list [data-game-card]');
+            const canCopyDraft = !editable && adminGameInfoRevision === null && !adminGameInfoSaving && !!adminUser;
             cards.forEach((card, index) => {
-                card.querySelectorAll('input, textarea, select').forEach(input => { input.disabled = !editable; });
+                card.querySelectorAll('input, textarea, select').forEach(input => {
+                    const textField = input.matches('input[type="text"], textarea');
+                    input.disabled = !editable && !(canCopyDraft && textField);
+                    if (textField) input.readOnly = canCopyDraft;
+                });
                 card.querySelectorAll('[data-game-action]').forEach(button => {
                     button.disabled = !editable ||
                         (button.dataset.gameAction === 'up' && index === 0) ||
@@ -970,6 +1003,10 @@
 
         function getAdminError(error) {
             const message = String(error?.message || '未知錯誤');
+            if (/admin mfa required/i.test(message)) return '管理操作須先完成驗證器兩步驗證，請重新驗證。';
+            if (/admin_check_access/i.test(message) && (/could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) {
+                return '尚未部署新版後台登入 SQL。請先在 Supabase SQL Editor 執行最新版管理員腳本。';
+            }
             if (/game info version conflict/i.test(message)) return '遊戲資訊已由其他管理員修改。請先複製未儲存內容，再按「重新讀取」查看最新版本。';
             if (/invalid game info data/i.test(message)) return '遊戲資訊不符合限制。請確認文字長度、圖片選項及最多 12 筆。';
             if (/admin_(?:get|save)_shop_game_info/i.test(message) &&
@@ -1032,7 +1069,7 @@
             if (/admin_(?:can_manage_roles|grant_admin_role|revoke_admin_role)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少角色管理 RPC。請執行 sql/supabase-admin-role-management.sql，並確認已指定首位角色管理員。';
             if (/admin_(?:list_member_balances|adjust_member_balance)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '尚未部署餘額功能。請在 Supabase SQL Editor 執行 sql/supabase-member-balances.sql，再重新載入會員清單。';
             if (/admin_(?:list_members|set_member_order_access)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少會員管理 RPC。請先在 Supabase SQL Editor 執行 sql/supabase-members-schema.sql，再重新整理後台。';
-            if (/admin_(?:list_products|save_product)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少商品管理 RPC。請在本站連接的 Supabase 專案執行 sql/supabase-fix-product-admin-rpc.sql，再重新整理後台。';
+            if (/admin_(?:list_products|save_product)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少商品管理 RPC。請在本站連接的 Supabase 專案執行最新版 sql/supabase-admin-schema.sql，再重新整理後台。';
             if (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message)) return '找不到管理 RPC。請先執行 supabase-admin-schema.sql，並確認資料表結構已建立。';
             if (/relation .*shop_admins.* does not exist/i.test(message)) return '尚未建立管理員名單。請先執行 supabase-admin-schema.sql，再把管理帳號加入 public.shop_admins。';
             if (/permission denied|not authorized|42501|admin access required/i.test(message)) return '管理權限未通過。請確認登入帳號已加入 public.shop_admins，或先在 Supabase SQL Editor 執行管理後台 SQL。';
@@ -1048,16 +1085,62 @@
         function showAdminLogin(message, tone = 'info', hasSession = false) {
             document.getElementById('admin-login-screen').hidden = false;
             document.getElementById('admin-app').hidden = true;
+            document.getElementById('admin-login-form').hidden = hasSession;
+            document.getElementById('admin-mfa-panel').hidden = true;
             document.getElementById('admin-login-signout').hidden = !hasSession;
             if (message) setLoginStatus(message, tone);
         }
 
+        function clearAdminMfaState() {
+            adminMfaEpoch += 1;
+            adminMfaUser = null;
+            adminMfaFactorId = null;
+            adminMfaEnrollmentId = null;
+            document.getElementById('admin-mfa-enroll-button').disabled = false;
+            document.getElementById('admin-mfa-cancel').disabled = false;
+            document.getElementById('admin-mfa-verify-button').disabled = false;
+            document.getElementById('admin-mfa-panel').hidden = true;
+            document.getElementById('admin-mfa-setup').hidden = true;
+            document.getElementById('admin-mfa-enrollment').hidden = true;
+            document.getElementById('admin-mfa-verify-form').hidden = true;
+            document.getElementById('admin-mfa-description').textContent = '';
+            document.getElementById('admin-mfa-code').value = '';
+            document.getElementById('admin-mfa-secret').textContent = '';
+            const qr = document.getElementById('admin-mfa-qr');
+            qr.removeAttribute('src');
+            qr.hidden = true;
+            const status = document.getElementById('admin-mfa-status');
+            status.textContent = '';
+            status.hidden = true;
+        }
+
+        function setAdminMfaStatus(message, tone = 'info') {
+            const status = document.getElementById('admin-mfa-status');
+            status.textContent = message;
+            status.className = `mt-3 text-xs leading-relaxed ${tone === 'error' ? 'text-red-300' : 'text-slate-300'}`;
+            status.hidden = !message;
+        }
+
         function handleRevokedAdminAccess(error) {
-            if (!adminUser || !/admin access required/i.test(String(error?.message || ''))) return false;
+            if (!adminUser || !/admin access required|admin mfa required/i.test(String(error?.message || ''))) return false;
+            const requiresMfa = /admin mfa required/i.test(String(error?.message || ''));
             adminAuthCheckId += 1;
             adminUser = null;
             clearSensitiveAdminData();
-            showAdminLogin('此帳號已失去後台管理權限。請登出，或聯絡專案擁有者確認名單。', 'error', true);
+            clearAdminMfaState();
+            showAdminLogin(requiresMfa
+                ? '兩步驗證已失效，正在重新確認驗證狀態…'
+                : '此帳號已失去後台管理權限。請登出，或聯絡專案擁有者確認名單。', 'error', true);
+            if (requiresMfa) {
+                const checkId = adminAuthCheckId;
+                void adminClient.auth.getSession().then(({ data, error: sessionError }) => {
+                    if (checkId !== adminAuthCheckId) return;
+                    if (sessionError) throw sessionError;
+                    return verifyAdminSession(data?.session);
+                }).catch(sessionError => {
+                    if (checkId === adminAuthCheckId) showAdminLogin(getAdminError(sessionError), 'error', true);
+                });
+            }
             return true;
         }
 
@@ -1906,7 +1989,8 @@
                 grant_admin_role: '授予管理員', revoke_admin_role: '撤銷管理員',
                 pause_member_orders: '暫停新下單', resume_member_orders: '恢復新下單',
                 credit_member_balance: '會員餘額加值', debit_member_balance: '會員餘額扣減',
-                create_product: '建立商品', update_product: '修改商品', update_announcement: '更新公告', view_order_detail: '查看訂單明細'
+                create_product: '建立商品', update_product: '修改商品', update_announcement: '更新公告',
+                update_game_info: '更新遊戲資訊', view_order_detail: '查看訂單明細'
             };
             entries.forEach(entry => {
                 const row = document.createElement('tr');
@@ -1926,6 +2010,9 @@
                 if (details.source === 'manual') parts.push('手動核發');
                 if (details.expires_at) parts.push(`到期 ${formatDate(details.expires_at)}`);
                 if (details.reference) parts.push(`收款編號 ${details.reference}`);
+                if (entry.action === 'update_game_info' && details.revision != null) {
+                    parts.push(`版本 ${details.revision} · 共 ${details.item_count} 筆，顯示 ${details.visible_count} 筆`);
+                }
                 if (entry.action === 'credit_member_balance' || entry.action === 'debit_member_balance') {
                     parts.push(`調整 ${formatCurrency(details.delta)}（${formatCurrency(details.balance_before)} → ${formatCurrency(details.balance_after)}）`);
                 }
@@ -3119,27 +3206,72 @@
 
         async function verifyAdminSession(session) {
             const checkId = ++adminAuthCheckId;
+            if (adminSigningOut) return;
             const user = session?.user || null;
             if (!user) {
                 adminUser = null;
                 clearSensitiveAdminData();
+                clearAdminMfaState();
                 showAdminLogin('請使用管理員帳號登入。');
                 return;
             }
 
-            showAdminLogin('正在驗證管理員權限…', 'info', true);
+            if ((adminUser && adminUser.id !== user.id) || (adminMfaUser && adminMfaUser.id !== user.id)) {
+                adminUser = null;
+                clearSensitiveAdminData();
+                clearAdminMfaState();
+            }
+            showAdminLogin('正在確認管理員名單與兩步驗證…', 'info', true);
             try {
+                // This RPC discloses only membership; no admin data is fetched at AAL1.
+                const { data: allowed, error: accessError } = await adminClient.rpc('admin_check_access');
+                if (accessError) throw accessError;
+                if (allowed !== true) throw new Error('Admin access required');
+                if (checkId !== adminAuthCheckId) return;
+
+                const { data: assurance, error: assuranceError } = await adminClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (assuranceError) throw assuranceError;
+                if (checkId !== adminAuthCheckId) return;
+
+                if (assurance?.currentLevel !== 'aal2' || assurance?.nextLevel !== 'aal2') {
+                    if (assurance?.currentLevel !== 'aal1') {
+                        throw new Error('兩步驗證工作階段已失效，請登出後重新登入。');
+                    }
+                    const { data: factors, error: factorsError } = await adminClient.auth.mfa.listFactors();
+                    if (factorsError) throw factorsError;
+                    if (checkId !== adminAuthCheckId) return;
+
+                    const verifiedTotp = factors?.totp?.find(factor => factor.status === 'verified');
+                    if (adminUser) clearSensitiveAdminData();
+                    adminUser = null;
+                    if (adminMfaUser?.id !== user.id) clearAdminMfaState();
+                    adminMfaUser = user;
+                    adminMfaFactorId = verifiedTotp?.id || null;
+                    document.getElementById('admin-mfa-panel').hidden = false;
+                    const canEnroll = !verifiedTotp && assurance.nextLevel === 'aal1';
+                    document.getElementById('admin-mfa-setup').hidden = !canEnroll;
+                    document.getElementById('admin-mfa-verify-form').hidden = !verifiedTotp && !adminMfaEnrollmentId;
+                    document.getElementById('admin-mfa-description').textContent = verifiedTotp
+                        ? `已驗證 ${user.email || '管理員'} 的帳號，請輸入驗證器代碼。`
+                        : canEnroll
+                            ? '此管理員尚未設定驗證器。請先設定並驗證，完成後才能開啟後台。'
+                            : '此帳號已有其他類型的驗證因子，請聯絡專案擁有者設定支援的 TOTP 驗證器。';
+                    setLoginStatus(canEnroll ? '請先設定兩步驗證。' : '請完成兩步驗證。');
+                    return;
+                }
+
                 const { data, error } = await adminClient.rpc('admin_dashboard_summary');
                 if (error) throw error;
                 if (checkId !== adminAuthCheckId) return;
 
+                clearAdminMfaState();
                 adminUser = user;
                 document.getElementById('admin-login-screen').hidden = true;
                 document.getElementById('admin-app').hidden = false;
                 document.getElementById('admin-email-label').textContent = user.email || '';
                 renderAdminMetrics(data || {});
                 setAdminView('overview');
-                setAppStatus('管理權限已驗證。收款確認需先在平台外核實，且不會自動發卡。', 'success');
+                setAppStatus('管理權限與兩步驗證已通過。收款確認仍須在平台外核實，且不會自動發卡。', 'success');
                 try {
                     await loadOverviewOrders();
                 } catch (error) {
@@ -3154,7 +3286,95 @@
                 console.error('Admin role verification failed:', error);
                 adminUser = null;
                 clearSensitiveAdminData();
+                clearAdminMfaState();
                 showAdminLogin(getAdminError(error), 'error', true);
+            }
+        }
+
+        async function adminStartMfaEnrollment() {
+            if (!adminClient || !adminMfaUser || adminMfaFactorId || adminMfaEnrollmentId) return;
+            const epoch = adminMfaEpoch;
+            const userId = adminMfaUser.id;
+            const button = document.getElementById('admin-mfa-enroll-button');
+            button.disabled = true;
+            setAdminMfaStatus('正在產生此帳號的驗證器金鑰…');
+            try {
+                const { data, error } = await adminClient.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'AXG SHOP 後台' });
+                if (error) throw error;
+                if (epoch !== adminMfaEpoch || adminMfaUser?.id !== userId) return;
+                adminMfaEnrollmentId = data?.id || null;
+                if (!adminMfaEnrollmentId || !data?.totp?.secret) throw new Error('無法取得驗證器金鑰，請重新登入後再試。');
+                document.getElementById('admin-mfa-secret').textContent = data.totp.secret;
+                const qr = document.getElementById('admin-mfa-qr');
+                if (typeof data.totp.qr_code === 'string' && /^data:image\/svg\+xml(?:;[^,]*)?,/i.test(data.totp.qr_code)) {
+                    qr.src = data.totp.qr_code;
+                    qr.hidden = false;
+                }
+                document.getElementById('admin-mfa-enrollment').hidden = false;
+                document.getElementById('admin-mfa-verify-form').hidden = false;
+                setAdminMfaStatus('掃描 QR Code 或手動輸入金鑰後，填入六位數代碼完成設定。');
+            } catch (error) {
+                if (epoch === adminMfaEpoch) setAdminMfaStatus(getAdminError(error), 'error');
+            } finally {
+                if (epoch === adminMfaEpoch) button.disabled = false;
+            }
+        }
+
+        async function adminCancelMfaEnrollment() {
+            if (!adminMfaUser || !adminMfaEnrollmentId) return;
+            const factorId = adminMfaEnrollmentId;
+            const epoch = adminMfaEpoch;
+            const button = document.getElementById('admin-mfa-cancel');
+            button.disabled = true;
+            try {
+                const { error } = await adminClient.auth.mfa.unenroll({ factorId });
+                if (error) throw error;
+                if (epoch !== adminMfaEpoch) return;
+                adminMfaEnrollmentId = null;
+                adminMfaEpoch += 1;
+                document.getElementById('admin-mfa-enrollment').hidden = true;
+                document.getElementById('admin-mfa-verify-form').hidden = true;
+                document.getElementById('admin-mfa-code').value = '';
+                document.getElementById('admin-mfa-secret').textContent = '';
+                const qr = document.getElementById('admin-mfa-qr');
+                qr.removeAttribute('src');
+                qr.hidden = true;
+                setAdminMfaStatus('未完成的設定已刪除。可重新建立驗證器。');
+            } catch (error) {
+                if (epoch === adminMfaEpoch) setAdminMfaStatus(getAdminError(error), 'error');
+            } finally {
+                if (epoch === adminMfaEpoch || adminMfaUser) button.disabled = false;
+            }
+        }
+
+        async function adminVerifyMfa(event) {
+            event.preventDefault();
+            const form = document.getElementById('admin-mfa-verify-form');
+            if (!adminMfaUser || !form.reportValidity()) return;
+            const factorId = adminMfaFactorId || adminMfaEnrollmentId;
+            if (!factorId) return;
+            const epoch = adminMfaEpoch;
+            const button = document.getElementById('admin-mfa-verify-button');
+            button.disabled = true;
+            setAdminMfaStatus('正在驗證一次性代碼…');
+            try {
+                const code = document.getElementById('admin-mfa-code').value.trim();
+                const { error } = await adminClient.auth.mfa.challengeAndVerify({ factorId, code });
+                if (error) throw error;
+                if (epoch !== adminMfaEpoch) return;
+                document.getElementById('admin-mfa-code').value = '';
+                setAdminMfaStatus('驗證完成，正在確認資料庫權限…');
+                const { data, error: sessionError } = await adminClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                if (epoch === adminMfaEpoch) await verifyAdminSession(data?.session);
+            } catch (error) {
+                if (epoch === adminMfaEpoch) {
+                    document.getElementById('admin-mfa-code').value = '';
+                    setAdminMfaStatus(/mfa_verification_failed|invalid.*code|expired.*code/i.test(String(error?.message))
+                        ? '驗證碼無效或已過期，請使用驗證器目前顯示的代碼重試。' : getAdminError(error), 'error');
+                }
+            } finally {
+                if (epoch === adminMfaEpoch) button.disabled = false;
             }
         }
 
@@ -3180,7 +3400,7 @@
                 const { error } = await adminClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 document.getElementById('admin-password').value = '';
-                setLoginStatus('登入完成，正在確認是否為管理員…');
+                setLoginStatus('密碼驗證完成，正在確認管理員名單與第二步驗證…');
             } catch (error) {
                 setLoginStatus(/invalid login credentials/i.test(String(error?.message)) ? '帳號或密碼錯誤。' : `登入失敗：${String(error?.message || '未知錯誤')}`, 'error');
             } finally {
@@ -3189,15 +3409,23 @@
         }
 
         async function adminSignOut() {
-            if (!adminClient) return;
-            const { error } = await adminClient.auth.signOut();
-            if (error) {
-                setAppStatus(`登出失敗：${String(error.message || '未知錯誤')}`, 'error');
-                return;
-            }
+            if (!adminClient || adminSigningOut) return;
+            adminSigningOut = true;
+            adminAuthCheckId += 1;
             adminUser = null;
             clearSensitiveAdminData();
-            showAdminLogin('已安全登出。', 'success');
+            clearAdminMfaState();
+            document.getElementById('admin-password').value = '';
+            showAdminLogin('正在登出目前裝置…', 'info', true);
+            try {
+                const { error } = await adminClient.auth.signOut({ scope: 'local' });
+                if (error) throw error;
+                showAdminLogin('已安全登出。', 'success');
+            } catch (error) {
+                showAdminLogin(`登出失敗，資料已從畫面清除；請重試登出：${String(error?.message || '未知錯誤')}`, 'error', true);
+            } finally {
+                adminSigningOut = false;
+            }
         }
 
         function initializeAdmin() {
@@ -3210,8 +3438,20 @@
                 return;
             }
 
-            adminClient.auth.onAuthStateChange((_event, session) => {
-                setTimeout(() => void verifyAdminSession(session), 0);
+            adminClient.auth.onAuthStateChange((event, session) => {
+                if (adminSigningOut) return;
+                const eventCheckId = ++adminAuthCheckId;
+                if (event === 'SIGNED_OUT' || !session?.user) {
+                    adminUser = null;
+                    clearSensitiveAdminData();
+                    clearAdminMfaState();
+                    showAdminLogin('請使用管理員帳號登入。');
+                    return;
+                }
+                document.getElementById('admin-app').hidden = true;
+                setTimeout(() => {
+                    if (eventCheckId === adminAuthCheckId) void verifyAdminSession(session);
+                }, 0);
             });
 
             document.querySelectorAll('[data-admin-view]').forEach(button => {
