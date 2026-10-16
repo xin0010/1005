@@ -164,6 +164,72 @@
             outline-offset: 3px;
         }
 
+        .shop-nav-strip {
+            background: #252225;
+            border-top: 1px solid rgba(255, 255, 255, .07);
+        }
+        .shop-nav-inner, .shop-nav-main { display: flex; align-items: stretch; }
+        .shop-nav-inner { justify-content: space-between; }
+        .shop-nav-link {
+            position: relative; display: inline-flex; align-items: center; justify-content: center;
+            gap: .55rem; min-height: 3.65rem; padding: .55rem 1.05rem;
+            border: 0; background: transparent; color: #e9e5e9;
+            font: 700 .875rem 'Inter', sans-serif; text-decoration: none;
+            white-space: nowrap; cursor: pointer; transition: background-color .2s, color .2s;
+        }
+        .shop-nav-main > .shop-nav-link + .shop-nav-link::before {
+            content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            width: 1px; height: 1.6rem; background: rgba(255, 255, 255, .17);
+        }
+        .shop-nav-link:hover:not(.shop-nav-pending), .shop-nav-more[open] > summary {
+            background: #373237; color: #fff;
+        }
+        .shop-nav-link[aria-current="page"], .shop-nav-more.has-active-child > summary {
+            background: #403b40; color: #fff; box-shadow: inset 0 -2px 0 var(--brand-pink);
+        }
+        .shop-nav-link:focus-visible, .shop-mobile-link:focus-visible {
+            outline: 2px solid var(--brand-gold); outline-offset: -3px;
+        }
+        .shop-nav-icon { flex: none; width: 2rem; height: 2rem; object-fit: contain; image-rendering: pixelated; }
+        .shop-nav-link > .fa-solid, .shop-nav-link > .fa-brands { font-size: 1.15rem; color: #e0c0da; }
+        .shop-nav-pending { color: #aaa3aa; cursor: not-allowed; }
+        .shop-nav-pending .fa-line { color: #819f8b; }
+        .shop-nav-pending small { color: #bfb7bf; font-size: .7rem; font-weight: 500; }
+        .shop-nav-more { position: relative; }
+        .shop-nav-more > summary { list-style: none; }
+        .shop-nav-more > summary::-webkit-details-marker { display: none; }
+        .shop-nav-more > summary .fa-chevron-down { font-size: .7rem; }
+        .shop-nav-more[open] > summary .fa-chevron-down { transform: rotate(180deg); }
+        .shop-nav-dropdown {
+            position: absolute; right: 0; top: 100%; z-index: 60; width: 15rem;
+            padding: .4rem; border: 1px solid #574557; border-radius: 0 0 .75rem .75rem;
+            background: #29252b; box-shadow: 0 18px 30px rgba(0, 0, 0, .45);
+        }
+        .shop-nav-dropdown button {
+            display: flex; align-items: center; gap: .7rem; width: 100%; min-height: 2.75rem;
+            padding: .6rem .75rem; border: 0; border-radius: .5rem;
+            background: transparent; color: #e2dce0; font: 600 .8rem 'Inter', sans-serif;
+            text-align: left; cursor: pointer;
+        }
+        .shop-nav-dropdown button:hover, .shop-nav-dropdown button[aria-current="page"] {
+            background: #453545; color: #fff;
+        }
+        .shop-nav-dropdown p { margin: .5rem .75rem .25rem; color: #bcb5bb; font-size: .7rem; }
+        .shop-mobile-link {
+            display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 3rem;
+            padding: .6rem .85rem; border: 0; border-radius: .7rem;
+            background: transparent; color: #e9e5e9; font: 700 .875rem 'Inter', sans-serif;
+            text-align: left; text-decoration: none; cursor: pointer;
+        }
+        .shop-mobile-link:hover, .shop-mobile-link[aria-current="page"] { background: #403b40; color: #fff; }
+        .shop-mobile-link .fa-solid, .shop-mobile-link .fa-brands { width: 2rem; text-align: center; color: #e0c0da; }
+        .shop-mobile-link.shop-nav-pending { color: #aaa3aa; cursor: not-allowed; }
+        .shop-mobile-link.shop-nav-pending .fa-line { color: #819f8b; }
+        .shop-mobile-divider { margin: .5rem 0; border-top: 1px solid #554b54; }
+        @media (max-width: 1100px) {
+            .shop-nav-link { padding-inline: .75rem; font-size: .8rem; }
+        }
+
         /* 導覽與頁尾共用會員頁的配色；只有公告列在我的帳號頁隱藏。 */
         body.account-view-active #shop-announcement-banner { display: none; }
         .shop-footer {
@@ -331,37 +397,6 @@
                 <span class="block text-[9px] font-mono text-brand-300 -mt-1 tracking-widest uppercase">輔助官網</span>
             </div>
         </button>
-            <nav class="hidden lg:flex items-center space-x-1 text-sm font-medium font-mono text-slate-300">
-                <button onclick="switchTab('home')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">首頁</button>
-                
-                <div class="relative group py-2">
-                    <button class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors inline-flex items-center gap-1.5 bg-transparent border-0 cursor-pointer">
-                        <span>輔助分類</span>
-                        <i class="fa-solid fa-chevron-down text-xs opacity-70 group-hover:rotate-180 transition-transform"></i>
-                    </button>
-                    <div class="absolute left-0 mt-1 w-60 bg-[#262126] border border-brand-900/60 rounded-xl shadow-2xl py-2 hidden group-hover:block z-50 backdrop-blur-xl">
-                        <button onclick="switchTab('mobile-store'); filterProducts('valorant');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-crosshairs text-brand-400 w-4"></i> VALORANT 特戰英豪
-                        </button>
-                        <button onclick="switchTab('mobile-store'); filterProducts('pubg');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-gun text-brand-400 w-4"></i> PUBG 絕地求生
-                        </button>
-                        <button onclick="switchTab('mobile-store'); filterProducts('mobile');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-mobile-screen text-brand-400 w-4"></i> 熱門手遊輔助 (FF/傳說)
-                        </button>
-                        <button onclick="switchTab('mobile-store'); filterProducts('account');" class="w-full text-left px-4 py-2.5 hover:bg-brand-950/60 hover:text-brand-400 flex items-center gap-3 text-xs transition-colors bg-transparent border-0 cursor-pointer text-slate-300">
-                            <i class="fa-solid fa-key text-brand-400 w-4"></i>P12 證書
-                        </button>
-                    </div>
-                </div>
-
-                <button onclick="switchTab('mobile-store')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">全部商城</button>
-                <button onclick="switchTab('orders')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">卡號查詢</button>
-                <button onclick="switchTab('downloads')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">下載專區</button>
-                <button onclick="switchTab('wallet')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">餘額儲值</button>
-                <button onclick="switchTab('trouble')" class="nav-btn px-3 py-2 rounded-lg hover:text-brand-400 hover:bg-slate-800/50 transition-colors bg-transparent border-0 cursor-pointer">疑難雜症</button>
-            </nav>
-
             <div class="flex flex-none items-center gap-2 sm:gap-3">
                 <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
                     <i class="fa-brands fa-discord text-sm"></i>
@@ -380,15 +415,41 @@
             </div>
         </div>
 
+        <div class="shop-nav-strip hidden lg:block">
+            <nav class="shop-nav-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="商城主選單">
+                <div class="shop-nav-main">
+                    <button type="button" data-nav-view="home" aria-current="page" onclick="switchTab('home')" class="shop-nav-link"><img src="首頁.png" alt="" width="32" height="32" class="shop-nav-icon">首頁</button>
+                    <button type="button" data-nav-view="mobile-store" onclick="switchTab('mobile-store')" class="shop-nav-link"><img src="輔助商城.png" alt="" width="32" height="32" class="shop-nav-icon">輔助商城</button>
+                    <button type="button" data-nav-view="downloads" onclick="switchTab('downloads')" class="shop-nav-link"><i class="fa-solid fa-download" aria-hidden="true"></i>輔助下載</button>
+                    <button type="button" data-nav-view="trouble" onclick="switchTab('trouble')" class="shop-nav-link"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>常見問題</button>
+                    <span class="shop-nav-link shop-nav-pending" aria-label="售後 LINE 群，連結待提供" title="尚未提供售後 LINE 群連結，請使用 Discord 客服"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 群 <small>待提供</small></span>
+                </div>
+                <details id="shop-nav-more" class="shop-nav-more">
+                    <summary class="shop-nav-link"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i>更多功能<i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
+                    <div class="shop-nav-dropdown">
+                        <button type="button" data-nav-view="orders" onclick="switchTab('orders')"><i class="fa-solid fa-receipt" aria-hidden="true"></i>卡號與訂單查詢</button>
+                        <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')"><i class="fa-solid fa-wallet" aria-hidden="true"></i>餘額儲值</button>
+                        <p>輔助分類</p>
+                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('valorant');"><i class="fa-solid fa-crosshairs" aria-hidden="true"></i>VALORANT 特戰英豪</button>
+                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('pubg');"><i class="fa-solid fa-gun" aria-hidden="true"></i>PUBG 絕地求生</button>
+                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('mobile');"><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i>熱門手遊輔助 (FF/傳說)</button>
+                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('account');"><i class="fa-solid fa-key" aria-hidden="true"></i>P12 證書</button>
+                    </div>
+                </details>
+            </nav>
+        </div>
+
         <div id="mobile-menu" class="lg:hidden hidden absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto bg-[#262126] border-b border-brand-900/50 px-5 py-3 font-mono text-sm shadow-2xl">
-            <button onclick="switchTab('home')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 首頁</button>
-            <button onclick="switchTab('mobile-store')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 輔助授權商城</button>
-            <button onclick="switchTab('orders')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 卡號與訂單查詢</button>
-            <button onclick="switchTab('downloads')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 下載專區</button>
-            <button onclick="switchTab('wallet')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 餘額儲值</button>
-            <button onclick="switchTab('trouble')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 疑難雜症 FAQ</button>
-            <button onclick="switchTab('account')" class="block w-full min-h-11 text-left py-2 text-slate-300 hover:text-brand-400 bg-transparent border-0 cursor-pointer">▶ 會員中心 / 登入</button>
-            <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="flex min-h-11 items-center text-left py-2 text-indigo-400 font-bold no-underline">▶ 加入 Discord 售後群</a>
+            <button type="button" data-nav-view="home" aria-current="page" onclick="switchTab('home')" class="shop-mobile-link"><img src="首頁.png" alt="" width="32" height="32" class="shop-nav-icon">首頁</button>
+            <button type="button" data-nav-view="mobile-store" onclick="switchTab('mobile-store')" class="shop-mobile-link"><img src="輔助商城.png" alt="" width="32" height="32" class="shop-nav-icon">輔助商城</button>
+            <button type="button" data-nav-view="downloads" onclick="switchTab('downloads')" class="shop-mobile-link"><i class="fa-solid fa-download" aria-hidden="true"></i>輔助下載</button>
+            <button type="button" data-nav-view="trouble" onclick="switchTab('trouble')" class="shop-mobile-link"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>常見問題</button>
+            <span class="shop-mobile-link shop-nav-pending" aria-label="售後 LINE 群，連結待提供"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 群 <small>連結待提供</small></span>
+            <div class="shop-mobile-divider" aria-hidden="true"></div>
+            <button type="button" data-nav-view="orders" onclick="switchTab('orders')" class="shop-mobile-link"><i class="fa-solid fa-receipt" aria-hidden="true"></i>卡號與訂單查詢</button>
+            <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')" class="shop-mobile-link"><i class="fa-solid fa-wallet" aria-hidden="true"></i>餘額儲值</button>
+            <button type="button" data-nav-view="account" onclick="switchTab('account')" class="shop-mobile-link"><i class="fa-solid fa-user" aria-hidden="true"></i>會員中心 / 登入</button>
+            <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="shop-mobile-link text-indigo-300"><i class="fa-brands fa-discord" aria-hidden="true"></i>加入 Discord 售後群</a>
         </div>
     </header>
 
@@ -1057,6 +1118,13 @@
                 const el = document.getElementById(`view-${v}`);
                 if (el) el.classList.toggle('hidden', v !== tabId);
             });
+            document.querySelectorAll('[data-nav-view]').forEach(item => {
+                if (item.dataset.navView === tabId) item.setAttribute('aria-current', 'page');
+                else item.removeAttribute('aria-current');
+            });
+            const more = document.getElementById('shop-nav-more');
+            more?.classList.toggle('has-active-child', tabId === 'orders' || tabId === 'wallet');
+            more?.removeAttribute('open');
             document.body.classList.toggle('account-view-active', tabId === 'account');
             if (!document.getElementById('mobile-menu')?.classList.contains('hidden')) toggleMobileMenu(false);
             updateHomeBackgroundVideo();
