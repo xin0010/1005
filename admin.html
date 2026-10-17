@@ -5,29 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="referrer" content="no-referrer">
-    <meta name="theme-color" content="#080d18">
+    <meta name="theme-color" content="#1b1b1b">
     <title>AXG SHOP｜管理後台</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script id="admin-tailwind-theme">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 200: '#fbe4f2', 300: '#f8c6e9', 400: '#f1b8e1', 500: '#c73e94', 600: '#7925d9', 900: '#522642', 950: '#392036' },
+                        gold: { 300: '#ffe1a9', 400: '#f4c678' },
+                        slate: { 200: '#eee9ed', 300: '#e2dce0', 400: '#c7bec6', 500: '#ada4ac', 600: '#776f77', 700: '#554b54', 800: '#3c353c', 900: '#262126', 950: '#1b1b1b' }
+                    }
+                }
+            }
+        };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { color-scheme: dark; }
+        :root {
+            color-scheme: dark;
+            --surface-main: #1b1b1b;
+            --surface-card: #262126;
+            --brand-purple: #7925d9;
+            --brand-pink: #c73e94;
+            --brand-gold: #f4c678;
+            --brand-gradient: linear-gradient(100deg, var(--brand-purple), var(--brand-pink) 52%, var(--brand-gold));
+        }
         * { box-sizing: border-box; }
         [hidden] { display: none !important; }
-        body { margin: 0; min-height: 100vh; background: #080d18; color: #e5edf8; font-family: 'DM Sans', sans-serif; }
+        body { margin: 0; min-height: 100vh; background: var(--surface-main); color: #eee9ed; font-family: 'DM Sans', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .admin-grid { background-image: linear-gradient(rgba(56,189,248,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.035) 1px, transparent 1px); background-size: 32px 32px; }
-        .glass { background: rgba(13,21,39,.82); border: 1px solid rgba(148,163,184,.13); backdrop-filter: blur(14px); }
-        .nav-item[aria-current="page"] { color: #67e8f9; background: rgba(8,145,178,.13); border-color: rgba(34,211,238,.22); }
+        .admin-grid {
+            background-image: linear-gradient(rgba(199,62,148,.032) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(199,62,148,.032) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        #admin-login-screen { background: radial-gradient(ellipse at 50% 12%, rgba(121,37,217,.21), transparent 62%); }
+        .glass {
+            background: linear-gradient(145deg, rgba(47,37,47,.96), rgba(34,30,34,.96));
+            border: 1px solid rgba(241,184,225,.17);
+            box-shadow: 0 12px 35px rgba(0,0,0,.12);
+            backdrop-filter: blur(14px);
+        }
+        .admin-login-card { position: relative; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.4); }
+        .admin-login-card::before { content: ''; position: absolute; inset: 0 0 auto; height: 4px; background: var(--brand-gradient); }
+        .admin-brand-mark {
+            background: linear-gradient(115deg, #7925d9, #ad3488); color: #fff;
+            box-shadow: 0 6px 22px rgba(199,62,148,.28);
+        }
+        .admin-primary {
+            background: linear-gradient(110deg, #7021ba, #a12d79);
+            border: 1px solid rgba(255,255,255,.16); color: #fff;
+            transition: filter .2s ease, box-shadow .2s ease;
+        }
+        .admin-primary:hover:not(:disabled) { filter: brightness(1.13); box-shadow: 0 0 20px rgba(199,62,148,.32); }
+        .admin-sidebar { background: linear-gradient(180deg, #2b232b, #211d21); }
+        .admin-toolbar { background: rgba(31,27,31,.94); }
+        .nav-item[aria-current="page"] {
+            color: #fbe4f2; background: rgba(199,62,148,.18);
+            border-color: rgba(241,184,225,.34); box-shadow: inset 3px 0 0 var(--brand-pink);
+        }
         .nav-item { min-height: 44px; flex: none; white-space: nowrap; }
+        .nav-item:hover:not([aria-current="page"]) { background: rgba(241,184,225,.08); color: #fbe4f2; }
         .admin-view button, #admin-app header button, dialog button { min-height: 44px; }
         .admin-pagination { flex-wrap: wrap; }
         .admin-pagination span { flex: 1; min-width: 6rem; text-align: center; overflow-wrap: anywhere; }
         #admin-login-signout { min-height: 44px; }
-        :focus-visible { outline: 2px solid #22d3ee; outline-offset: 3px; }
-        dialog { color: inherit; background: #0d1527; border: 1px solid rgba(34,211,238,.3); border-radius: 20px; padding: 0; }
+        :focus-visible { outline: 2px solid var(--brand-gold); outline-offset: 3px; }
+        input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 2px solid var(--brand-gold); outline-offset: 2px;
+            box-shadow: 0 0 0 3px rgba(199,62,148,.2);
+        }
+        input[type="checkbox"] { accent-color: var(--brand-pink); }
+        dialog { color: inherit; background: var(--surface-card); border: 1px solid rgba(241,184,225,.36); border-radius: 20px; padding: 0; }
         dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(5px); }
         #detail-subtitle { overflow-wrap: anywhere; }
         @media (max-width: 767px) {
@@ -41,8 +95,8 @@
             table tbody { display: block; width: 100%; }
             table tbody tr {
                 display: block; margin: .75rem; padding: .75rem;
-                border: 1px solid rgba(148,163,184,.23); border-radius: 1rem;
-                background: rgba(15,23,42,.72);
+                border: 1px solid rgba(241,184,225,.23); border-radius: 1rem;
+                background: rgba(47,37,47,.82);
             }
             table tbody td:not([colspan]) {
                 display: flex; justify-content: space-between; align-items: flex-start;
@@ -50,9 +104,9 @@
                 padding: .55rem 0; text-align: right; white-space: normal;
                 overflow-wrap: anywhere;
             }
-            table tbody td:not([colspan]) + td:not([colspan]) { border-top: 1px solid rgba(148,163,184,.13); }
+            table tbody td:not([colspan]) + td:not([colspan]) { border-top: 1px solid rgba(241,184,225,.13); }
             table tbody td[data-label]::before {
-                content: attr(data-label); flex: none; color: #94a3b8;
+                content: attr(data-label); flex: none; color: #c7bec6;
                 font-weight: 600; text-align: left; white-space: nowrap;
             }
             table tbody td[data-label="操作"], table tbody td[data-label="明細"],
@@ -73,11 +127,11 @@
 </head>
 <body class="admin-grid">
     <main id="admin-login-screen" class="min-h-screen flex items-center justify-center px-4 py-10">
-        <section class="glass w-full max-w-md rounded-3xl p-7 shadow-2xl shadow-black/40">
+        <section class="glass admin-login-card w-full max-w-md rounded-3xl p-7 shadow-2xl shadow-black/40">
             <div class="mb-7 flex items-center gap-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400 font-extrabold text-slate-950">AXG</div>
+                <div class="admin-brand-mark flex h-12 w-12 items-center justify-center rounded-2xl font-extrabold">AXG</div>
                 <div>
-                    <p class="mono mb-1 text-xs font-semibold uppercase tracking-[.22em] text-cyan-300">AXG SHOP</p>
+                    <p class="mono mb-1 text-xs font-semibold uppercase tracking-[.22em] text-brand-300">AXG SHOP</p>
                     <h1 class="m-0 text-xl font-bold text-white">管理後台登入</h1>
                 </div>
             </div>
@@ -85,45 +139,45 @@
             <form id="admin-login-form" class="space-y-4" onsubmit="adminSignIn(event)">
                 <div>
                     <label for="admin-email" class="mb-2 block text-xs font-semibold text-slate-300">管理員電子郵件</label>
-                    <input id="admin-email" type="email" autocomplete="username" required maxlength="254" class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="admin@example.com">
+                    <input id="admin-email" type="email" autocomplete="username" required maxlength="254" class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="admin@example.com">
                 </div>
                 <div>
                     <label for="admin-password" class="mb-2 block text-xs font-semibold text-slate-300">密碼</label>
-                    <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="輸入管理員密碼">
+                    <input id="admin-password" type="password" autocomplete="current-password" required class="w-full rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="輸入管理員密碼">
                 </div>
-                <button id="admin-login-button" type="submit" class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-wait disabled:opacity-60">登入並進行兩步驗證</button>
+                <button id="admin-login-button" type="submit" class="admin-primary w-full rounded-xl px-4 py-3 font-bold disabled:cursor-wait disabled:opacity-60">登入並進行兩步驗證</button>
             </form>
-            <section id="admin-mfa-panel" hidden class="mt-5 rounded-2xl border border-cyan-400/30 bg-slate-950/70 p-4" aria-labelledby="admin-mfa-title">
+            <section id="admin-mfa-panel" hidden class="mt-5 rounded-2xl border border-brand-400/30 bg-slate-950/70 p-4" aria-labelledby="admin-mfa-title">
                 <h2 id="admin-mfa-title" class="mt-0 text-base font-bold text-white">驗證器兩步驗證</h2>
                 <p id="admin-mfa-description" class="text-xs leading-relaxed text-slate-300"></p>
                 <div id="admin-mfa-setup" hidden>
-                    <button id="admin-mfa-enroll-button" type="button" onclick="adminStartMfaEnrollment()" class="mt-3 w-full rounded-xl border border-cyan-400 px-4 py-3 text-sm font-semibold text-cyan-200 hover:bg-cyan-400/10 disabled:opacity-50">設定驗證器</button>
+                    <button id="admin-mfa-enroll-button" type="button" onclick="adminStartMfaEnrollment()" class="mt-3 w-full rounded-xl border border-brand-400 px-4 py-3 text-sm font-semibold text-brand-200 hover:bg-brand-950/60 disabled:opacity-50">設定驗證器</button>
                     <div id="admin-mfa-enrollment" hidden class="mt-4 space-y-3">
                         <p class="m-0 text-xs leading-relaxed text-amber-200">請在私密環境掃描或輸入金鑰；金鑰只在本次設定時顯示，請勿截圖或分享。</p>
                         <img id="admin-mfa-qr" hidden alt="驗證器設定 QR Code" class="mx-auto h-48 w-48 rounded-lg bg-white p-2">
                         <p class="m-0 text-xs text-slate-400">無法掃描時，於驗證器 App 手動輸入此金鑰：</p>
-                        <p id="admin-mfa-secret" class="mono break-all rounded-lg bg-slate-900 p-3 text-xs text-cyan-200"></p>
+                        <p id="admin-mfa-secret" class="mono break-all rounded-lg bg-slate-900 p-3 text-xs text-brand-200"></p>
                         <button id="admin-mfa-cancel" type="button" onclick="adminCancelMfaEnrollment()" class="w-full rounded-xl border border-slate-600 px-4 py-2.5 text-xs text-slate-300 hover:border-red-400 disabled:opacity-50">取消並刪除未完成的設定</button>
                     </div>
                 </div>
                 <form id="admin-mfa-verify-form" hidden class="mt-4 space-y-3" onsubmit="adminVerifyMfa(event)">
                     <label for="admin-mfa-code" class="block text-xs font-semibold text-slate-300">驗證器顯示的六位數代碼</label>
-                    <input id="admin-mfa-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-center text-lg tracking-[.4em] text-white outline-none focus:border-cyan-400" placeholder="000000">
-                    <button id="admin-mfa-verify-button" type="submit" class="w-full rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">驗證並開啟後台</button>
+                    <input id="admin-mfa-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-center text-lg tracking-[.4em] text-white outline-none focus:border-brand-400" placeholder="000000">
+                    <button id="admin-mfa-verify-button" type="submit" class="admin-primary w-full rounded-xl px-4 py-3 font-bold disabled:opacity-50">驗證並開啟後台</button>
                 </form>
                 <p id="admin-mfa-status" hidden class="mt-3 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite"></p>
             </section>
             <p id="admin-login-status" class="mt-4 rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">正在初始化安全連線…</p>
-            <button id="admin-login-signout" type="button" onclick="adminSignOut()" hidden class="mt-3 w-full rounded-xl border border-slate-700 px-4 py-2.5 text-xs text-slate-300 hover:border-cyan-400">登出目前帳號</button>
+            <button id="admin-login-signout" type="button" onclick="adminSignOut()" hidden class="mt-3 w-full rounded-xl border border-slate-700 px-4 py-2.5 text-xs text-slate-300 hover:border-brand-400">登出目前帳號</button>
             <p class="mt-6 border-t border-slate-800 pt-4 text-[11px] leading-relaxed text-slate-500">此頁不包含管理員密碼或 Service Role Key。僅限 HTTPS 網域使用；請勿把本頁當作公開使用者頁面。</p>
         </section>
     </main>
 
     <div id="admin-app" hidden class="min-h-screen lg:flex">
-        <aside class="sticky top-0 z-20 border-b border-slate-800 bg-[#0b1120] p-3 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-5">
+        <aside class="admin-sidebar sticky top-0 z-20 border-b border-slate-800 p-3 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r lg:p-5">
             <div class="hidden items-center gap-3 px-2 lg:mb-10 lg:flex">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400 font-extrabold text-slate-950">AXG</div>
-                <div><p class="mono m-0 text-[10px] uppercase tracking-[.2em] text-cyan-300">CONTROL DESK</p><p class="m-0 text-sm font-bold text-white">管理中心</p></div>
+                <div class="admin-brand-mark flex h-10 w-10 items-center justify-center rounded-xl font-extrabold">AXG</div>
+                <div><p class="mono m-0 text-[10px] uppercase tracking-[.2em] text-brand-300">CONTROL DESK</p><p class="m-0 text-sm font-bold text-white">管理中心</p></div>
             </div>
             <nav aria-label="後台導覽" class="flex gap-2 overflow-x-auto overscroll-x-contain lg:flex-col">
                 <button type="button" class="nav-item rounded-xl border border-transparent px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/70" data-admin-view="overview" aria-current="page"><span class="mr-2">◫</span>總覽</button>
@@ -142,11 +196,11 @@
         </aside>
 
         <div class="min-w-0 flex-1 lg:ml-64">
-            <header class="z-10 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-[#080d18]/90 px-4 py-3 backdrop-blur-xl sm:px-7 lg:sticky lg:top-0">
+            <header class="admin-toolbar z-10 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 px-4 py-3 backdrop-blur-xl sm:px-7 lg:sticky lg:top-0">
                 <div class="min-w-0"><p class="mono mb-0.5 text-[10px] uppercase tracking-[.2em] text-slate-500">ADMINISTRATION</p><h2 id="admin-page-title" class="m-0 text-lg font-bold text-white">營運總覽</h2></div>
                 <div class="flex items-center gap-2 sm:gap-3">
                     <span id="admin-email-label" class="hidden max-w-48 truncate text-xs text-slate-400 sm:block"></span>
-                    <button type="button" onclick="refreshCurrentView()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400">重新整理</button>
+                    <button type="button" onclick="refreshCurrentView()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400">重新整理</button>
                     <button type="button" onclick="adminSignOut()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-red-400 hover:text-red-300">登出</button>
                 </div>
             </header>
@@ -156,14 +210,14 @@
 
                 <section id="admin-view-overview" class="admin-view space-y-6">
                     <div class="flex flex-wrap items-end justify-between gap-3">
-                        <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">OVERVIEW</p><h3 class="m-0 text-2xl font-bold text-white">營運總覽</h3><p class="mt-2 text-sm text-slate-400">訂單與授權統計。數字只讀自 Supabase 後端。</p></div>
+                        <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">OVERVIEW</p><h3 class="m-0 text-2xl font-bold text-white">營運總覽</h3><p class="mt-2 text-sm text-slate-400">訂單與授權統計。數字只讀自 Supabase 後端。</p></div>
                         <span id="overview-updated" class="text-[11px] text-slate-500">尚未載入</span>
                     </div>
                     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                         <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">訂單總數</p><p id="metric-total-orders" class="mono m-0 text-3xl font-bold text-white">—</p><p class="mt-2 text-[11px] text-slate-500">資料庫全部訂單</p></article>
                         <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">待付款</p><p id="metric-pending-orders" class="mono m-0 text-3xl font-bold text-amber-300">—</p><p class="mt-2 text-[11px] text-slate-500">尚未確認付款</p></article>
                         <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">已付款訂單</p><p id="metric-paid-orders" class="mono m-0 text-3xl font-bold text-emerald-300">—</p><p class="mt-2 text-[11px] text-slate-500">依資料庫訂單狀態統計</p></article>
-                        <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">已付款金額</p><p id="metric-paid-revenue" class="mono m-0 text-3xl font-bold text-cyan-300">—</p><p class="mt-2 text-[11px] text-slate-500">僅統計已付款訂單</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-3 text-xs text-slate-400">已付款金額</p><p id="metric-paid-revenue" class="mono m-0 text-3xl font-bold text-gold-300">—</p><p class="mt-2 text-[11px] text-slate-500">僅統計已付款訂單</p></article>
                     </div>
                     <div class="grid gap-4 xl:grid-cols-3">
                         <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">有效授權</p><p id="metric-active-authorizations" class="mono m-0 text-2xl font-bold text-violet-300">—</p></article>
@@ -171,42 +225,42 @@
                         <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">發卡待處理</p><p id="metric-pending-authorizations" class="mono m-0 text-2xl font-bold text-amber-300">—</p></article>
                     </div>
                     <div class="glass rounded-2xl p-5 sm:p-6">
-                        <div class="flex flex-wrap items-center justify-between gap-3"><div><h4 class="m-0 font-bold text-white">最近訂單</h4><p class="mt-1 text-xs text-slate-500">點選訂單可查看授權狀態。</p></div><button type="button" onclick="setAdminView('orders')" class="rounded-lg border border-cyan-500/30 px-3 py-2 text-xs text-cyan-300 hover:bg-cyan-950/40">管理全部訂單</button></div>
+                        <div class="flex flex-wrap items-center justify-between gap-3"><div><h4 class="m-0 font-bold text-white">最近訂單</h4><p class="mt-1 text-xs text-slate-500">點選訂單可查看授權狀態。</p></div><button type="button" onclick="setAdminView('orders')" class="rounded-lg border border-brand-500/40 px-3 py-2 text-xs text-brand-300 hover:bg-brand-950/60">管理全部訂單</button></div>
                         <div class="mt-4 overflow-x-auto"><table class="w-full min-w-[760px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="px-3 py-3">時間</th><th class="px-3 py-3">訂單</th><th class="px-3 py-3">會員</th><th class="px-3 py-3">金額</th><th class="px-3 py-3">狀態</th><th class="px-3 py-3">明細</th></tr></thead><tbody id="overview-orders-body" class="divide-y divide-slate-800/80"><tr><td colspan="6" class="px-3 py-8 text-center text-slate-500">登入後載入訂單。</td></tr></tbody></table></div>
                     </div>
                 </section>
 
                 <section id="admin-view-announcement" class="admin-view hidden space-y-5">
                     <div>
-                        <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">STOREFRONT ANNOUNCEMENT</p>
+                        <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">STOREFRONT ANNOUNCEMENT</p>
                         <h3 class="m-0 text-2xl font-bold text-white">公告管理</h3>
                         <p class="mt-2 text-sm leading-relaxed text-slate-400">修改商城頂端的「最新公告」。公告為純文字，Discord 客服連結由網站固定提供，儲存後重新載入商城即可看到更新。</p>
                     </div>
                     <form id="admin-announcement-form" class="glass max-w-3xl space-y-4 rounded-2xl p-4 sm:p-6" onsubmit="saveAdminAnnouncement(event)">
                         <div>
                             <label for="admin-announcement-content" class="mb-2 block text-sm font-semibold text-white">公告內容</label>
-                            <textarea id="admin-announcement-content" required maxlength="280" rows="3" disabled aria-describedby="admin-announcement-hint admin-announcement-count" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm leading-relaxed text-white outline-none focus:border-cyan-400" placeholder="輸入要顯示於商城頂端的公告"></textarea>
+                            <textarea id="admin-announcement-content" required maxlength="280" rows="3" disabled aria-describedby="admin-announcement-hint admin-announcement-count" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm leading-relaxed text-white outline-none focus:border-brand-400" placeholder="輸入要顯示於商城頂端的公告"></textarea>
                             <div class="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-400">
                                 <span id="admin-announcement-hint">限 1–280 字，不可換行；不要輸入卡號或密碼。</span>
                                 <span id="admin-announcement-count" aria-live="polite">0 / 280</span>
                             </div>
                         </div>
-                        <div class="rounded-xl border border-cyan-900/50 bg-slate-950/60 p-4">
-                            <p class="mb-2 text-xs font-bold text-cyan-300">公告預覽（尚未儲存）</p>
+                        <div class="rounded-xl border border-brand-500/40 bg-slate-950/60 p-4">
+                            <p class="mb-2 text-xs font-bold text-brand-300">公告預覽（尚未儲存）</p>
                             <p id="admin-announcement-preview" class="m-0 break-words text-sm text-slate-200">載入公告後顯示預覽。</p>
                         </div>
                         <p id="admin-announcement-updated" class="m-0 text-xs text-slate-500"></p>
                         <p id="admin-announcement-status" class="m-0 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">開啟公告管理後載入目前公告。</p>
                         <div class="flex flex-wrap gap-3 border-t border-slate-800 pt-4">
-                            <button id="admin-announcement-reload" type="button" onclick="loadAdminAnnouncement()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-cyan-400">重新讀取</button>
-                            <button id="admin-announcement-save" type="submit" disabled class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50">儲存並發布公告</button>
+                            <button id="admin-announcement-reload" type="button" onclick="loadAdminAnnouncement()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-brand-400">重新讀取</button>
+                            <button id="admin-announcement-save" type="submit" disabled class="admin-primary rounded-xl px-5 py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50">儲存並發布公告</button>
                         </div>
                     </form>
                 </section>
 
                 <section id="admin-view-game-info" class="admin-view hidden space-y-5">
                     <div>
-                        <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">GAME & PLATFORM DISPLAY</p>
+                        <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">GAME & PLATFORM DISPLAY</p>
                         <h3 class="m-0 text-2xl font-bold text-white">遊戲與平台資訊</h3>
                         <p class="mt-2 text-sm leading-relaxed text-slate-400">管理商城商品目錄上方的展示標籤；可新增、刪除、調整順序或暫時隱藏。此處僅供展示，不會變更商品上架狀態或售價。最多 12 筆，圖片僅能選用網站已提供的檔案。</p>
                     </div>
@@ -215,46 +269,46 @@
                         <p id="admin-game-info-status" class="m-0 text-xs leading-relaxed text-slate-300" role="status" aria-live="polite">開啟遊戲資訊後載入目前內容。</p>
                         <div id="admin-game-info-list" class="space-y-4"></div>
                         <div class="flex flex-wrap gap-3 border-t border-slate-800 pt-4">
-                            <button id="admin-game-info-add" type="button" onclick="addAdminGameInfo()" disabled class="rounded-xl border border-cyan-500/50 px-4 py-2.5 text-sm text-cyan-300 hover:bg-cyan-950/40 disabled:cursor-not-allowed disabled:opacity-50">＋ 新增遊戲</button>
-                            <button id="admin-game-info-reload" type="button" onclick="loadAdminGameInfo()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-cyan-400">重新讀取</button>
-                            <button id="admin-game-info-save" type="submit" disabled class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50">儲存並發布至商城</button>
+                            <button id="admin-game-info-add" type="button" onclick="addAdminGameInfo()" disabled class="rounded-xl border border-brand-500/50 px-4 py-2.5 text-sm text-brand-300 hover:bg-brand-950/60 disabled:cursor-not-allowed disabled:opacity-50">＋ 新增遊戲</button>
+                            <button id="admin-game-info-reload" type="button" onclick="loadAdminGameInfo()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-200 hover:border-brand-400">重新讀取</button>
+                            <button id="admin-game-info-save" type="submit" disabled class="admin-primary rounded-xl px-5 py-2.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50">儲存並發布至商城</button>
                         </div>
                     </form>
                 </section>
 
                 <section id="admin-view-orders" class="admin-view hidden space-y-5">
-                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">ORDER OPERATIONS</p><h3 class="m-0 text-2xl font-bold text-white">訂單與授權</h3><p class="mt-2 text-sm text-slate-400">依訂單編號、會員信箱或狀態篩選；已付款商品可由明細核發或撤銷授權。卡號只在已付款且有效時顯示。</p></div>
+                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">ORDER OPERATIONS</p><h3 class="m-0 text-2xl font-bold text-white">訂單與授權</h3><p class="mt-2 text-sm text-slate-400">依訂單編號、會員信箱或狀態篩選；已付款商品可由明細核發或撤銷授權。卡號只在已付款且有效時顯示。</p></div>
                     <form id="admin-orders-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminOrders(0, event)">
-                        <label class="sr-only" for="admin-order-search">搜尋訂單</label><input id="admin-order-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋訂單編號或會員信箱" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
-                        <label class="sr-only" for="admin-order-status">訂單狀態</label><select id="admin-order-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">所有狀態</option><option value="pending">待付款</option><option value="paid">已付款</option><option value="cancelled">已取消</option><option value="refunded">已退款</option></select>
-                        <button id="admin-orders-search-button" type="submit" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">搜尋訂單</button>
-                        <button type="button" onclick="exportAdminOrdersCsv()" class="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 hover:border-cyan-400">匯出本頁 CSV</button>
+                        <label class="sr-only" for="admin-order-search">搜尋訂單</label><input id="admin-order-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋訂單編號或會員信箱" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
+                        <label class="sr-only" for="admin-order-status">訂單狀態</label><select id="admin-order-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400"><option value="">所有狀態</option><option value="pending">待付款</option><option value="paid">已付款</option><option value="cancelled">已取消</option><option value="refunded">已退款</option></select>
+                        <button id="admin-orders-search-button" type="submit" class="admin-primary rounded-xl px-5 py-3 text-sm font-bold disabled:opacity-50">搜尋訂單</button>
+                        <button type="button" onclick="exportAdminOrdersCsv()" class="rounded-xl border border-slate-700 px-4 py-3 text-sm text-slate-300 hover:border-brand-400">匯出本頁 CSV</button>
                     </form>
                     <div class="glass overflow-hidden rounded-2xl">
                         <div class="overflow-x-auto"><table class="w-full min-w-[900px] text-left text-xs"><thead class="border-b border-slate-800 bg-slate-950/40 text-slate-500"><tr><th class="px-4 py-3">成立時間</th><th class="px-4 py-3">訂單編號</th><th class="px-4 py-3">會員信箱</th><th class="px-4 py-3">總額</th><th class="px-4 py-3">訂單狀態</th><th class="px-4 py-3">商品／授權</th><th class="px-4 py-3 text-right">操作</th></tr></thead><tbody id="admin-orders-body" class="divide-y divide-slate-800/80"><tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">登入管理員帳號後載入資料。</td></tr></tbody></table></div>
-                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-prev-page" type="button" onclick="changeAdminPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-next-page" type="button" onclick="changeAdminPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-prev-page" type="button" onclick="changeAdminPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-next-page" type="button" onclick="changeAdminPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
                     </div>
                 </section>
 
                 <section id="admin-view-products" class="admin-view hidden space-y-5">
                     <div class="flex flex-wrap items-end justify-between gap-4">
                         <div>
-                            <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">CATALOG OPERATIONS</p>
+                            <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">CATALOG OPERATIONS</p>
                             <h3 class="m-0 text-2xl font-bold text-white">商品管理</h3>
                             <p class="mt-2 text-sm text-slate-400">新增、修改及上下架均寫入資料庫；歷史訂單的商品名稱與價格不會隨之改變。</p>
                         </div>
-                        <button type="button" onclick="openProductEditor()" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300">＋ 新增商品</button>
+                        <button type="button" onclick="openProductEditor()" class="admin-primary rounded-xl px-5 py-3 text-sm font-bold">＋ 新增商品</button>
                     </div>
                     <form id="admin-products-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminProducts(0, event)">
                         <label class="sr-only" for="admin-product-search">搜尋商品</label>
-                        <input id="admin-product-search" type="search" maxlength="160" autocomplete="off" placeholder="搜尋商品名稱、分類或編號" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                        <input id="admin-product-search" type="search" maxlength="160" autocomplete="off" placeholder="搜尋商品名稱、分類或編號" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
                         <label class="sr-only" for="admin-product-status">上架狀態</label>
-                        <select id="admin-product-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                        <select id="admin-product-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
                             <option value="">所有商品</option>
                             <option value="active">上架中</option>
                             <option value="inactive">已下架</option>
                         </select>
-                        <button id="admin-products-search-button" type="submit" class="rounded-xl border border-cyan-500/40 px-5 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40 disabled:opacity-50">搜尋商品</button>
+                        <button id="admin-products-search-button" type="submit" class="rounded-xl border border-brand-500/40 px-5 py-3 text-sm font-semibold text-brand-300 hover:bg-brand-950/60 disabled:opacity-50">搜尋商品</button>
                     </form>
                     <p id="admin-products-status" class="text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">開啟商品管理後載入資料。</p>
                     <div class="glass overflow-hidden rounded-2xl">
@@ -269,53 +323,53 @@
                             </table>
                         </div>
                         <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3">
-                            <button id="admin-products-prev-page" type="button" onclick="changeProductPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button>
+                            <button id="admin-products-prev-page" type="button" onclick="changeProductPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button>
                             <span id="admin-products-page-label" class="text-xs text-slate-500">第 1 頁</span>
-                            <button id="admin-products-next-page" type="button" onclick="changeProductPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button>
+                            <button id="admin-products-next-page" type="button" onclick="changeProductPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button>
                         </div>
                     </div>
                 </section>
 
                 <section id="admin-view-stock" class="admin-view hidden space-y-5">
                     <div class="flex flex-wrap items-end justify-between gap-4">
-                        <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">CARD KEY INVENTORY</p><h3 class="m-0 text-2xl font-bold text-white">卡密管理</h3><p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">可手動新增一組或批次匯入商品卡密，並刪除尚未核發的卡密。已付款訂單可從庫存按商品核發；清單只顯示尾碼，不提供完整卡密查詢或匯出。</p></div>
-                        <div class="flex flex-wrap gap-2"><button type="button" onclick="openCardStockImport('single')" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-300">＋ 手動新增卡密</button><button type="button" onclick="openCardStockImport('batch')" class="rounded-xl border border-cyan-500/40 px-5 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40">批次匯入</button></div>
+                        <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">CARD KEY INVENTORY</p><h3 class="m-0 text-2xl font-bold text-white">卡密管理</h3><p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">可手動新增一組或批次匯入商品卡密，並刪除尚未核發的卡密。已付款訂單可從庫存按商品核發；清單只顯示尾碼，不提供完整卡密查詢或匯出。</p></div>
+                        <div class="flex flex-wrap gap-2"><button type="button" onclick="openCardStockImport('single')" class="admin-primary rounded-xl px-5 py-3 text-sm font-bold">＋ 手動新增卡密</button><button type="button" onclick="openCardStockImport('batch')" class="rounded-xl border border-brand-500/40 px-5 py-3 text-sm font-semibold text-brand-300 hover:bg-brand-950/60">批次匯入</button></div>
                     </div>
                     <div class="grid gap-4 sm:grid-cols-3">
                         <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">可用庫存</p><p id="stock-metric-available" class="mono m-0 text-2xl font-bold text-emerald-300">—</p></article>
-                        <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">已核發</p><p id="stock-metric-issued" class="mono m-0 text-2xl font-bold text-cyan-300">—</p></article>
+                        <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">已核發</p><p id="stock-metric-issued" class="mono m-0 text-2xl font-bold text-brand-300">—</p></article>
                         <article class="glass rounded-2xl p-5"><p class="mb-2 text-xs text-slate-400">已作廢</p><p id="stock-metric-void" class="mono m-0 text-2xl font-bold text-slate-300">—</p></article>
                     </div>
                     <form id="admin-stock-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminCardStock(0, event)">
                         <label class="sr-only" for="admin-stock-product-filter">篩選商品</label>
-                        <select id="admin-stock-product-filter" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">所有商品</option></select>
+                        <select id="admin-stock-product-filter" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400"><option value="">所有商品</option></select>
                         <label class="sr-only" for="admin-stock-status-filter">篩選庫存狀態</label>
-                        <select id="admin-stock-status-filter" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">所有狀態</option><option value="available">可用</option><option value="issued">已核發</option><option value="void">已作廢</option></select>
-                        <button id="admin-stock-search-button" type="submit" class="rounded-xl border border-cyan-500/40 px-5 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40 disabled:opacity-50">查詢庫存</button>
+                        <select id="admin-stock-status-filter" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400"><option value="">所有狀態</option><option value="available">可用</option><option value="issued">已核發</option><option value="void">已作廢</option></select>
+                        <button id="admin-stock-search-button" type="submit" class="rounded-xl border border-brand-500/40 px-5 py-3 text-sm font-semibold text-brand-300 hover:bg-brand-950/60 disabled:opacity-50">查詢庫存</button>
                     </form>
                     <p id="admin-stock-status" class="text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">開啟卡密管理後載入資料。</p>
                     <div class="glass overflow-hidden rounded-2xl">
                         <div class="overflow-x-auto"><table class="w-full min-w-[800px] text-left text-xs"><thead class="border-b border-slate-800 bg-slate-950/40 text-slate-400"><tr><th class="px-4 py-3">匯入時間</th><th class="px-4 py-3">商品</th><th class="px-4 py-3">卡密尾碼</th><th class="px-4 py-3">狀態</th><th class="px-4 py-3">核發訂單</th><th class="px-4 py-3 text-right">操作</th></tr></thead><tbody id="admin-stock-body" class="divide-y divide-slate-800/80"><tr><td colspan="6" class="px-4 py-10 text-center text-slate-500">正在等待載入庫存。</td></tr></tbody></table></div>
-                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-stock-prev-page" type="button" onclick="changeCardStockPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:opacity-40">上一頁</button><span id="admin-stock-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-stock-next-page" type="button" onclick="changeCardStockPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:opacity-40">下一頁</button></div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-stock-prev-page" type="button" onclick="changeCardStockPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:opacity-40">上一頁</button><span id="admin-stock-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-stock-next-page" type="button" onclick="changeCardStockPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:opacity-40">下一頁</button></div>
                     </div>
                 </section>
 
                 <section id="admin-view-members" class="admin-view hidden space-y-5">
                     <div class="flex flex-wrap items-end justify-between gap-4">
                         <div>
-                            <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">MEMBER OPERATIONS</p>
+                            <p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">MEMBER OPERATIONS</p>
                             <h3 class="m-0 text-2xl font-bold text-white">會員帳號管理</h3>
                             <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">搜尋會員並查看訂單與餘額；管理員核對款項後可手動加值或調整餘額。新下單與管理員身分仍由各自權限控管。</p>
                         </div>
-                        <a href="https://supabase.com/dashboard/project/zquzmagkcqjfjjuarhkd/auth/users" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-cyan-500/40 px-4 py-2.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40">Auth 使用者管理 ↗</a>
+                        <a href="https://supabase.com/dashboard/project/zquzmagkcqjfjjuarhkd/auth/users" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-brand-500/40 px-4 py-2.5 text-xs font-semibold text-brand-300 hover:bg-brand-950/60">Auth 使用者管理 ↗</a>
                     </div>
                     <p class="glass rounded-xl p-4 text-xs leading-relaxed text-slate-400">加值僅在核對實際收款並輸入未使用的收款編號後由管理員手動執行；Discord 洽詢不會入帳。會員可選擇餘額付款，由資料庫一次扣款並標記訂單已付款，發卡仍需管理員處理。授予管理員身分會開放訂單、商品及會員管理，但不會授予再次新增管理員的資格。建立／刪除帳號與重設密碼仍由 Supabase Auth 處理，本頁不接觸密碼或 Service Role Key。</p>
                     <form id="admin-members-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminMembers(0, event)">
                         <label class="sr-only" for="admin-member-search">搜尋會員</label>
-                        <input id="admin-member-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋會員信箱或使用者 ID" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                        <input id="admin-member-search" type="search" maxlength="254" autocomplete="off" placeholder="搜尋會員信箱或使用者 ID" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
                         <label class="sr-only" for="admin-member-status">新下單權限</label>
-                        <select id="admin-member-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">全部會員</option><option value="active">可下單</option><option value="paused">暫停新下單</option></select>
-                        <button id="admin-members-search-button" type="submit" class="rounded-xl border border-cyan-500/40 px-5 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40 disabled:opacity-50">搜尋會員</button>
+                        <select id="admin-member-status" class="rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400"><option value="">全部會員</option><option value="active">可下單</option><option value="paused">暫停新下單</option></select>
+                        <button id="admin-members-search-button" type="submit" class="rounded-xl border border-brand-500/40 px-5 py-3 text-sm font-semibold text-brand-300 hover:bg-brand-950/60 disabled:opacity-50">搜尋會員</button>
                     </form>
                     <p id="admin-members-status" class="text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">開啟會員管理後載入資料。</p>
                     <div class="glass overflow-hidden rounded-2xl">
@@ -325,16 +379,16 @@
                                 <tbody id="admin-members-body" class="divide-y divide-slate-800/80"><tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">登入管理員帳號後載入會員。</td></tr></tbody>
                             </table>
                         </div>
-                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-members-prev-page" type="button" onclick="changeMemberPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-members-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-members-next-page" type="button" onclick="changeMemberPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-members-prev-page" type="button" onclick="changeMemberPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-members-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-members-next-page" type="button" onclick="changeMemberPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
                     </div>
                 </section>
 
                 <section id="admin-view-audit" class="admin-view hidden space-y-5">
-                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-cyan-300">AUDIT TRAIL</p><h3 class="m-0 text-2xl font-bold text-white">操作紀錄</h3><p class="mt-2 text-sm text-slate-400">查看管理員的收款確認、授權、會員及商品操作；紀錄不包含授權卡號明文。紀錄不可從後台刪除。</p></div>
+                    <div><p class="mono mb-2 text-[10px] uppercase tracking-[.22em] text-brand-300">AUDIT TRAIL</p><h3 class="m-0 text-2xl font-bold text-white">操作紀錄</h3><p class="mt-2 text-sm text-slate-400">查看管理員的收款確認、授權、會員及商品操作；紀錄不包含授權卡號明文。紀錄不可從後台刪除。</p></div>
                     <p id="admin-audit-status" class="text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">開啟操作紀錄後載入資料。</p>
                     <div class="glass overflow-hidden rounded-2xl">
                         <div class="overflow-x-auto"><table class="w-full min-w-[900px] text-left text-xs"><thead class="border-b border-slate-800 bg-slate-950/40 text-slate-400"><tr><th class="px-4 py-3">時間</th><th class="px-4 py-3">操作者</th><th class="px-4 py-3">操作</th><th class="px-4 py-3">訂單</th><th class="px-4 py-3">對象／原因</th></tr></thead><tbody id="admin-audit-body" class="divide-y divide-slate-800/80"><tr><td colspan="5" class="px-4 py-10 text-center text-slate-500">登入管理員帳號後載入紀錄。</td></tr></tbody></table></div>
-                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-audit-prev-page" type="button" onclick="changeAuditPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-audit-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-audit-next-page" type="button" onclick="changeAuditPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
+                        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-4 py-3"><button id="admin-audit-prev-page" type="button" onclick="changeAuditPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">上一頁</button><span id="admin-audit-page-label" class="text-xs text-slate-500">第 1 頁</span><button id="admin-audit-next-page" type="button" onclick="changeAuditPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-40">下一頁</button></div>
                     </div>
                 </section>
             </div>
@@ -342,8 +396,8 @@
     </div>
 
     <dialog id="admin-order-dialog" class="w-[calc(100%-2rem)] max-w-3xl shadow-2xl shadow-black/50">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-800 p-5 sm:p-6"><div><p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-cyan-300">ORDER DETAIL</p><h2 id="detail-title" class="m-0 text-lg font-bold text-white">訂單明細</h2><p id="detail-subtitle" class="mb-0 mt-1 text-xs text-slate-500"></p></div><button type="button" onclick="closeOrderDetail()" aria-label="關閉訂單明細" class="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 hover:border-cyan-400">關閉</button></div>
-        <p id="detail-payment-source" class="mx-5 mb-0 mt-4 text-xs text-cyan-200 sm:mx-6" role="status" aria-live="polite"></p>
+        <div class="flex items-start justify-between gap-4 border-b border-slate-800 p-5 sm:p-6"><div><p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-brand-300">ORDER DETAIL</p><h2 id="detail-title" class="m-0 text-lg font-bold text-white">訂單明細</h2><p id="detail-subtitle" class="mb-0 mt-1 text-xs text-slate-500"></p></div><button type="button" onclick="closeOrderDetail()" aria-label="關閉訂單明細" class="rounded-lg border border-slate-700 px-3 py-2 text-slate-300 hover:border-brand-400">關閉</button></div>
+        <p id="detail-payment-source" class="mx-5 mb-0 mt-4 text-xs text-brand-200 sm:mx-6" role="status" aria-live="polite"></p>
         <div id="detail-status" class="mx-5 mt-4 rounded-lg border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300 sm:mx-6" role="status" aria-live="polite">正在載入…</div>
         <div class="max-h-[65vh] overflow-auto p-5 sm:p-6"><table class="w-full min-w-[850px] text-left text-xs"><thead class="border-b border-slate-800 text-slate-500"><tr><th class="py-3 pr-3">商品</th><th class="py-3 pr-3">數量／單價</th><th class="py-3 pr-3">授權狀態</th><th class="py-3 pr-3">卡號（符合條件時）</th><th class="py-3 pr-3">到期日</th><th class="py-3 text-right">操作</th></tr></thead><tbody id="detail-items-body" class="divide-y divide-slate-800"></tbody></table></div>
     </dialog>
@@ -368,14 +422,14 @@
 
     <dialog id="admin-stock-import-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
         <form id="admin-stock-import-form" class="space-y-4 p-5 sm:p-6" onsubmit="submitCardStockImport(event)">
-            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-cyan-300">CARD KEY INVENTORY</p><h2 id="stock-import-title" class="m-0 text-xl font-bold text-white">手動新增一組卡密</h2>
+            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-brand-300">CARD KEY INVENTORY</p><h2 id="stock-import-title" class="m-0 text-xl font-bold text-white">手動新增一組卡密</h2>
             <p id="stock-import-description" class="m-0 text-xs leading-relaxed text-slate-400">選擇商品並輸入一組未使用過的卡密。儲存後只會顯示尾碼，不會自動核發給訂單。</p>
-            <div><label for="stock-import-product" class="mb-1.5 block text-xs font-semibold text-slate-300">所屬商品</label><select id="stock-import-product" required class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"><option value="">請先載入商品</option></select></div>
-            <div id="stock-import-single-field"><label for="stock-import-single-key" class="mb-1.5 block text-xs font-semibold text-slate-300">卡密（一組，8–160 字）</label><textarea id="stock-import-single-key" rows="2" maxlength="160" autocomplete="off" spellcheck="false" class="mono w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400" placeholder="英數字及 . _ : / + = -"></textarea></div>
-            <div id="stock-import-batch-field" hidden><label for="stock-import-keys" class="mb-1.5 block text-xs font-semibold text-slate-300">卡密（每行一組）</label><textarea id="stock-import-keys" rows="6" maxlength="17000" autocomplete="off" spellcheck="false" class="mono w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400" placeholder="一行一組，8–160 字英數字及 . _ : / + = -"></textarea></div>
-            <div><label id="stock-import-reason-label" for="stock-import-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">新增原因／來源（必填，最多 500 字）</label><textarea id="stock-import-reason" required maxlength="500" rows="2" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="請勿在此輸入卡密"></textarea></div>
+            <div><label for="stock-import-product" class="mb-1.5 block text-xs font-semibold text-slate-300">所屬商品</label><select id="stock-import-product" required class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400"><option value="">請先載入商品</option></select></div>
+            <div id="stock-import-single-field"><label for="stock-import-single-key" class="mb-1.5 block text-xs font-semibold text-slate-300">卡密（一組，8–160 字）</label><textarea id="stock-import-single-key" rows="2" maxlength="160" autocomplete="off" spellcheck="false" class="mono w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-white outline-none focus:border-brand-400" placeholder="英數字及 . _ : / + = -"></textarea></div>
+            <div id="stock-import-batch-field" hidden><label for="stock-import-keys" class="mb-1.5 block text-xs font-semibold text-slate-300">卡密（每行一組）</label><textarea id="stock-import-keys" rows="6" maxlength="17000" autocomplete="off" spellcheck="false" class="mono w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-xs text-white outline-none focus:border-brand-400" placeholder="一行一組，8–160 字英數字及 . _ : / + = -"></textarea></div>
+            <div><label id="stock-import-reason-label" for="stock-import-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">新增原因／來源（必填，最多 500 字）</label><textarea id="stock-import-reason" required maxlength="500" rows="2" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="請勿在此輸入卡密"></textarea></div>
             <p id="stock-import-status" hidden role="status" aria-live="polite" class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300"></p>
-            <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="stock-import-cancel" type="button" onclick="closeCardStockImport()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="stock-import-submit" type="submit" class="rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">確認新增</button></div>
+            <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="stock-import-cancel" type="button" onclick="closeCardStockImport()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="stock-import-submit" type="submit" class="admin-primary rounded-xl px-4 py-2.5 text-sm font-bold disabled:opacity-50">確認新增</button></div>
         </form>
     </dialog>
 
@@ -419,18 +473,18 @@
     <dialog id="admin-product-dialog" class="w-[calc(100%-2rem)] max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
         <form id="admin-product-form" class="space-y-4 p-5 sm:p-7" onsubmit="submitProduct(event)">
             <div>
-                <p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-cyan-300">PRODUCT EDITOR</p>
+                <p class="mono mb-1 text-[10px] uppercase tracking-[.2em] text-brand-300">PRODUCT EDITOR</p>
                 <h2 id="product-dialog-title" class="m-0 text-xl font-bold text-white">新增商品</h2>
                 <p class="mb-0 mt-2 text-xs leading-relaxed text-slate-400">商品編號由資料庫產生，價格單位為新臺幣。圖片請先放入網站圖片資料夾，再輸入檔名。</p>
             </div>
             <div>
                 <label for="product-name" class="mb-1.5 block text-xs font-semibold text-slate-300">商品名稱</label>
-                <input id="product-name" required maxlength="160" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="輸入商品名稱">
+                <input id="product-name" required maxlength="160" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="輸入商品名稱">
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="product-category" class="mb-1.5 block text-xs font-semibold text-slate-300">商品分類</label>
-                    <select id="product-category" required class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                    <select id="product-category" required class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
                         <option value="valorant">特戰英豪</option>
                         <option value="pubg">絕地求生</option>
                         <option value="mobile">熱門手遊</option>
@@ -439,16 +493,16 @@
                 </div>
                 <div>
                     <label for="product-price" class="mb-1.5 block text-xs font-semibold text-slate-300">售價（NT$）</label>
-                    <input id="product-price" type="number" required min="1" max="500000" step="1" inputmode="numeric" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="例如 1200">
+                    <input id="product-price" type="number" required min="1" max="500000" step="1" inputmode="numeric" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="例如 1200">
                 </div>
             </div>
             <div>
                 <label for="product-tag" class="mb-1.5 block text-xs font-semibold text-slate-300">商品標籤（選填）</label>
-                <input id="product-tag" maxlength="32" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="例如 熱門商品">
+                <input id="product-tag" maxlength="32" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="例如 熱門商品">
             </div>
             <div>
                 <label for="product-image-file" class="mb-1.5 block text-xs font-semibold text-slate-300">圖片檔名</label>
-                <input id="product-image-file" required maxlength="120" pattern="[A-Za-z0-9_\-]+[.](png|jpg|jpeg|webp)" list="product-image-suggestions" value="logo-700x700.png" autocomplete="off" spellcheck="false" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="例如 logo-700x700.png">
+                <input id="product-image-file" required maxlength="120" pattern="[A-Za-z0-9_\-]+[.](png|jpg|jpeg|webp)" list="product-image-suggestions" value="logo-700x700.png" autocomplete="off" spellcheck="false" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="例如 logo-700x700.png">
                 <datalist id="product-image-suggestions">
                     <option value="PUBGM-700x700.png"></option><option value="freefire.png"></option><option value="moba.png"></option><option value="logo-700x700.png"></option><option value="logo.jpg"></option>
                 </datalist>
@@ -456,26 +510,26 @@
             </div>
             <div>
                 <label for="product-description" class="mb-1.5 block text-xs font-semibold text-slate-300">商品介紹</label>
-                <textarea id="product-description" maxlength="2000" rows="4" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="說明商品內容與注意事項"></textarea>
+                <textarea id="product-description" maxlength="2000" rows="4" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="說明商品內容與注意事項"></textarea>
             </div>
-            <label class="flex items-center gap-2 text-sm text-slate-300"><input id="product-active" type="checkbox" class="accent-cyan-400">上架（公開商城可見且可下單）</label>
+            <label class="flex items-center gap-2 text-sm text-slate-300"><input id="product-active" type="checkbox" class="accent-brand-500">上架（公開商城可見且可下單）</label>
             <p id="product-editor-status" hidden role="status" aria-live="polite" class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300"></p>
             <div class="flex justify-end gap-3 border-t border-slate-800 pt-4">
                 <button id="product-editor-cancel" type="button" onclick="closeProductEditor()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">取消</button>
-                <button id="product-editor-save" type="submit" class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">儲存商品</button>
+                <button id="product-editor-save" type="submit" class="admin-primary rounded-xl px-5 py-2.5 text-sm font-bold disabled:opacity-50">儲存商品</button>
             </div>
         </form>
     </dialog>
 
     <dialog id="admin-member-dialog" class="w-[calc(100%-2rem)] max-w-lg shadow-2xl shadow-black/50">
         <form id="admin-member-form" class="space-y-4 p-5 sm:p-6" onsubmit="submitMemberAccess(event)">
-            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-cyan-300">MEMBER ORDER ACCESS</p>
+            <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-brand-300">MEMBER ORDER ACCESS</p>
             <h2 id="member-dialog-title" class="m-0 text-xl font-bold text-white">調整新下單權限</h2>
             <p id="member-dialog-account" class="mono mb-0 break-all text-xs text-slate-400"></p>
             <p id="member-dialog-explanation" class="mb-0 text-xs leading-relaxed text-slate-400"></p>
-            <div><label for="member-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">原因（暫停時必填，最多 500 字）</label><textarea id="member-reason" maxlength="500" rows="3" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400" placeholder="說明此操作的原因"></textarea></div>
+            <div><label for="member-reason" class="mb-1.5 block text-xs font-semibold text-slate-300">原因（暫停時必填，最多 500 字）</label><textarea id="member-reason" maxlength="500" rows="3" class="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400" placeholder="說明此操作的原因"></textarea></div>
             <p id="member-dialog-status" hidden role="status" aria-live="polite" class="rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-xs text-slate-300"></p>
-            <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="member-dialog-cancel" type="button" onclick="closeMemberDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="member-dialog-submit" type="submit" class="rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">確認調整</button></div>
+            <div class="flex justify-end gap-3 border-t border-slate-800 pt-4"><button id="member-dialog-cancel" type="button" onclick="closeMemberDialog()" class="rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">返回</button><button id="member-dialog-submit" type="submit" class="admin-primary rounded-xl px-4 py-2.5 text-sm font-bold disabled:opacity-50">確認調整</button></div>
         </form>
     </dialog>
 
@@ -484,7 +538,7 @@
             <p class="mono mb-0 text-[10px] uppercase tracking-[.2em] text-emerald-300">MEMBER BALANCE</p>
             <h2 class="m-0 text-xl font-bold text-white">調整會員餘額</h2>
             <p id="balance-dialog-account" class="mono mb-0 break-all text-xs text-slate-400"></p>
-            <p id="balance-dialog-current" class="mb-0 text-sm font-bold text-cyan-300"></p>
+            <p id="balance-dialog-current" class="mb-0 text-sm font-bold text-gold-300"></p>
             <p class="mb-0 text-xs leading-relaxed text-amber-200">只在外部實際核對收款後加值；操作會留存紀錄。Discord 洽詢及建立訂單不會入帳；會員選擇餘額付款時才會扣款。</p>
             <div><label for="balance-direction" class="mb-1.5 block text-xs font-semibold text-slate-300">調整方式</label><select id="balance-direction" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"><option value="credit">加值（需核對實際收款）</option><option value="debit">扣減（人工更正）</option></select></div>
             <div><label for="balance-amount" class="mb-1.5 block text-xs font-semibold text-slate-300">調整金額（NT$ 1–1,000,000 整數）</label><input id="balance-amount" type="number" min="1" max="1000000" step="1" required inputmode="numeric" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"></div>
@@ -511,7 +565,7 @@
         </form>
     </dialog>
 
-    <script>
+    <script id="admin-app-script">
         const ADMIN_SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
         const ADMIN_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
         const ADMIN_PAGE_SIZE = 25;
@@ -784,7 +838,7 @@
                 const header = document.createElement('div');
                 header.className = 'mb-4 flex flex-wrap items-center justify-between gap-2';
                 const title = document.createElement('strong');
-                title.className = 'text-sm text-cyan-300';
+                title.className = 'text-sm text-brand-300';
                 title.textContent = `第 ${index + 1} 筆 · ${item.name || '新遊戲'}`;
                 header.appendChild(title);
                 const actions = document.createElement('div');
@@ -795,7 +849,7 @@
                     button.dataset.gameAction = action;
                     button.textContent = text;
                     button.setAttribute('aria-label', `${text}第 ${index + 1} 筆遊戲`);
-                    button.className = 'rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-cyan-400';
+                    button.className = 'rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400';
                     actions.appendChild(button);
                 }
                 header.appendChild(actions);
@@ -819,7 +873,7 @@
                     input.value = item[key];
                     input.required = true;
                     input.maxLength = max;
-                    input.className = 'w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm font-normal text-white outline-none focus:border-cyan-400';
+                    input.className = 'w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm font-normal text-white outline-none focus:border-brand-400';
                     wrapper.append(caption, input);
                     fields.appendChild(wrapper);
                 }
@@ -830,7 +884,7 @@
                 imageCaption.textContent = '展示圖片';
                 const image = document.createElement('select');
                 image.dataset.gameField = 'image';
-                image.className = 'w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm font-normal text-white outline-none focus:border-cyan-400';
+                image.className = 'w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm font-normal text-white outline-none focus:border-brand-400';
                 for (const [filename, label] of Object.entries(ADMIN_GAME_IMAGES)) image.add(new Option(`${label} (${filename})`, filename));
                 image.value = item.image;
                 imageLabel.append(imageCaption, image);
@@ -841,7 +895,7 @@
                 visible.type = 'checkbox';
                 visible.dataset.gameField = 'visible';
                 visible.checked = item.visible;
-                visible.className = 'h-5 w-5 accent-cyan-400';
+                visible.className = 'h-5 w-5 accent-brand-500';
                 visibleLabel.append(visible, document.createTextNode('在商城顯示此遊戲'));
                 fields.appendChild(visibleLabel);
                 card.appendChild(fields);
@@ -1206,7 +1260,7 @@
                 buildTableCell(row, formatDate(order.created_at), 'whitespace-nowrap px-4 py-3 text-slate-400');
                 buildTableCell(row, order.order_number ? `#${order.order_number}` : '—', 'mono px-4 py-3 font-semibold text-white');
                 buildTableCell(row, order.customer_email || '—', 'max-w-56 truncate px-4 py-3 text-slate-300');
-                buildTableCell(row, formatCurrency(order.total_amount), 'whitespace-nowrap px-4 py-3 font-semibold text-cyan-300');
+                buildTableCell(row, formatCurrency(order.total_amount), 'whitespace-nowrap px-4 py-3 font-semibold text-gold-300');
                 const statusCell = document.createElement('td');
                 statusCell.className = 'px-4 py-3';
                 statusCell.appendChild(statusBadge(order.status));
@@ -1219,7 +1273,7 @@
                 actionCell.className = 'px-4 py-3 text-right';
                 const detailButton = document.createElement('button');
                 detailButton.type = 'button';
-                detailButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-cyan-300 hover:border-cyan-400 hover:bg-cyan-950/40';
+                detailButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-brand-300 hover:border-brand-400 hover:bg-brand-950/60';
                 detailButton.textContent = '查看明細';
                 detailButton.addEventListener('click', () => openAdminOrderDetail(order.order_id));
                 actionCell.appendChild(detailButton);
@@ -1362,7 +1416,7 @@
                 productCell.appendChild(productInfo);
                 row.appendChild(productCell);
                 buildTableCell(row, ADMIN_PRODUCT_CATEGORIES[product.category] || product.category);
-                buildTableCell(row, formatCurrency(product.price), 'mono whitespace-nowrap px-4 py-3 font-semibold text-cyan-300');
+                buildTableCell(row, formatCurrency(product.price), 'mono whitespace-nowrap px-4 py-3 font-semibold text-gold-300');
 
                 const stateCell = document.createElement('td');
                 stateCell.className = 'px-4 py-3';
@@ -1378,7 +1432,7 @@
                 actions.className = 'whitespace-nowrap px-4 py-3 text-right';
                 const editButton = document.createElement('button');
                 editButton.type = 'button';
-                editButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-cyan-300 hover:border-cyan-400';
+                editButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-brand-300 hover:border-brand-400';
                 editButton.textContent = '編輯';
                 editButton.setAttribute('aria-label', `編輯商品 ${product.name}`);
                 editButton.addEventListener('click', () => openProductEditor(product));
@@ -1501,12 +1555,12 @@
                 row.className = 'transition hover:bg-slate-900/60';
                 buildTableCell(row, formatDate(stock.created_at), 'whitespace-nowrap px-4 py-3 text-slate-400');
                 buildTableCell(row, `#${stock.product_id} ${stock.product_name}`, 'px-4 py-3 text-white');
-                buildTableCell(row, `••••${stock.key_hint}`, 'mono px-4 py-3 text-cyan-200');
+                buildTableCell(row, `••••${stock.key_hint}`, 'mono px-4 py-3 text-brand-200');
                 const stateCell = document.createElement('td');
                 stateCell.className = 'px-4 py-3';
                 const badge = document.createElement('span');
                 const labels = { available: '可用', issued: '已核發', void: '已作廢' };
-                const colors = { available: 'text-emerald-300', issued: 'text-cyan-300', void: 'text-slate-400' };
+                const colors = { available: 'text-emerald-300', issued: 'text-brand-300', void: 'text-slate-400' };
                 badge.className = `font-semibold ${colors[stock.status] || 'text-slate-400'}`;
                 badge.textContent = labels[stock.status] || '未知';
                 stateCell.appendChild(badge);
@@ -1813,7 +1867,7 @@
                 const balanceReady = Number.isSafeInteger(member.balance) && member.balance >= 0 &&
                     member.balance <= 100000000 && Number.isSafeInteger(member.balance_revision) && member.balance_revision >= 0;
                 buildTableCell(row, balanceReady ? formatCurrency(member.balance) : '未載入',
-                    'whitespace-nowrap px-4 py-3 font-bold text-cyan-300');
+                    'whitespace-nowrap px-4 py-3 font-bold text-gold-300');
 
                 const stateCell = document.createElement('td');
                 stateCell.className = 'px-4 py-3';
@@ -1825,7 +1879,7 @@
                 stateCell.appendChild(badge);
                 if (member.is_admin) {
                     const adminLabel = document.createElement('p');
-                    adminLabel.className = 'mb-0 mt-1 text-[10px] text-cyan-300';
+                    adminLabel.className = 'mb-0 mt-1 text-[10px] text-brand-300';
                     adminLabel.textContent = '管理員';
                     stateCell.appendChild(adminLabel);
                 }
@@ -1835,7 +1889,7 @@
                 actions.className = 'whitespace-nowrap px-4 py-3 text-right';
                 const ordersButton = document.createElement('button');
                 ordersButton.type = 'button';
-                ordersButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-cyan-300 hover:border-cyan-400 disabled:opacity-40';
+                ordersButton.className = 'rounded-lg border border-slate-700 px-3 py-2 text-[11px] text-brand-300 hover:border-brand-400 disabled:opacity-40';
                 ordersButton.textContent = '查看訂單';
                 ordersButton.disabled = !member.email;
                 ordersButton.addEventListener('click', () => {
@@ -1997,7 +2051,7 @@
                 row.className = 'hover:bg-slate-900/60';
                 buildTableCell(row, formatDate(entry.occurred_at), 'whitespace-nowrap px-4 py-3 text-slate-400');
                 buildTableCell(row, entry.actor_email || '已刪除的帳號', 'px-4 py-3 text-slate-200');
-                buildTableCell(row, labels[entry.action] || entry.action, 'whitespace-nowrap px-4 py-3 text-cyan-300');
+                buildTableCell(row, labels[entry.action] || entry.action, 'whitespace-nowrap px-4 py-3 text-brand-300');
                 buildTableCell(row, entry.order_number ? `#${entry.order_number}` : '—', 'mono px-4 py-3 text-slate-300');
                 const details = entry.details || {};
                 const parts = [];
@@ -2608,12 +2662,12 @@
                     keyCell.className = 'py-3 pr-3';
                     if (order.status === 'paid' && item.authorization_status === 'active' && item.authorization_key) {
                         const key = document.createElement('span');
-                        key.className = 'mono inline-block max-w-52 select-all whitespace-pre-line break-all text-cyan-300';
+                        key.className = 'mono inline-block max-w-52 select-all whitespace-pre-line break-all text-gold-300';
                         key.textContent = item.authorization_key;
                         keyCell.appendChild(key);
                         const copy = document.createElement('button');
                         copy.type = 'button';
-                        copy.className = 'ml-2 rounded border border-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:border-cyan-400';
+                        copy.className = 'ml-2 rounded border border-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:border-brand-400';
                         copy.textContent = '複製';
                         copy.addEventListener('click', async () => {
                             try {
