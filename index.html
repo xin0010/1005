@@ -181,7 +181,7 @@
             content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
             width: 1px; height: 1.6rem; background: rgba(255, 255, 255, .17);
         }
-        .shop-nav-link:hover:not(.shop-nav-pending), .shop-nav-more[open] > summary {
+        .shop-nav-link:hover, .shop-nav-more[open] > summary {
             background: #373237; color: #fff;
         }
         .shop-nav-link[aria-current="page"], .shop-nav-more.has-active-child > summary {
@@ -192,9 +192,6 @@
         }
         .shop-nav-icon { flex: none; width: 2rem; height: 2rem; object-fit: contain; image-rendering: pixelated; }
         .shop-nav-link > .fa-solid, .shop-nav-link > .fa-brands { font-size: 1.15rem; color: #e0c0da; }
-        .shop-nav-pending { color: #aaa3aa; cursor: not-allowed; }
-        .shop-nav-pending .fa-line { color: #819f8b; }
-        .shop-nav-pending small { color: #bfb7bf; font-size: .7rem; font-weight: 500; }
         .shop-nav-more { position: relative; }
         .shop-nav-more > summary { list-style: none; }
         .shop-nav-more > summary::-webkit-details-marker { display: none; }
@@ -223,8 +220,7 @@
         }
         .shop-mobile-link:hover, .shop-mobile-link[aria-current="page"] { background: #403b40; color: #fff; }
         .shop-mobile-link .fa-solid, .shop-mobile-link .fa-brands { width: 2rem; text-align: center; color: #e0c0da; }
-        .shop-mobile-link.shop-nav-pending { color: #aaa3aa; cursor: not-allowed; }
-        .shop-mobile-link.shop-nav-pending .fa-line { color: #819f8b; }
+        .shop-nav-link .fa-line, .shop-mobile-link .fa-line { color: #70e39d; }
         .shop-mobile-divider { margin: .5rem 0; border-top: 1px solid #554b54; }
         @media (max-width: 1100px) {
             .shop-nav-link { padding-inline: .75rem; font-size: .8rem; }
@@ -422,7 +418,7 @@
                     <button type="button" data-nav-view="mobile-store" onclick="switchTab('mobile-store')" class="shop-nav-link"><img src="輔助商城.png" alt="" width="32" height="32" class="shop-nav-icon">輔助商城</button>
                     <button type="button" data-nav-view="downloads" onclick="switchTab('downloads')" class="shop-nav-link"><i class="fa-solid fa-download" aria-hidden="true"></i>輔助下載</button>
                     <button type="button" data-nav-view="trouble" onclick="switchTab('trouble')" class="shop-nav-link"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>常見問題</button>
-                    <span class="shop-nav-link shop-nav-pending" aria-label="售後 LINE 群，連結待提供" title="尚未提供售後 LINE 群連結，請使用 Discord 客服"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 群 <small>待提供</small></span>
+                    <a href="https://line.me/R/ti/p/@734cbevd" target="_blank" rel="noopener noreferrer" class="shop-nav-link"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 客服</a>
                 </div>
                 <details id="shop-nav-more" class="shop-nav-more">
                     <summary class="shop-nav-link"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i>更多功能<i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
@@ -444,7 +440,7 @@
             <button type="button" data-nav-view="mobile-store" onclick="switchTab('mobile-store')" class="shop-mobile-link"><img src="輔助商城.png" alt="" width="32" height="32" class="shop-nav-icon">輔助商城</button>
             <button type="button" data-nav-view="downloads" onclick="switchTab('downloads')" class="shop-mobile-link"><i class="fa-solid fa-download" aria-hidden="true"></i>輔助下載</button>
             <button type="button" data-nav-view="trouble" onclick="switchTab('trouble')" class="shop-mobile-link"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>常見問題</button>
-            <span class="shop-mobile-link shop-nav-pending" aria-label="售後 LINE 群，連結待提供"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 群 <small>連結待提供</small></span>
+            <a href="https://line.me/R/ti/p/@734cbevd" target="_blank" rel="noopener noreferrer" class="shop-mobile-link"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 客服</a>
             <div class="shop-mobile-divider" aria-hidden="true"></div>
             <button type="button" data-nav-view="orders" onclick="switchTab('orders')" class="shop-mobile-link"><i class="fa-solid fa-receipt" aria-hidden="true"></i>卡號與訂單查詢</button>
             <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')" class="shop-mobile-link"><i class="fa-solid fa-wallet" aria-hidden="true"></i>餘額儲值</button>
