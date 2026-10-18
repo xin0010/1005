@@ -573,8 +573,15 @@
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-white border-l-4 border-brand-400 pl-3 mb-2">訂單與授權卡號查詢</h2>
-                    <p class="text-xs text-slate-400">登入後僅能查詢目前會員帳號所屬的訂單；可用訂單編號篩選。為保護卡號，不能透過公開信箱或電話查詢。</p>
+                    <p class="text-xs text-slate-400">登入後僅能查詢本人訂單與管理員直接發放的卡密；訂單編號只篩選下方訂單。為保護卡號，不能透過公開信箱或電話查詢。</p>
                 </div>
+
+                <section class="mb-8 rounded-2xl border border-brand-500/40 bg-[#262126] p-4 shadow-2xl sm:p-6" aria-labelledby="member-keys-title">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h3 id="member-keys-title" class="mb-1 text-lg font-bold text-white">我的卡密 · 管理員直發</h3><p class="m-0 text-xs text-slate-400">直接發給帳號的卡號不屬於訂單、不代表已付款；到期或撤銷後將不再顯示完整卡號。</p></div><button id="member-keys-refresh" type="button" onclick="loadMyMemberAuthorizations(0)" disabled class="rounded-lg border border-brand-500/40 px-3 py-2 text-xs text-brand-200 hover:bg-brand-950/50 disabled:opacity-40">重新整理卡密</button></div>
+                    <p id="member-keys-status" class="mb-3 text-xs text-slate-400" role="status" aria-live="polite">登入後可查看本人直發卡密。</p>
+                    <div id="member-keys-list" class="space-y-3"></div>
+                    <div class="mt-4 flex items-center justify-between gap-3"><button id="member-keys-prev" type="button" onclick="changeMyMemberAuthorizationPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 disabled:opacity-40">上一頁</button><span id="member-keys-page" class="text-xs text-slate-400">第 1 頁</span><button id="member-keys-next" type="button" onclick="changeMyMemberAuthorizationPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 disabled:opacity-40">下一頁</button></div>
+                </section>
 
                 <div id="order-created-panel" class="hidden mb-6 rounded-2xl border border-brand-500/40 bg-brand-950/30 p-5 text-sm text-brand-200" role="status" aria-live="polite">
                     <p id="order-created-title" class="mb-2 font-bold">待付款訂單已建立</p>
@@ -739,6 +746,7 @@
             <div id="auth-session-panel" class="account-session hidden" aria-live="polite">
                 <p>目前登入帳號</p>
                 <p id="auth-session-email" class="account-session-email"></p>
+                <button type="button" onclick="switchTab('orders')" class="account-register-cta mr-2">查看我的卡密</button>
                 <button type="button" onclick="signOutMember()" class="account-register-cta">登出</button>
             </div>
             <p id="auth-status" class="hidden" role="status" aria-live="polite"></p>
@@ -964,6 +972,9 @@
         let cartPreviousFocus = null;
         let orderLookupRequestId = 0;
         let balanceRequestId = 0;
+        let memberKeysRequestId = 0;
+        let memberKeysPage = 0;
+        let memberKeysExpiryTimer = null;
 
         function resetMyBalanceDisplay() {
             balanceRequestId += 1;
@@ -1131,6 +1142,7 @@
             }
             if (tabId === 'orders') {
                 queryOrders();
+                void loadMyMemberAuthorizations(0);
             }
             if (tabId === 'wallet') void loadMyBalance();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1830,6 +1842,124 @@
             tbody.appendChild(tr);
         }
 
+        function setMemberKeysStatus(message, tone = 'info') {
+            const status = document.getElementById('member-keys-status');
+            status.className = `mb-3 text-xs ${tone === 'error' ? 'text-red-300' : tone === 'success' ? 'text-emerald-300' : 'text-slate-400'}`;
+            status.textContent = message;
+        }
+
+        function clearMyMemberAuthorizations() {
+            memberKeysRequestId += 1;
+            memberKeysPage = 0;
+            window.clearTimeout(memberKeysExpiryTimer);
+            memberKeysExpiryTimer = null;
+            document.getElementById('member-keys-list').replaceChildren();
+            document.getElementById('member-keys-prev').disabled = true;
+            document.getElementById('member-keys-next').disabled = true;
+            document.getElementById('member-keys-page').textContent = '第 1 頁';
+            document.getElementById('member-keys-refresh').disabled = !currentAuthUser;
+            setMemberKeysStatus(currentAuthUser ? '開啟卡號查詢載入本人直發卡密。' : '登入後可查看本人直發卡密。');
+        }
+
+        function renderMyMemberAuthorizations(entries, userId, requestId) {
+            const list = document.getElementById('member-keys-list');
+            list.replaceChildren();
+            for (const entry of entries) {
+                const card = document.createElement('article');
+                card.className = 'rounded-xl border border-slate-700 bg-slate-900/70 p-4';
+                const name = document.createElement('h4');
+                name.className = 'm-0 text-sm font-bold text-brand-300';
+                name.textContent = entry.product_name || '會員授權';
+                const date = document.createElement('p');
+                date.className = 'mb-2 mt-1 text-[11px] text-slate-400';
+                const status = entry.authorization_status;
+                const expiresAt = entry.expires_at ? new Date(entry.expires_at) : null;
+                const expired = expiresAt && (!Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= Date.now());
+                const active = status === 'active' && !expired && typeof entry.authorization_key === 'string' && !!entry.authorization_key;
+                date.textContent = `核發 ${entry.issued_at ? new Date(entry.issued_at).toLocaleString('zh-TW') : '—'} · ${active ? '有效' : status === 'revoked' ? '已撤銷' : expired || status === 'expired' ? '已到期' : '暫不可用'}${entry.expires_at ? ` · 到期 ${expiresAt?.toLocaleString('zh-TW') || '—'}` : ''}`;
+                card.append(name, date);
+                if (active) {
+                    const key = document.createElement('p');
+                    key.className = 'mono mb-2 select-all break-all rounded-lg border border-brand-500/40 bg-brand-950/60 p-3 text-sm font-bold text-gold-300';
+                    key.textContent = entry.authorization_key;
+                    const copy = document.createElement('button');
+                    copy.type = 'button';
+                    copy.className = 'rounded-lg border border-brand-500/40 px-3 py-2 text-xs text-brand-200';
+                    copy.textContent = '複製卡號';
+                    copy.addEventListener('click', () => {
+                        if (currentAuthUser?.id === userId && memberKeysRequestId === requestId &&
+                            (!expiresAt || expiresAt.getTime() > Date.now())) copyToClipboard(entry.authorization_key);
+                    });
+                    card.append(key, copy);
+                } else {
+                    const unavailable = document.createElement('p');
+                    unavailable.className = 'm-0 text-xs text-slate-400';
+                    unavailable.textContent = '卡號已隱藏，請洽客服。';
+                    card.appendChild(unavailable);
+                }
+                list.appendChild(card);
+            }
+        }
+
+        async function loadMyMemberAuthorizations(page = memberKeysPage) {
+            const userId = currentAuthUser?.id;
+            if (!userId) {
+                clearMyMemberAuthorizations();
+                return;
+            }
+            const requestId = ++memberKeysRequestId;
+            memberKeysPage = Math.max(0, Number(page) || 0);
+            window.clearTimeout(memberKeysExpiryTimer);
+            memberKeysExpiryTimer = null;
+            const refresh = document.getElementById('member-keys-refresh');
+            refresh.disabled = true;
+            refresh.setAttribute('aria-busy', 'true');
+            document.getElementById('member-keys-list').replaceChildren();
+            document.getElementById('member-keys-prev').disabled = true;
+            document.getElementById('member-keys-next').disabled = true;
+            setMemberKeysStatus('正在安全讀取本人直發卡密…');
+            try {
+                if (!supabaseClient) throw new Error('Supabase unavailable');
+                const { data, error } = await supabaseClient.rpc('get_my_member_authorizations', {
+                    p_limit: 51, p_offset: memberKeysPage * 50
+                });
+                if (error) throw error;
+                if (requestId !== memberKeysRequestId || currentAuthUser?.id !== userId) return;
+                if (!Array.isArray(data)) throw new Error('直發卡密資料不完整');
+                const entries = data.slice(0, 50);
+                renderMyMemberAuthorizations(entries, userId, requestId);
+                document.getElementById('member-keys-page').textContent = `第 ${memberKeysPage + 1} 頁`;
+                document.getElementById('member-keys-prev').disabled = memberKeysPage === 0;
+                document.getElementById('member-keys-next').disabled = data.length <= 50;
+                setMemberKeysStatus(entries.length ? `已載入 ${entries.length} 組本人直發卡密。` : '目前沒有管理員直接發放的卡密。', 'success');
+                const futureExpiries = entries.filter(entry => entry.authorization_status === 'active' && entry.authorization_key)
+                    .map(entry => new Date(entry.expires_at).getTime())
+                    .filter(time => Number.isFinite(time) && time > Date.now());
+                if (futureExpiries.length) {
+                    memberKeysExpiryTimer = window.setTimeout(() => {
+                        if (requestId === memberKeysRequestId && currentAuthUser?.id === userId) {
+                            void loadMyMemberAuthorizations(memberKeysPage);
+                        }
+                    }, Math.min(2147483647, Math.max(0, Math.min(...futureExpiries) - Date.now())));
+                }
+            } catch (error) {
+                if (requestId !== memberKeysRequestId || currentAuthUser?.id !== userId) return;
+                document.getElementById('member-keys-list').replaceChildren();
+                setMemberKeysStatus(error?.code === 'PGRST202' || /get_my_member_authorizations.*(?:does not exist|schema cache|could not find)/i.test(String(error?.message || ''))
+                    ? '會員直發卡密功能尚未部署；請管理員套用資料庫腳本。'
+                    : '卡密讀取失敗，請稍後按「重新整理卡密」；此狀態不代表沒有卡密。', 'error');
+            } finally {
+                if (requestId === memberKeysRequestId && currentAuthUser?.id === userId) {
+                    refresh.disabled = false;
+                    refresh.removeAttribute('aria-busy');
+                }
+            }
+        }
+
+        function changeMyMemberAuthorizationPage(delta) {
+            void loadMyMemberAuthorizations(Math.max(0, memberKeysPage + delta));
+        }
+
         function renderOrderHistory(orders) {
             const tbody = document.getElementById('orders-table-body');
             if (!tbody) return;
@@ -2380,6 +2510,7 @@
                 authRecoveryActive = false;
                 activeAuthTab = 'login';
                 resetMyBalanceDisplay();
+                clearMyMemberAuthorizations();
                 renderAuthView();
                 setAuthStatus('已安全登出。', 'success');
             } catch (error) {
@@ -2407,14 +2538,20 @@
 
                 const previousUserId = currentAuthUser?.id;
                 currentAuthUser = session?.user || null;
-                if (previousUserId !== currentAuthUser?.id) resetMyBalanceDisplay();
+                if (previousUserId !== currentAuthUser?.id) {
+                    resetMyBalanceDisplay();
+                    clearMyMemberAuthorizations();
+                }
                 renderAuthView();
                 if (currentAuthUser && !document.getElementById('view-wallet').classList.contains('hidden') &&
                     (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) void loadMyBalance();
                 const ordersView = document.getElementById('view-orders');
                 if (currentAuthUser && ordersView && !ordersView.classList.contains('hidden') && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
                     window.setTimeout(() => {
-                        if (currentAuthUser?.id === session?.user?.id) void queryOrders();
+                        if (currentAuthUser?.id === session?.user?.id) {
+                            void queryOrders();
+                            void loadMyMemberAuthorizations(0);
+                        }
                     }, 0);
                 }
             });
@@ -2464,6 +2601,9 @@
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden && currentAuthUser && !document.getElementById('view-wallet').classList.contains('hidden')) {
                     void loadMyBalance();
+                }
+                if (!document.hidden && currentAuthUser && !document.getElementById('view-orders').classList.contains('hidden')) {
+                    void loadMyMemberAuthorizations(memberKeysPage);
                 }
             });
             window.matchMedia?.('(prefers-reduced-motion: reduce)')?.addEventListener?.('change', updateHomeBackgroundVideo);
