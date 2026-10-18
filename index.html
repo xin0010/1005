@@ -62,6 +62,7 @@
         }
 
         *, ::before, ::after { box-sizing: border-box; }
+        [hidden] { display: none !important; }
 
         body {
             background-color: var(--surface-main);
@@ -222,12 +223,41 @@
         .shop-mobile-link .fa-solid, .shop-mobile-link .fa-brands { width: 2rem; text-align: center; color: #e0c0da; }
         .shop-nav-link .fa-line, .shop-mobile-link .fa-line { color: #70e39d; }
         .shop-mobile-divider { margin: .5rem 0; border-top: 1px solid #554b54; }
+        #header-account-button .fa-chevron-down { transition: transform .2s ease; }
+        #header-account-button[aria-expanded="true"] .fa-chevron-down { transform: rotate(180deg); }
+        .account-dropdown {
+            position: absolute; top: calc(100% + .5rem); right: 0; z-index: 70;
+            width: min(18rem, calc(100vw - 2rem)); max-height: calc(100dvh - 5rem);
+            overflow-y: auto; padding: .45rem; border: 1px solid #715071;
+            border-radius: .9rem; background: #29252b;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, .55);
+        }
+        .account-menu-greeting {
+            display: flex; flex-direction: column; gap: .2rem; padding: .8rem 1rem;
+            border-bottom: 1px solid #554b54; border-radius: .55rem .55rem 0 0;
+            background: linear-gradient(120deg, #47304a, #322532);
+        }
+        .account-menu-greeting strong { color: #fff; font-size: .9rem; }
+        .account-menu-greeting span { color: #d5c6d2; font-size: .72rem; overflow-wrap: anywhere; }
+        .account-menu-heading { margin: .55rem .8rem; color: #d5c6d2; font-size: .75rem; font-weight: 700; }
+        .account-menu-link {
+            display: flex; align-items: center; gap: .8rem; width: 100%; min-height: 2.9rem;
+            padding: .65rem .85rem; border: 0; border-radius: .55rem; background: transparent;
+            color: #eee9ed; font: 600 .85rem 'Inter', sans-serif;
+            text-align: left; cursor: pointer;
+        }
+        .account-menu-link .fa-solid { width: 1.1rem; color: #e0c0da; text-align: center; }
+        .account-menu-link:hover, .account-menu-link:focus-visible { background: #453545; color: #fff; }
+        .account-menu-logout { margin-top: .4rem; border-top: 1px solid #554b54; color: #ffcfda; }
+        .shop-mobile-logout { border-top: 1px solid #554b54; border-radius: 0; color: #ffcfda; }
+        #member-keys-title { scroll-margin-top: 9rem; }
         @media (max-width: 1100px) {
             .shop-nav-link { padding-inline: .75rem; font-size: .8rem; }
         }
 
         /* 導覽與頁尾共用會員頁的配色；只有公告列在我的帳號頁隱藏。 */
         body.account-view-active #shop-announcement-banner { display: none; }
+        body.dashboard-view-active #shop-announcement-banner { display: none; }
         .shop-footer {
             background: linear-gradient(rgba(27, 27, 27, 0.5), rgba(27, 27, 27, 0.5)),
                 linear-gradient(110deg, #4e27a4, #986b97 53%, #d4b772);
@@ -236,6 +266,92 @@
         }
         .shop-footer .text-slate-400,
         .shop-footer .text-slate-500 { color: #f5edf9; }
+
+        #view-dashboard { flex: 1 0 auto; width: 100%; background: #1b1b1b; }
+        .dashboard-shell {
+            display: grid; grid-template-columns: minmax(12.5rem, 15.5rem) minmax(0, 1fr);
+            gap: 1.6rem; max-width: 78rem; min-height: 38rem; margin: 0 auto; padding: 1.5rem;
+        }
+        .dashboard-sidebar { border-right: 1px solid #39343a; padding: .25rem 1.25rem 1rem 0; }
+        .dashboard-sidebar nav { position: sticky; top: 9rem; display: flex; flex-direction: column; gap: .15rem; }
+        .dashboard-side-link {
+            position: relative; width: 100%; min-height: 2.9rem; padding: .65rem .75rem;
+            border: 0; border-radius: .45rem; background: transparent; color: #d0c7d2;
+            font: 700 .85rem 'Inter', sans-serif; text-align: left; cursor: pointer;
+        }
+        .dashboard-side-link:hover { background: #29242b; color: #fff; }
+        .dashboard-side-link[aria-current="page"] { color: #d9b6ff; }
+        .dashboard-side-link[aria-current="page"]::after {
+            content: ''; position: absolute; bottom: .18rem; left: .75rem; width: 72%; height: 1px;
+            background: linear-gradient(90deg, #d1a0ff, #f4c678 65%, transparent);
+        }
+        .dashboard-main { min-width: 0; }
+        .dashboard-hero {
+            min-height: 12.5rem; padding: 2rem 2.1rem; border: 1px solid #60403d;
+            border-radius: 1rem; background: linear-gradient(112deg, #632363, #803c32 54%, #493018);
+        }
+        .dashboard-hero h1 { margin: 0 0 .75rem; font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 800; overflow-wrap: anywhere; }
+        .dashboard-hero p { margin: 0 0 1.2rem; font-size: .85rem; line-height: 1.6; font-weight: 600; }
+        .dashboard-hero button {
+            min-height: 2.8rem; padding: .6rem 1.2rem; border: 1px solid #dcb4c066;
+            border-radius: .55rem; background: #ffffff23; color: #fff;
+            font-size: .85rem; font-weight: 700; cursor: pointer;
+        }
+        .dashboard-hero button:hover { background: #ffffff38; }
+        .dashboard-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; margin: 1.2rem 0; }
+        .dashboard-card { border: 1px solid #343037; border-radius: 1rem; background: #1c1c1d; box-shadow: 0 12px 24px #0002; }
+        .dashboard-stat-card { min-height: 10.5rem; padding: 1.35rem 1rem; text-align: center; }
+        .dashboard-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 2.8rem; height: 2.8rem; margin-bottom: .7rem; border-radius: .7rem;
+            background: linear-gradient(135deg, #541079, #a04b20); color: #ffe5c2;
+            box-shadow: 0 0 18px #b0546338; font-size: 1.3rem;
+        }
+        .dashboard-icon.paid { background: linear-gradient(135deg, #965316, #d59a20); color: #fff; }
+        .dashboard-icon.spent { background: linear-gradient(135deg, #392455, #681390); color: #f9d595; }
+        .dashboard-stat-card h2 { margin: 0 0 .35rem; color: #aaa4ae; font-size: .8rem; font-weight: 600; }
+        .dashboard-stat-card strong { display: block; color: #fff; font-size: clamp(1.15rem, 2.2vw, 1.65rem); overflow-wrap: anywhere; }
+        .dashboard-stat-card p { margin: .45rem 0 0; color: #aaa4ae; font-size: .7rem; }
+        .dashboard-panels { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 1fr); gap: 1.2rem; }
+        .dashboard-panel { min-height: 20rem; padding: 1.35rem; }
+        .dashboard-panel-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+        .dashboard-panel h2 { margin: 0; color: #fff; font-size: 1rem; font-weight: 800; }
+        .dashboard-panel-header button { min-height: 2.75rem; border: 0; background: transparent; color: #f4c678; font-size: .8rem; font-weight: 700; cursor: pointer; }
+        .dashboard-panel-header button:hover { text-decoration: underline; }
+        .dashboard-notice { margin: 0 0 1.1rem; padding: .85rem 1rem; border: 1px solid #715071; border-radius: .7rem; background: #352a36; color: #fbe4f2; font-size: .8rem; line-height: 1.6; }
+        .dashboard-order-list { margin: 1rem 0 0; padding: 0; list-style: none; }
+        .dashboard-order-list li + li { border-top: 1px solid #363138; }
+        .dashboard-order-list button { display: flex; width: 100%; flex-direction: column; gap: .4rem; padding: .85rem .3rem; border: 0; background: transparent; color: #fff; text-align: left; cursor: pointer; }
+        .dashboard-order-list button:hover strong { color: #f4c678; }
+        .dashboard-order-list small { color: #aaa4ae; font-size: .75rem; }
+        .dashboard-empty { margin: 2rem 0 0; color: #aaa4ae; font-size: .85rem; }
+        .dashboard-status-list { display: flex; flex-direction: column; gap: 1.15rem; margin-top: 1.4rem; }
+        .dashboard-status-header { display: flex; align-items: center; gap: .7rem; font-size: .83rem; }
+        .dashboard-status-header .dashboard-icon { width: 2.1rem; height: 2.1rem; margin: 0; border-radius: .55rem; font-size: .95rem; }
+        .dashboard-status-header strong { font-weight: 700; }
+        .dashboard-status-header output { margin-left: auto; color: #f4c678; font-weight: 700; }
+        .dashboard-status-track { height: .32rem; margin-top: .4rem; overflow: hidden; border-radius: 1rem; background: #383438; }
+        .dashboard-status-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--brand-gradient); transition: width .25s ease; }
+        @media (max-width: 1000px) {
+            .dashboard-panels { grid-template-columns: minmax(0, 1fr); }
+            .dashboard-panel { min-height: 0; }
+        }
+        @media (max-width: 767px) {
+            .dashboard-shell { display: block; padding: 1rem; }
+            .dashboard-sidebar { margin-bottom: 1rem; padding: 0 0 .7rem; border-right: 0; border-bottom: 1px solid #39343a; }
+            .dashboard-sidebar nav { position: static; flex-direction: row; gap: .25rem; overflow-x: auto; }
+            .dashboard-side-link { flex: none; width: auto; padding: .6rem .8rem; white-space: nowrap; }
+            .dashboard-side-link[aria-current="page"]::after { left: .8rem; width: calc(100% - 1.6rem); }
+            .dashboard-hero { padding: 1.5rem; }
+            .dashboard-stats { gap: .65rem; }
+        }
+        @media (max-width: 560px) {
+            .dashboard-stats { grid-template-columns: minmax(0, 1fr); }
+            .dashboard-stat-card { min-height: 0; padding: 1rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .dashboard-status-track span { transition: none; }
+        }
 
         #view-account {
             flex: 1 0 auto;
@@ -398,7 +514,25 @@
                     <i class="fa-brands fa-discord text-sm"></i>
                     <span>Discord 客服</span>
                 </a>
-                <button id="header-account-button" type="button" onclick="switchTab('account')" class="hidden sm:inline-flex min-h-11 items-center whitespace-nowrap bg-transparent border-0 px-2 text-xs font-bold text-white hover:text-brand-300 cursor-pointer">登入 / 註冊</button>
+                <div id="header-account-menu" class="relative hidden sm:block">
+                    <button id="header-account-button" type="button" onclick="toggleAccountMenu()" aria-controls="account-dropdown" aria-expanded="false" class="inline-flex min-h-11 items-center gap-2 whitespace-nowrap bg-transparent border-0 px-2 text-xs font-bold text-white hover:text-brand-300 cursor-pointer"><span id="header-account-label">登入 / 註冊</span><i class="fa-solid fa-chevron-down text-[10px]" aria-hidden="true"></i></button>
+                    <nav id="account-dropdown" class="account-dropdown" aria-label="帳號選單" hidden>
+                        <div id="account-menu-guest">
+                            <p class="account-menu-heading">會員入口</p>
+                            <button type="button" onclick="openAuthPage('login')" class="account-menu-link"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>登入</button>
+                            <button type="button" onclick="openAuthPage('register')" class="account-menu-link"><i class="fa-solid fa-user-plus" aria-hidden="true"></i>註冊</button>
+                        </div>
+                        <div id="account-menu-member" hidden>
+                            <div class="account-menu-greeting"><strong id="account-menu-name">你好，會員</strong><span id="account-menu-email"></span></div>
+                            <button type="button" onclick="switchTab('dashboard')" class="account-menu-link"><i class="fa-solid fa-gauge" aria-hidden="true"></i>控制台</button>
+                            <button type="button" onclick="switchTab('orders')" class="account-menu-link"><i class="fa-solid fa-receipt" aria-hidden="true"></i>訂單</button>
+                            <button type="button" onclick="openMemberKeys()" class="account-menu-link"><i class="fa-solid fa-key" aria-hidden="true"></i>卡密</button>
+                            <button type="button" onclick="switchTab('wallet')" class="account-menu-link"><i class="fa-solid fa-wallet" aria-hidden="true"></i>我的錢包</button>
+                            <button type="button" onclick="switchTab('account')" class="account-menu-link"><i class="fa-solid fa-user" aria-hidden="true"></i>帳戶詳細資訊</button>
+                            <button type="button" onclick="signOutMember()" class="account-menu-link account-menu-logout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>登出</button>
+                        </div>
+                    </nav>
+                </div>
                 
                 <button id="cart-toggle-button" type="button" onclick="toggleCart(true)" aria-controls="cart-drawer" aria-expanded="false" class="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 border border-brand-900/60 hover:border-brand-400 transition-all text-slate-300 hover:text-brand-400 cursor-pointer" aria-label="檢視購物車">
                     <i class="fa-solid fa-cart-shopping text-base"></i>
@@ -442,9 +576,22 @@
             <button type="button" data-nav-view="trouble" onclick="switchTab('trouble')" class="shop-mobile-link"><i class="fa-solid fa-circle-question" aria-hidden="true"></i>常見問題</button>
             <a href="https://line.me/R/ti/p/@734cbevd" target="_blank" rel="noopener noreferrer" class="shop-mobile-link"><i class="fa-brands fa-line" aria-hidden="true"></i>售後 LINE 客服</a>
             <div class="shop-mobile-divider" aria-hidden="true"></div>
-            <button type="button" data-nav-view="orders" onclick="switchTab('orders')" class="shop-mobile-link"><i class="fa-solid fa-receipt" aria-hidden="true"></i>卡號與訂單查詢</button>
-            <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')" class="shop-mobile-link"><i class="fa-solid fa-wallet" aria-hidden="true"></i>餘額儲值</button>
-            <button type="button" data-nav-view="account" onclick="switchTab('account')" class="shop-mobile-link"><i class="fa-solid fa-user" aria-hidden="true"></i>會員中心 / 登入</button>
+            <div id="mobile-guest-menu">
+                <button type="button" data-nav-view="orders" onclick="switchTab('orders')" class="shop-mobile-link"><i class="fa-solid fa-receipt" aria-hidden="true"></i>卡號與訂單查詢</button>
+                <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')" class="shop-mobile-link"><i class="fa-solid fa-wallet" aria-hidden="true"></i>餘額儲值</button>
+                <p class="account-menu-heading">會員入口</p>
+                <button type="button" data-nav-view="account" onclick="openAuthPage('login')" class="shop-mobile-link"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>登入</button>
+                <button type="button" onclick="openAuthPage('register')" class="shop-mobile-link"><i class="fa-solid fa-user-plus" aria-hidden="true"></i>註冊</button>
+            </div>
+            <div id="mobile-member-menu" hidden>
+                <div class="account-menu-greeting"><strong id="mobile-member-name">你好，會員</strong><span id="mobile-member-email"></span></div>
+                <button type="button" data-nav-view="dashboard" onclick="switchTab('dashboard')" class="shop-mobile-link"><i class="fa-solid fa-gauge" aria-hidden="true"></i>控制台</button>
+                <button type="button" data-nav-view="orders" onclick="switchTab('orders')" class="shop-mobile-link"><i class="fa-solid fa-receipt" aria-hidden="true"></i>訂單</button>
+                <button type="button" onclick="openMemberKeys()" class="shop-mobile-link"><i class="fa-solid fa-key" aria-hidden="true"></i>卡密</button>
+                <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')" class="shop-mobile-link"><i class="fa-solid fa-wallet" aria-hidden="true"></i>我的錢包</button>
+                <button type="button" onclick="switchTab('account')" class="shop-mobile-link"><i class="fa-solid fa-user" aria-hidden="true"></i>帳戶詳細資訊</button>
+                <button type="button" onclick="signOutMember()" class="shop-mobile-link shop-mobile-logout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>登出</button>
+            </div>
             <a href="https://discord.gg/CahMc8zNjN" target="_blank" rel="noopener noreferrer" class="shop-mobile-link text-indigo-300"><i class="fa-brands fa-discord" aria-hidden="true"></i>加入 Discord 售後群</a>
         </div>
     </header>
@@ -577,7 +724,7 @@
                 </div>
 
                 <section class="mb-8 rounded-2xl border border-brand-500/40 bg-[#262126] p-4 shadow-2xl sm:p-6" aria-labelledby="member-keys-title">
-                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h3 id="member-keys-title" class="mb-1 text-lg font-bold text-white">我的卡密 · 管理員直發</h3><p class="m-0 text-xs text-slate-400">直接發給帳號的卡號不屬於訂單、不代表已付款；到期或撤銷後將不再顯示完整卡號。</p></div><button id="member-keys-refresh" type="button" onclick="loadMyMemberAuthorizations(0)" disabled class="rounded-lg border border-brand-500/40 px-3 py-2 text-xs text-brand-200 hover:bg-brand-950/50 disabled:opacity-40">重新整理卡密</button></div>
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h3 id="member-keys-title" tabindex="-1" class="mb-1 text-lg font-bold text-white">我的卡密 · 管理員直發</h3><p class="m-0 text-xs text-slate-400">直接發給帳號的卡號不屬於訂單、不代表已付款；到期或撤銷後將不再顯示完整卡號。</p></div><button id="member-keys-refresh" type="button" onclick="loadMyMemberAuthorizations(0)" disabled class="rounded-lg border border-brand-500/40 px-3 py-2 text-xs text-brand-200 hover:bg-brand-950/50 disabled:opacity-40">重新整理卡密</button></div>
                     <p id="member-keys-status" class="mb-3 text-xs text-slate-400" role="status" aria-live="polite">登入後可查看本人直發卡密。</p>
                     <div id="member-keys-list" class="space-y-3"></div>
                     <div class="mt-4 flex items-center justify-between gap-3"><button id="member-keys-prev" type="button" onclick="changeMyMemberAuthorizationPage(-1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 disabled:opacity-40">上一頁</button><span id="member-keys-page" class="text-xs text-slate-400">第 1 頁</span><button id="member-keys-next" type="button" onclick="changeMyMemberAuthorizationPage(1)" disabled class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 disabled:opacity-40">下一頁</button></div>
@@ -736,6 +883,78 @@
             </div>
         </section>
 
+        <section id="view-dashboard" class="hidden" aria-labelledby="dashboard-title">
+            <div class="dashboard-shell">
+                <aside class="dashboard-sidebar" aria-label="會員功能">
+                    <nav aria-label="會員控制台選單">
+                        <button type="button" data-nav-view="dashboard" onclick="switchTab('dashboard')" class="dashboard-side-link">控制台</button>
+                        <button type="button" onclick="switchTab('orders')" class="dashboard-side-link">訂單</button>
+                        <button type="button" onclick="openMemberKeys()" class="dashboard-side-link">卡密</button>
+                        <button type="button" onclick="switchTab('wallet')" class="dashboard-side-link">我的錢包</button>
+                        <button type="button" onclick="switchTab('account')" class="dashboard-side-link">帳戶詳細資訊</button>
+                        <button type="button" onclick="signOutMember()" class="dashboard-side-link">登出</button>
+                    </nav>
+                </aside>
+                <div class="dashboard-main">
+                    <div class="dashboard-hero">
+                        <h1 id="dashboard-title">您好，<span id="dashboard-member-name">會員</span>！</h1>
+                        <p>歡迎來到您的控制台。在這裡查看本人的訂單摘要與帳戶資訊。</p>
+                        <button type="button" onclick="switchTab('account')">查看帳戶資訊</button>
+                    </div>
+                    <p id="dashboard-message" class="dashboard-notice mt-5" role="status" aria-live="polite">正在載入本人訂單統計…</p>
+                    <div class="dashboard-stats" aria-label="本人訂單摘要">
+                        <article class="dashboard-card dashboard-stat-card">
+                            <span class="dashboard-icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></span>
+                            <h2>會員身分</h2>
+                            <strong>一般會員</strong>
+                        </article>
+                        <article class="dashboard-card dashboard-stat-card">
+                            <span class="dashboard-icon paid" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                            <h2>已付款訂單</h2>
+                            <strong id="dashboard-paid-count">—</strong>
+                        </article>
+                        <article class="dashboard-card dashboard-stat-card">
+                            <span class="dashboard-icon spent" aria-hidden="true"><i class="fa-solid fa-sack-dollar"></i></span>
+                            <h2>總消費金額</h2>
+                            <strong id="dashboard-paid-total">—</strong>
+                            <p>依目前已付款訂單計算</p>
+                        </article>
+                    </div>
+                    <div class="dashboard-panels">
+                        <section class="dashboard-card dashboard-panel" aria-labelledby="dashboard-recent-title">
+                            <div class="dashboard-panel-header">
+                                <h2 id="dashboard-recent-title">最近訂單</h2>
+                                <button type="button" onclick="openAllOrders()">查看全部<span aria-hidden="true"> →</span></button>
+                            </div>
+                            <p id="dashboard-recent-empty" class="dashboard-empty">正在載入近期訂單…</p>
+                            <ul id="dashboard-recent-orders" class="dashboard-order-list" aria-label="最近四筆訂單"></ul>
+                        </section>
+                        <section class="dashboard-card dashboard-panel" aria-labelledby="dashboard-status-title">
+                            <h2 id="dashboard-status-title">訂單狀態</h2>
+                            <div class="dashboard-status-list">
+                                <div data-dashboard-status="paid">
+                                    <div class="dashboard-status-header"><span class="dashboard-icon paid" aria-hidden="true"><i class="fa-solid fa-check"></i></span><strong>已付款</strong><output>—</output></div>
+                                    <div class="dashboard-status-track" aria-hidden="true"><span></span></div>
+                                </div>
+                                <div data-dashboard-status="pending">
+                                    <div class="dashboard-status-header"><span class="dashboard-icon" aria-hidden="true"><i class="fa-solid fa-hourglass-half"></i></span><strong>待付款</strong><output>—</output></div>
+                                    <div class="dashboard-status-track" aria-hidden="true"><span></span></div>
+                                </div>
+                                <div data-dashboard-status="cancelled">
+                                    <div class="dashboard-status-header"><span class="dashboard-icon" aria-hidden="true"><i class="fa-solid fa-ban"></i></span><strong>已取消</strong><output>—</output></div>
+                                    <div class="dashboard-status-track" aria-hidden="true"><span></span></div>
+                                </div>
+                                <div data-dashboard-status="refunded">
+                                    <div class="dashboard-status-header"><span class="dashboard-icon" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></span><strong>已退款</strong><output>—</output></div>
+                                    <div class="dashboard-status-track" aria-hidden="true"><span></span></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="view-account" class="hidden" aria-labelledby="account-title">
             <div class="account-heading">
                 <h2 id="account-title">我的帳號</h2>
@@ -746,6 +965,7 @@
             <div id="auth-session-panel" class="account-session hidden" aria-live="polite">
                 <p>目前登入帳號</p>
                 <p id="auth-session-email" class="account-session-email"></p>
+                <button type="button" onclick="switchTab('dashboard')" class="account-register-cta mr-2">前往控制台</button>
                 <button type="button" onclick="switchTab('orders')" class="account-register-cta mr-2">查看我的卡密</button>
                 <button type="button" onclick="signOutMember()" class="account-register-cta">登出</button>
             </div>
@@ -972,6 +1192,7 @@
         let cartPreviousFocus = null;
         let orderLookupRequestId = 0;
         let balanceRequestId = 0;
+        let dashboardRequestId = 0;
         let memberKeysRequestId = 0;
         let memberKeysPage = 0;
         let memberKeysExpiryTimer = null;
@@ -1026,6 +1247,112 @@
                     refresh.disabled = false;
                     refresh.removeAttribute('aria-busy');
                 }
+            }
+        }
+
+        function resetMemberDashboard() {
+            dashboardRequestId += 1;
+            document.getElementById('dashboard-paid-count').textContent = '—';
+            document.getElementById('dashboard-paid-total').textContent = '—';
+            document.getElementById('dashboard-recent-orders').replaceChildren();
+            document.getElementById('dashboard-recent-empty').textContent = currentAuthUser
+                ? '開啟控制台後載入本人近期訂單。' : '登入後可查看本人近期訂單。';
+            document.getElementById('dashboard-recent-empty').hidden = false;
+            const message = document.getElementById('dashboard-message');
+            message.textContent = currentAuthUser ? '開啟控制台後載入本人訂單統計。' : '登入後可查看本人訂單統計。';
+            message.hidden = false;
+            for (const status of document.querySelectorAll('[data-dashboard-status]')) {
+                status.querySelector('output').textContent = '—';
+                status.querySelector('.dashboard-status-track span').style.width = '0%';
+            }
+        }
+
+        function openAllOrders() {
+            document.getElementById('order-search-input').value = '';
+            switchTab('orders');
+        }
+
+        async function loadMemberDashboard() {
+            const userId = currentAuthUser?.id;
+            if (!userId) {
+                resetMemberDashboard();
+                return;
+            }
+
+            resetMemberDashboard();
+            const requestId = dashboardRequestId;
+            const message = document.getElementById('dashboard-message');
+            message.textContent = '正在安全讀取本人訂單統計…';
+            document.getElementById('dashboard-recent-empty').textContent = '正在載入近期訂單…';
+
+            try {
+                if (!supabaseClient) throw new Error('Supabase unavailable');
+                const { data, error } = await supabaseClient.rpc('get_my_dashboard');
+                if (error) throw error;
+                if (requestId !== dashboardRequestId || currentAuthUser?.id !== userId) return;
+
+                const asAmount = value => {
+                    const number = typeof value === 'number' ? value
+                        : (typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : NaN);
+                    if (!Number.isSafeInteger(number) || number < 0) throw new Error('控制台統計格式不正確');
+                    return number;
+                };
+                const statuses = ['paid', 'pending', 'cancelled', 'refunded'];
+                const counts = Object.fromEntries(statuses.map(status => [status, asAmount(data?.[`${status}_count`]) ]));
+                const spent = asAmount(data?.paid_total);
+                const orders = data?.recent_orders;
+                if (!Array.isArray(orders) || orders.length > 4 || !orders.every(order =>
+                    order && typeof order.order_number === 'string' && /^AXG-[A-Z0-9-]{1,72}$/.test(order.order_number) &&
+                    statuses.includes(order.status) && typeof order.created_at === 'string' &&
+                    !Number.isNaN(Date.parse(order.created_at)) &&
+                    (typeof order.total_amount === 'number' ||
+                        (typeof order.total_amount === 'string' && /^\d+$/.test(order.total_amount))) &&
+                    Number.isSafeInteger(Number(order.total_amount)) && Number(order.total_amount) >= 0)) {
+                    throw new Error('近期訂單格式不正確');
+                }
+
+                const format = new Intl.NumberFormat('zh-TW');
+                document.getElementById('dashboard-paid-count').textContent = format.format(counts.paid);
+                document.getElementById('dashboard-paid-total').textContent = `NT$ ${format.format(spent)}`;
+                const total = statuses.reduce((sum, status) => sum + counts[status], 0);
+                for (const status of statuses) {
+                    const row = document.querySelector(`[data-dashboard-status="${status}"]`);
+                    row.querySelector('output').textContent = format.format(counts[status]);
+                    row.querySelector('.dashboard-status-track span').style.width = `${total ? counts[status] / total * 100 : 0}%`;
+                }
+
+                const labels = { paid: '已付款', pending: '待付款', cancelled: '已取消', refunded: '已退款' };
+                const list = document.getElementById('dashboard-recent-orders');
+                const items = orders.map(order => {
+                    const item = document.createElement('li');
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    const number = document.createElement('strong');
+                    number.textContent = `#${order.order_number}`;
+                    const detail = document.createElement('small');
+                    detail.textContent = `${labels[order.status]} · ${new Date(order.created_at).toLocaleDateString('zh-TW')} · NT$ ${format.format(Number(order.total_amount))}`;
+                    button.append(number, detail);
+                    button.addEventListener('click', () => {
+                        if (currentAuthUser?.id !== userId) return;
+                        document.getElementById('order-search-input').value = order.order_number;
+                        switchTab('orders');
+                    });
+                    item.append(button);
+                    return item;
+                });
+                list.replaceChildren(...items);
+                const empty = document.getElementById('dashboard-recent-empty');
+                empty.textContent = '目前沒有訂單。';
+                empty.hidden = items.length > 0;
+                message.hidden = true;
+            } catch (error) {
+                if (requestId !== dashboardRequestId || currentAuthUser?.id !== userId) return;
+                console.warn('Member dashboard loading failed:', error);
+                resetMemberDashboard();
+                message.textContent = error?.code === 'PGRST202' || /get_my_dashboard.*(?:does not exist|schema cache|could not find)/i.test(String(error?.message || ''))
+                    ? '控制台統計尚未部署，請聯絡管理員套用會員控制台資料庫腳本。'
+                    : '控制台暫時無法載入，請稍後重試；目前顯示的「—」不代表零筆訂單或零元消費。';
+                document.getElementById('dashboard-recent-empty').textContent = '近期訂單暫時無法載入。';
             }
         }
 
@@ -1119,20 +1446,28 @@
             }
         }
 
-        function switchTab(tabId) {
-            const views = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'account'];
-            views.forEach(v => {
-                const el = document.getElementById(`view-${v}`);
-                if (el) el.classList.toggle('hidden', v !== tabId);
-            });
+        function updateNavigationState(tabId) {
             document.querySelectorAll('[data-nav-view]').forEach(item => {
-                if (item.dataset.navView === tabId) item.setAttribute('aria-current', 'page');
+                if (item.dataset.navView === tabId && !item.closest('[hidden]')) item.setAttribute('aria-current', 'page');
                 else item.removeAttribute('aria-current');
             });
             const more = document.getElementById('shop-nav-more');
             more?.classList.toggle('has-active-child', tabId === 'orders' || tabId === 'wallet');
+        }
+
+        function switchTab(tabId) {
+            if (tabId === 'dashboard' && (!currentAuthUser || authRecoveryActive)) tabId = 'account';
+            toggleAccountMenu(false);
+            const views = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'dashboard', 'account'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.toggle('hidden', v !== tabId);
+            });
+            updateNavigationState(tabId);
+            const more = document.getElementById('shop-nav-more');
             more?.removeAttribute('open');
             document.body.classList.toggle('account-view-active', tabId === 'account');
+            document.body.classList.toggle('dashboard-view-active', tabId === 'dashboard');
             if (!document.getElementById('mobile-menu')?.classList.contains('hidden')) toggleMobileMenu(false);
             updateHomeBackgroundVideo();
 
@@ -1145,7 +1480,29 @@
                 void loadMyMemberAuthorizations(0);
             }
             if (tabId === 'wallet') void loadMyBalance();
+            if (tabId === 'dashboard') void loadMemberDashboard();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleAccountMenu(forceOpen) {
+            const menu = document.getElementById('account-dropdown');
+            const button = document.getElementById('header-account-button');
+            const isOpen = typeof forceOpen === 'boolean' ? forceOpen : menu.hidden;
+            menu.hidden = !isOpen;
+            button.setAttribute('aria-expanded', String(isOpen));
+            if (isOpen && !document.getElementById('mobile-menu').classList.contains('hidden')) toggleMobileMenu(false);
+        }
+
+        function openAuthPage(type) {
+            switchTab('account');
+            switchAuthTab(type);
+        }
+
+        function openMemberKeys() {
+            switchTab('orders');
+            const title = document.getElementById('member-keys-title');
+            title?.focus();
+            title?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
         }
 
         function loadCart() {
@@ -1597,6 +1954,7 @@
             toggleButton?.setAttribute('aria-expanded', String(shouldOpen));
             document.body.classList.toggle('overflow-hidden', shouldOpen);
             if (shouldOpen) {
+                toggleAccountMenu(false);
                 if (!document.getElementById('mobile-menu')?.classList.contains('hidden')) toggleMobileMenu(false);
                 cartPreviousFocus = document.activeElement;
                 document.getElementById('cart-close-button')?.focus();
@@ -1610,6 +1968,7 @@
         function toggleMobileMenu(forceOpen) {
             const menu = document.getElementById('mobile-menu');
             const isOpen = typeof forceOpen === 'boolean' ? forceOpen : menu.classList.contains('hidden');
+            if (isOpen) toggleAccountMenu(false);
             menu.classList.toggle('hidden', !isOpen);
             const button = document.getElementById('mobile-menu-button');
             button.setAttribute('aria-expanded', String(isOpen));
@@ -2273,9 +2632,27 @@
             const signedIn = Boolean(currentAuthUser);
             const showNormalAuth = !signedIn && !authRecoveryActive;
             const showRegistration = showNormalAuth && activeAuthTab === 'register';
+            toggleAccountMenu(false);
+            document.getElementById('account-menu-guest').hidden = signedIn;
+            document.getElementById('account-menu-member').hidden = !signedIn;
+            document.getElementById('mobile-guest-menu').hidden = signedIn;
+            document.getElementById('mobile-member-menu').hidden = !signedIn;
+            const activeView = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'dashboard', 'account']
+                .find(view => !document.getElementById(`view-${view}`).classList.contains('hidden'));
+            if (activeView) updateNavigationState(activeView);
+            const metadata = currentAuthUser?.user_metadata;
+            const name = [metadata?.display_name, metadata?.full_name, metadata?.name]
+                .find(value => typeof value === 'string' && value.trim())?.trim().slice(0, 32) || '會員';
+            for (const id of ['account-menu-name', 'mobile-member-name']) {
+                document.getElementById(id).textContent = `你好，${name}`;
+            }
+            for (const id of ['account-menu-email', 'mobile-member-email']) {
+                document.getElementById(id).textContent = currentAuthUser?.email || '';
+            }
+            document.getElementById('dashboard-member-name').textContent = name;
             sessionPanel.classList.toggle('hidden', !signedIn || authRecoveryActive);
             if (sessionEmail) sessionEmail.textContent = currentAuthUser?.email || '';
-            document.getElementById('header-account-button').textContent = signedIn ? '我的帳號' : '登入 / 註冊';
+            document.getElementById('header-account-label').textContent = signedIn ? '我的帳號' : '登入 / 註冊';
             authLayout.classList.toggle('hidden', !showNormalAuth);
             loginForm.classList.toggle('hidden', !showNormalAuth);
             registerPromo.classList.toggle('hidden', showRegistration);
@@ -2498,7 +2875,10 @@
         }
 
         async function signOutMember() {
+            toggleAccountMenu(false);
+            if (!document.getElementById('mobile-menu').classList.contains('hidden')) toggleMobileMenu(false);
             if (!supabaseClient) {
+                switchTab('account');
                 setAuthStatus('Supabase SDK 尚未載入，無法登出。', 'error');
                 return;
             }
@@ -2511,9 +2891,13 @@
                 activeAuthTab = 'login';
                 resetMyBalanceDisplay();
                 clearMyMemberAuthorizations();
+                resetMemberDashboard();
                 renderAuthView();
+                switchTab('account');
                 setAuthStatus('已安全登出。', 'success');
+                document.getElementById('login-identifier')?.focus();
             } catch (error) {
+                switchTab('account');
                 setAuthStatus(getAuthErrorMessage(error), 'error');
             }
         }
@@ -2539,10 +2923,18 @@
                 const previousUserId = currentAuthUser?.id;
                 currentAuthUser = session?.user || null;
                 if (previousUserId !== currentAuthUser?.id) {
+                    if (!document.getElementById('mobile-menu').classList.contains('hidden')) toggleMobileMenu(false);
                     resetMyBalanceDisplay();
                     clearMyMemberAuthorizations();
+                    resetMemberDashboard();
                 }
                 renderAuthView();
+                if ((!currentAuthUser || authRecoveryActive) && !document.getElementById('view-dashboard').classList.contains('hidden')) {
+                    switchTab('account');
+                } else if (currentAuthUser && !document.getElementById('view-dashboard').classList.contains('hidden') &&
+                    (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
+                    void loadMemberDashboard();
+                }
                 if (currentAuthUser && !document.getElementById('view-wallet').classList.contains('hidden') &&
                     (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) void loadMyBalance();
                 const ordersView = document.getElementById('view-orders');
@@ -2605,6 +2997,9 @@
                 if (!document.hidden && currentAuthUser && !document.getElementById('view-orders').classList.contains('hidden')) {
                     void loadMyMemberAuthorizations(memberKeysPage);
                 }
+                if (!document.hidden && currentAuthUser && !document.getElementById('view-dashboard').classList.contains('hidden')) {
+                    void loadMemberDashboard();
+                }
             });
             window.matchMedia?.('(prefers-reduced-motion: reduce)')?.addEventListener?.('change', updateHomeBackgroundVideo);
             navigator.connection?.addEventListener?.('change', updateHomeBackgroundVideo);
@@ -2636,10 +3031,22 @@
                     }
                     return;
                 }
+                if (event.key === 'Escape' && !document.getElementById('account-dropdown').hidden) {
+                    toggleAccountMenu(false);
+                    document.getElementById('header-account-button').focus();
+                    return;
+                }
                 if (event.key === 'Escape' && !document.getElementById('mobile-menu').classList.contains('hidden')) {
                     toggleMobileMenu(false);
                     document.getElementById('mobile-menu-button').focus();
                 }
+            });
+
+            document.addEventListener('click', function(event) {
+                if (!document.getElementById('header-account-menu').contains(event.target)) toggleAccountMenu(false);
+            });
+            document.getElementById('header-account-menu').addEventListener('focusout', function(event) {
+                if (!this.contains(event.relatedTarget)) toggleAccountMenu(false);
             });
 
             const topupAmount = document.getElementById('topup-amount');
