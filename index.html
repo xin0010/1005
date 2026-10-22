@@ -165,6 +165,38 @@
             outline-offset: 3px;
         }
 
+        .floating-social-links {
+            position: fixed;
+            left: calc(1.5rem + env(safe-area-inset-left, 0px));
+            bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+        }
+        .floating-social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.25rem;
+            text-decoration: none;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, .3);
+            transition: transform .2s ease, background-color .2s ease;
+        }
+        .floating-social-link:hover { transform: scale(1.1); }
+        .floating-social-link--telegram { background-color: #0088cc; }
+        .floating-social-link--telegram:hover { background-color: #0077b5; }
+        .floating-social-link--discord { background-color: #4f46e5; }
+        .floating-social-link--discord:hover { background-color: #6366f1; }
+        @media (prefers-reduced-motion: reduce) {
+            .floating-social-link { transition: none; }
+            .floating-social-link:hover { transform: none; }
+        }
+
         .shop-nav-strip {
             background: #252225;
             border-top: 1px solid rgba(255, 255, 255, .07);
@@ -510,7 +542,7 @@
             </div>
         </button>
             <div class="flex flex-none items-center gap-2 sm:gap-3">
-                <a href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
+                <a href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30 font-mono text-xs no-underline transition-all">
                     <i class="fa-brands fa-discord text-sm"></i>
                     <span>Discord 客服</span>
                 </a>
@@ -589,7 +621,7 @@
                 <button type="button" onclick="switchTab('account')" class="shop-mobile-link"><i class="fa-solid fa-user" aria-hidden="true"></i>帳戶詳細資訊</button>
                 <button type="button" onclick="signOutMember()" class="shop-mobile-link shop-mobile-logout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>登出</button>
             </div>
-            <a href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="shop-mobile-link text-indigo-300"><i class="fa-brands fa-discord" aria-hidden="true"></i>加入 Discord 售後群</a>
+            <a href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="shop-mobile-link text-indigo-300"><i class="fa-brands fa-discord" aria-hidden="true"></i>加入 Discord 售後群</a>
         </div>
     </header>
 
@@ -602,7 +634,7 @@
             <div class="overflow-hidden whitespace-nowrap w-full">
                 <div class="inline-block animate-[marquee_25s_linear_infinite] text-slate-300" role="marquee" aria-label="即時公告">
                     <span id="shop-announcement-text">🔥 歡迎來到 AXG SHOP！登入後可建立待付款訂單，請攜帶訂單編號洽詢付款。</span>
-                    <a href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="ml-2 text-brand-400 underline">Discord 客服 ↗</a>
+                    <a href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="ml-2 text-brand-400 underline">Discord 客服 ↗</a>
                 </div>
             </div>
         </div>
@@ -640,7 +672,7 @@
                         <i class="fa-solid fa-store"></i>
                         <span>進入輔助商城</span>
                     </button>
-                    <a href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="px-8 py-4 rounded-xl border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 hover:text-white hover:bg-indigo-900/60 font-mono text-sm font-bold transition-all inline-flex items-center gap-2.5 no-underline shadow-lg">
+                    <a href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="px-8 py-4 rounded-xl border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 hover:text-white hover:bg-indigo-900/60 font-mono text-sm font-bold transition-all inline-flex items-center gap-2.5 no-underline shadow-lg">
                         <i class="fa-brands fa-discord text-lg"></i>
                         <span>官方 Discord 社群</span>
                     </a>
@@ -727,7 +759,7 @@
                     <p id="order-created-title" class="mb-2 font-bold">待付款訂單已建立</p>
                     <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-gold-300"></strong></p>
                     <p id="order-created-description" class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
-                    <a id="order-discord-link" href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-indigo-400/50 px-4 py-2 text-indigo-200 hover:bg-indigo-900/40">前往 Discord 洽詢付款</a>
+                    <a id="order-discord-link" href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-indigo-400/50 px-4 py-2 text-indigo-200 hover:bg-indigo-900/40">前往 Discord 洽詢付款</a>
                 </div>
 
                 <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-4 sm:p-6 shadow-2xl mb-8">
@@ -1113,9 +1145,14 @@
         <span id="toast-msg">Notification Message</span>
     </div>
 
-    <a href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 left-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 no-underline" title="Discord 真人客服">
-        <i class="fa-brands fa-discord text-xl"></i>
-    </a>
+    <nav class="floating-social-links" aria-label="社群連結">
+        <a id="floating-telegram-link" href="https://t.me/dadigroup" target="_blank" rel="noopener noreferrer" class="floating-social-link floating-social-link--telegram" title="Telegram（TG）" aria-label="前往 Telegram（TG）（另開新分頁）">
+            <i class="fa-brands fa-telegram" aria-hidden="true"></i>
+        </a>
+        <a href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="floating-social-link floating-social-link--discord" title="Discord 真人客服" aria-label="前往 Discord 真人客服（另開新分頁）">
+            <i class="fa-brands fa-discord" aria-hidden="true"></i>
+        </a>
+    </nav>
 
     <footer class="shop-footer text-slate-400 py-12 mt-auto font-mono text-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -1137,7 +1174,7 @@
             <div>
                 <h4 class="text-white font-bold mb-3 border-l-2 border-brand-400 pl-2">技術支援</h4>
                 <ul class="space-y-2 list-none p-0 m-0">
-                    <li><a href="https://discord.gg/NjXfWsauD" target="_blank" rel="noopener noreferrer" class="hover:text-brand-200 text-slate-400 no-underline">Discord 官方客服</a></li>
+                    <li><a href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="hover:text-brand-200 text-slate-400 no-underline">Discord 官方客服</a></li>
                     <li><button onclick="switchTab('trouble')" class="hover:text-brand-200 bg-transparent border-0 cursor-pointer p-0 text-slate-400">常見問題與免責聲明</button></li>
                 </ul>
             </div>
@@ -1171,7 +1208,7 @@
         }
 
         const ORDER_PAYMENT_REDIRECT_URLS = Object.freeze({
-            discord: 'https://discord.gg/NjXfWsauD'
+            discord: 'https://discord.gg/8ccCbma94W'
         });
         const products = [];
         const productCategories = [];
