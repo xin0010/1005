@@ -302,6 +302,20 @@
                         </div>
                         <button type="button" onclick="openProductEditor()" class="admin-primary rounded-xl px-5 py-3 text-sm font-bold">＋ 新增商品</button>
                     </div>
+                    <section class="glass rounded-2xl p-4 sm:p-6" aria-labelledby="admin-categories-title">
+                        <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+                            <div><h4 id="admin-categories-title" class="m-0 text-base font-bold text-white">商品分類</h4><p class="mb-0 mt-2 text-xs leading-relaxed text-slate-400">分類會儲存在資料庫並顯示於商城。代碼建立後不可更改；已有商品的分類不可刪除，請先將商品改到其他分類。</p></div>
+                            <button type="button" onclick="loadAdminCategories()" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-brand-400">重新讀取分類</button>
+                        </div>
+                        <p id="admin-categories-status" role="status" aria-live="polite" class="mb-3 text-xs text-slate-400">開啟商品管理後載入分類。</p>
+                        <div id="admin-categories-list" class="mb-5 grid gap-2 sm:grid-cols-2"></div>
+                        <form id="admin-category-form" onsubmit="saveAdminCategory(event)" class="grid gap-3 border-t border-slate-800 pt-4 sm:grid-cols-[1fr_1fr_7rem_auto] sm:items-end">
+                            <div><label for="admin-category-code" class="mb-1 block text-xs font-semibold text-slate-300">分類代碼</label><input id="admin-category-code" required maxlength="32" pattern="[a-z][a-z0-9_\-]{0,31}" autocomplete="off" spellcheck="false" placeholder="例如 game" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-400"></div>
+                            <div><label for="admin-category-name" class="mb-1 block text-xs font-semibold text-slate-300">顯示名稱</label><input id="admin-category-name" required maxlength="60" autocomplete="off" placeholder="例如 遊戲點數" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-400"></div>
+                            <div><label for="admin-category-order" class="mb-1 block text-xs font-semibold text-slate-300">排序</label><input id="admin-category-order" type="number" required min="0" max="9999" step="1" value="50" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-400"></div>
+                            <div class="flex gap-2"><button id="admin-category-save" type="submit" disabled class="admin-primary rounded-xl px-4 py-2.5 text-sm font-bold disabled:opacity-50">新增分類</button><button id="admin-category-cancel" type="button" onclick="cancelAdminCategoryEdit()" hidden class="rounded-xl border border-slate-700 px-3 py-2.5 text-xs text-slate-300">取消</button></div>
+                        </form>
+                    </section>
                     <form id="admin-products-filter" class="glass flex flex-col gap-3 rounded-2xl p-4 md:flex-row" onsubmit="loadAdminProducts(0, event)">
                         <label class="sr-only" for="admin-product-search">搜尋商品</label>
                         <input id="admin-product-search" type="search" maxlength="160" autocomplete="off" placeholder="搜尋商品名稱、分類或編號" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
@@ -487,12 +501,7 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="product-category" class="mb-1.5 block text-xs font-semibold text-slate-300">商品分類</label>
-                    <select id="product-category" required class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400">
-                        <option value="valorant">特戰英豪</option>
-                        <option value="pubg">絕地求生</option>
-                        <option value="mobile">熱門手遊</option>
-                        <option value="account">帳號與憑證</option>
-                    </select>
+                    <select id="product-category" required class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-brand-400"><option value="">請先載入分類</option></select>
                 </div>
                 <div>
                     <label for="product-price" class="mb-1.5 block text-xs font-semibold text-slate-300">售價（NT$）</label>
@@ -589,7 +598,6 @@
         const ADMIN_SUPABASE_URL = 'https://zquzmagkcqjfjjuarhkd.supabase.co';
         const ADMIN_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_qRn-xVHXR4mWOLNPr-Ekhg_Y9QXq7bx';
         const ADMIN_PAGE_SIZE = 25;
-        const ADMIN_PRODUCT_CATEGORIES = { valorant: '特戰英豪', pubg: '絕地求生', mobile: '熱門手遊', account: '帳號與憑證' };
         let adminClient = null;
         let adminUser = null;
         let adminMfaUser = null;
@@ -606,6 +614,11 @@
         let adminProductPage = 0;
         let adminProductRequestId = 0;
         let adminVisibleProducts = [];
+        let adminCategoryRequestId = 0;
+        let adminCategories = [];
+        let adminCategoriesLoaded = false;
+        let editingCategory = null;
+        let adminCategorySaving = false;
         let editingProduct = null;
         let productSaving = false;
         let adminStockPage = 0;
@@ -1126,6 +1139,12 @@
             if (/duplicate key value|23505/i.test(message)) return '此交易參考編號已用於另一筆訂單，請核對後重新輸入。';
             if (/product is referenced; unpublish it instead/i.test(message)) return '商品已有訂單、卡密庫存或會員直發紀錄，無法刪除；請使用「下架」保留歷史資料。';
             if (/product version conflict/i.test(message)) return '商品已被其他管理員修改。請關閉表單或重新整理商品清單後再操作。';
+            if (/product category version conflict/i.test(message)) return '分類已被其他管理員修改。請重新讀取分類後再操作。';
+            if (/product category is in use/i.test(message)) return '分類仍有商品使用；請先把所有商品移至其他分類。';
+            if (/product category already exists/i.test(message)) return '此分類代碼已存在，請重新讀取分類。';
+            if (/product category limit reached/i.test(message)) return '分類最多 50 個，請先移除未使用的分類。';
+            if (/invalid product category data/i.test(message)) return '分類代碼需為 1–32 字小寫英數、底線或連字號；名稱需 1–60 字且不可換行，排序為 0–9999。';
+            if (/product category not found/i.test(message)) return '找不到分類。請重新讀取分類。';
             if (/product not found/i.test(message)) return '找不到商品。請重新整理商品清單。';
             if (/invalid product request/i.test(message)) return '商品編號不正確，請重新整理商品清單。';
             if (/invalid product data/i.test(message)) return '商品資料不符合限制。請確認名稱、分類、售價、圖片檔名與文字長度。';
@@ -1159,6 +1178,7 @@
             if (/admin_(?:list_member_balances|adjust_member_balance)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '尚未部署餘額功能。請在 Supabase SQL Editor 執行 sql/supabase-member-balances.sql，再重新載入會員清單。';
             if (/admin_(?:list_members|set_member_order_access)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少會員管理 RPC。請先在 Supabase SQL Editor 執行 sql/supabase-members-schema.sql，再重新整理後台。';
             if (/admin_(?:list_products|save_product|delete_product)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '缺少商品管理 RPC。請在本站連接的 Supabase 專案執行最新版 sql/supabase-admin-schema.sql，再重新整理後台。';
+            if (/admin_(?:list|save|delete)_product_categor(?:y|ies)/i.test(message) && (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message) || error?.code === 'PGRST202')) return '尚未部署商品分類。請先執行最新版商品資料庫腳本，再執行最新版管理員腳本。';
             if (/function .* does not exist|could not find the function|schema cache|PGRST202/i.test(message)) return '找不到管理 RPC。請先執行 supabase-admin-schema.sql，並確認資料表結構已建立。';
             if (/relation .*shop_admins.* does not exist/i.test(message)) return '尚未建立管理員名單。請先執行 supabase-admin-schema.sql，再把管理帳號加入 public.shop_admins。';
             if (/permission denied|not authorized|42501|admin access required/i.test(message)) return '管理權限未通過。請確認登入帳號已加入 public.shop_admins，或先在 Supabase SQL Editor 執行管理後台 SQL。';
@@ -1412,6 +1432,177 @@
             status.className = `text-xs leading-relaxed ${tone === 'error' ? 'text-red-300' : 'text-slate-400'}`;
         }
 
+        function setAdminCategoryStatus(message, tone = 'info') {
+            const status = document.getElementById('admin-categories-status');
+            status.textContent = message;
+            status.className = `mb-3 text-xs ${tone === 'error' ? 'text-red-300' : 'text-slate-400'}`;
+        }
+
+        function validAdminCategory(item) {
+            return item && typeof item.code === 'string' && /^[a-z][a-z0-9_-]{0,31}$/.test(item.code) &&
+                typeof item.name === 'string' && item.name === item.name.trim() &&
+                Array.from(item.name).length >= 1 && Array.from(item.name).length <= 60 &&
+                !/[\u0000-\u001f\u007f-\u009f]/.test(item.name) &&
+                Number.isSafeInteger(item.display_order) && item.display_order >= 0 && item.display_order <= 9999 &&
+                Number.isSafeInteger(item.revision) && item.revision >= 1 &&
+                Number.isSafeInteger(Number(item.product_count)) && Number(item.product_count) >= 0;
+        }
+
+        function renderAdminCategories() {
+            const list = document.getElementById('admin-categories-list');
+            list.replaceChildren();
+            const select = document.getElementById('product-category');
+            const previousValue = select.value;
+            select.replaceChildren(new Option('請選擇分類', ''));
+            for (const category of adminCategories) {
+                select.add(new Option(category.name, category.code));
+                const card = document.createElement('div');
+                card.className = 'rounded-xl border border-slate-700 bg-slate-950/50 p-3 text-xs';
+                const title = document.createElement('strong');
+                title.className = 'text-white';
+                title.textContent = category.name;
+                const details = document.createElement('p');
+                details.className = 'my-1 text-slate-400';
+                details.textContent = `${category.code} · 排序 ${category.display_order} · ${category.product_count} 件商品`;
+                const edit = document.createElement('button');
+                edit.type = 'button';
+                edit.className = 'mr-3 text-brand-300';
+                edit.textContent = '編輯';
+                edit.addEventListener('click', () => editAdminCategory(category));
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'text-red-300 disabled:opacity-40';
+                remove.textContent = '刪除';
+                remove.disabled = Number(category.product_count) > 0;
+                remove.addEventListener('click', () => void deleteAdminCategory(category));
+                card.append(title, details, edit, remove);
+                list.appendChild(card);
+            }
+            if (adminCategories.some(item => item.code === previousValue)) select.value = previousValue;
+            document.getElementById('admin-category-save').disabled = !adminCategoriesLoaded || adminCategorySaving;
+            if (!adminCategories.length && adminCategoriesLoaded) list.textContent = '尚無分類，請先新增分類。';
+        }
+
+        async function loadAdminCategories() {
+            if (!adminUser || !adminClient) return false;
+            const requestId = ++adminCategoryRequestId;
+            const userId = adminUser.id;
+            setAdminCategoryStatus('正在讀取商品分類…');
+            try {
+                const { data, error } = await adminClient.rpc('admin_list_product_categories');
+                if (error) throw error;
+                if (requestId !== adminCategoryRequestId || adminUser?.id !== userId) return false;
+                if (!Array.isArray(data) || data.length > 50 || !data.every(validAdminCategory) ||
+                    new Set(data.map(item => item.code)).size !== data.length) throw new Error('分類清單資料不完整');
+                adminCategories = data;
+                adminCategoriesLoaded = true;
+                renderAdminCategories();
+                setAdminCategoryStatus(`已載入 ${data.length} 個分類；變更後重新整理商城即可看到結果。`);
+                return true;
+            } catch (error) {
+                if (requestId !== adminCategoryRequestId || adminUser?.id !== userId) return false;
+                if (handleRevokedAdminAccess(error)) return false;
+                adminCategories = [];
+                adminCategoriesLoaded = false;
+                renderAdminCategories();
+                setAdminCategoryStatus(getAdminError(error), 'error');
+                return false;
+            }
+        }
+
+        function cancelAdminCategoryEdit(force = false) {
+            if (adminCategorySaving && !force) return;
+            editingCategory = null;
+            document.getElementById('admin-category-form').reset();
+            document.getElementById('admin-category-code').readOnly = false;
+            document.getElementById('admin-category-save').textContent = '新增分類';
+            document.getElementById('admin-category-cancel').hidden = true;
+        }
+
+        function editAdminCategory(category) {
+            if (!adminUser || adminCategorySaving || !adminCategoriesLoaded) return;
+            editingCategory = category;
+            document.getElementById('admin-category-code').value = category.code;
+            document.getElementById('admin-category-code').readOnly = true;
+            document.getElementById('admin-category-name').value = category.name;
+            document.getElementById('admin-category-order').value = category.display_order;
+            document.getElementById('admin-category-save').textContent = '儲存分類';
+            document.getElementById('admin-category-cancel').hidden = false;
+            document.getElementById('admin-category-name').focus();
+        }
+
+        async function saveAdminCategory(event) {
+            event.preventDefault();
+            if (!adminUser || !adminClient || !adminCategoriesLoaded || adminCategorySaving) return;
+            const form = document.getElementById('admin-category-form');
+            const code = document.getElementById('admin-category-code').value;
+            const name = document.getElementById('admin-category-name').value.trim();
+            const order = Number(document.getElementById('admin-category-order').value);
+            if (!/^[a-z][a-z0-9_-]{0,31}$/.test(code) || !name ||
+                Array.from(name).length > 60 || /[\u0000-\u001f\u007f-\u009f]/.test(name) ||
+                !Number.isSafeInteger(order) || order < 0 || order > 9999 || !form.reportValidity()) {
+                setAdminCategoryStatus('分類代碼、名稱或排序不符合限制。', 'error');
+                return;
+            }
+            const userId = adminUser.id;
+            const editing = editingCategory;
+            adminCategorySaving = true;
+            document.getElementById('admin-category-save').disabled = true;
+            setAdminCategoryStatus('正在儲存商品分類…');
+            try {
+                const { data, error } = await adminClient.rpc('admin_save_product_category', {
+                    p_code: code, p_name: name, p_display_order: order,
+                    p_expected_revision: editing?.revision ?? null
+                });
+                if (error) throw error;
+                if (adminUser?.id !== userId) return;
+                if (data?.code !== code || data?.name !== name || data?.display_order !== order ||
+                    data?.revision !== (editing?.revision ?? 0) + 1) {
+                    throw new Error('分類儲存結果無法確認，請先重新讀取分類。');
+                }
+                cancelAdminCategoryEdit(true);
+                const loaded = await loadAdminCategories();
+                if (loaded) {
+                    renderAdminProducts(adminVisibleProducts);
+                    setAdminCategoryStatus(`分類「${name}」已儲存，重新整理商城即可看到結果。`);
+                }
+            } catch (error) {
+                if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
+                setAdminCategoryStatus(getAdminError(error), 'error');
+            } finally {
+                adminCategorySaving = false;
+                if (adminUser?.id === userId) document.getElementById('admin-category-save').disabled = !adminCategoriesLoaded;
+            }
+        }
+
+        async function deleteAdminCategory(category) {
+            if (!adminUser || !adminClient || !adminCategoriesLoaded || adminCategorySaving ||
+                Number(category.product_count) > 0 ||
+                !window.confirm(`確定刪除分類「${category.name}」？僅未被商品使用的分類可刪除。`)) return;
+            const userId = adminUser.id;
+            adminCategorySaving = true;
+            setAdminCategoryStatus(`正在刪除分類「${category.name}」…`);
+            try {
+                const { data, error } = await adminClient.rpc('admin_delete_product_category', {
+                    p_code: category.code, p_expected_revision: category.revision
+                });
+                if (error) throw error;
+                if (adminUser?.id !== userId) return;
+                if (data?.code !== category.code) throw new Error('分類刪除結果無法確認，請重新讀取分類。');
+                cancelAdminCategoryEdit(true);
+                const loaded = await loadAdminCategories();
+                if (loaded) setAdminCategoryStatus(`分類「${category.name}」已刪除。`);
+            } catch (error) {
+                if (adminUser?.id !== userId) return;
+                if (handleRevokedAdminAccess(error)) return;
+                setAdminCategoryStatus(getAdminError(error), 'error');
+            } finally {
+                adminCategorySaving = false;
+                if (adminUser?.id === userId) document.getElementById('admin-category-save').disabled = !adminCategoriesLoaded;
+            }
+        }
+
         function renderAdminProducts(items, emptyMessage = '沒有符合條件的商品。') {
             const body = document.getElementById('admin-products-body');
             body.replaceChildren();
@@ -1450,7 +1641,7 @@
                 productInfo.append(image, details);
                 productCell.appendChild(productInfo);
                 row.appendChild(productCell);
-                buildTableCell(row, ADMIN_PRODUCT_CATEGORIES[product.category] || product.category);
+                buildTableCell(row, adminCategories.find(item => item.code === product.category)?.name || product.category);
                 buildTableCell(row, formatCurrency(product.price), 'mono whitespace-nowrap px-4 py-3 font-semibold text-gold-300');
 
                 const stateCell = document.createElement('td');
@@ -2758,14 +2949,17 @@
             }
         }
 
-        function openProductEditor(product = null) {
+        async function openProductEditor(product = null) {
             if (!adminUser || productSaving) return;
+            const userId = adminUser.id;
+            if (!adminCategoriesLoaded && !await loadAdminCategories()) return;
+            if (adminUser?.id !== userId || !adminCategoriesLoaded) return;
             editingProduct = product;
             const form = document.getElementById('admin-product-form');
             form.reset();
             document.getElementById('product-dialog-title').textContent = product ? `編輯商品 #${product.id}` : '新增商品';
             document.getElementById('product-name').value = product?.name || '';
-            document.getElementById('product-category').value = product?.category || 'pubg';
+            document.getElementById('product-category').value = product?.category || '';
             document.getElementById('product-price').value = product?.price ?? '';
             document.getElementById('product-tag').value = product?.tag || '';
             document.getElementById('product-description').value = product?.description || '';
@@ -3313,6 +3507,7 @@
             adminGameInfoRequestId += 1;
             adminDetailRequestId += 1;
             adminProductRequestId += 1;
+            adminCategoryRequestId += 1;
             adminStockRequestId += 1;
             adminStockProductsRequestId += 1;
             authorizationStockRequestId += 1;
@@ -3324,6 +3519,10 @@
             adminGameInfoRevision = null;
             adminGameInfoSaving = false;
             adminVisibleProducts = [];
+            adminCategories = [];
+            adminCategoriesLoaded = false;
+            editingCategory = null;
+            adminCategorySaving = false;
             adminVisibleStock = [];
             adminStockProducts = [];
             adminVisibleMembers = [];
@@ -3354,6 +3553,7 @@
             document.getElementById('overview-orders-body').replaceChildren();
             document.getElementById('detail-items-body').replaceChildren();
             document.getElementById('admin-products-body').replaceChildren();
+            document.getElementById('admin-categories-list').replaceChildren();
             document.getElementById('admin-stock-body').replaceChildren();
             document.getElementById('admin-members-body').replaceChildren();
             document.getElementById('admin-audit-body').replaceChildren();
@@ -3374,6 +3574,13 @@
             document.getElementById('admin-game-info-reload').disabled = false;
             setGameInfoStatus('開啟遊戲資訊後載入目前內容。');
             document.getElementById('admin-products-filter').reset();
+            document.getElementById('admin-category-form').reset();
+            document.getElementById('admin-category-code').readOnly = false;
+            document.getElementById('admin-category-save').textContent = '新增分類';
+            document.getElementById('admin-category-save').disabled = true;
+            document.getElementById('admin-category-cancel').hidden = true;
+            document.getElementById('product-category').replaceChildren(new Option('請先載入分類', ''));
+            setAdminCategoryStatus('開啟商品管理後載入分類。');
             document.getElementById('admin-stock-filter').reset();
             document.getElementById('admin-members-filter').reset();
             document.getElementById('admin-product-form').reset();
@@ -3558,7 +3765,11 @@
             if (activeAdminView === 'announcement') void loadAdminAnnouncement();
             if (activeAdminView === 'game-info') void loadAdminGameInfo();
             if (activeAdminView === 'orders') void loadAdminOrders(0);
-            if (activeAdminView === 'products') void loadAdminProducts(0);
+            if (activeAdminView === 'products') {
+                void loadAdminCategories().then(() => {
+                    if (activeAdminView === 'products' && adminUser) void loadAdminProducts(0);
+                });
+            }
             if (activeAdminView === 'stock') void loadCardStockProducts().then(loaded => {
                 if (loaded && activeAdminView === 'stock') void loadAdminCardStock(0);
             });
@@ -3578,6 +3789,8 @@
                     return;
                 }
                 if (activeAdminView === 'products') {
+                    await loadAdminCategories();
+                    if (!adminUser) return;
                     const loaded = await loadAdminProducts(adminProductPage);
                     if (loaded) setAppStatus('商品清單已更新。', 'success');
                     return;

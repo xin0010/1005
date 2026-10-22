@@ -560,10 +560,7 @@
                         <button type="button" data-nav-view="orders" onclick="switchTab('orders')"><i class="fa-solid fa-receipt" aria-hidden="true"></i>卡號與訂單查詢</button>
                         <button type="button" data-nav-view="wallet" onclick="switchTab('wallet')"><i class="fa-solid fa-wallet" aria-hidden="true"></i>餘額儲值</button>
                         <p>輔助分類</p>
-                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('valorant');"><i class="fa-solid fa-crosshairs" aria-hidden="true"></i>VALORANT 特戰英豪</button>
-                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('pubg');"><i class="fa-solid fa-gun" aria-hidden="true"></i>PUBG 絕地求生</button>
-                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('mobile');"><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i>熱門手遊輔助 (FF/傳說)</button>
-                        <button type="button" onclick="switchTab('mobile-store'); filterProducts('account');"><i class="fa-solid fa-key" aria-hidden="true"></i>P12 證書</button>
+                        <div id="shop-nav-categories" aria-label="商品分類"></div>
                     </div>
                 </details>
             </nav>
@@ -700,10 +697,6 @@
                 <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-8 font-mono">
                     <div class="flex min-w-0 flex-nowrap gap-2 w-full overflow-x-auto pb-2 md:flex-1" id="filter-tabs" role="group" aria-label="篩選商品分類">
                         <button onclick="filterProducts('all')" data-category="all" aria-pressed="true" class="filter-tab-btn px-4 py-2 rounded-xl bg-brand-950 border border-brand-500/60 text-brand-400 font-bold text-xs cursor-pointer">全部商品</button>
-                        <button onclick="filterProducts('valorant')" data-category="valorant" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">特戰英豪</button>
-                        <button onclick="filterProducts('pubg')" data-category="pubg" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">絕地求生</button>
-                        <button onclick="filterProducts('mobile')" data-category="mobile" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">熱門手遊</button>
-                        <button onclick="filterProducts('account')" data-category="account" class="filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer">帳號與憑證</button>
                     </div>
 
                     <div class="relative w-full md:w-64">
@@ -1181,6 +1174,7 @@
             discord: 'https://discord.gg/NjXfWsauD'
         });
         const products = [];
+        const productCategories = [];
         let catalogLoaded = false;
         let catalogLoadPromise = null;
         let activeCategory = 'all';
@@ -1647,9 +1641,22 @@
             catalogLoadPromise = (async () => {
                 try {
                     if (!supabaseClient) throw new Error('商品服務無法連線');
-                    const { data, error } = await supabaseClient.rpc('get_shop_products');
+                    const [{ data, error }, { data: categories, error: categoryError }] = await Promise.all([
+                        supabaseClient.rpc('get_shop_products'),
+                        supabaseClient.rpc('get_shop_product_categories')
+                    ]);
                     if (error) throw error;
+                    if (categoryError) throw categoryError;
                     if (!Array.isArray(data)) throw new Error('商品目錄資料不完整');
+                    if (!Array.isArray(categories) || categories.length > 50 || !categories.every(item =>
+                        item && typeof item.code === 'string' && /^[a-z][a-z0-9_-]{0,31}$/.test(item.code) &&
+                        typeof item.name === 'string' && item.name === item.name.trim() &&
+                        Array.from(item.name).length >= 1 && Array.from(item.name).length <= 60 &&
+                        !/[\u0000-\u001f\u007f-\u009f]/.test(item.name) &&
+                        Number.isSafeInteger(item.display_order) && item.display_order >= 0 && item.display_order <= 9999
+                    ) || new Set(categories.map(item => item.code)).size !== categories.length) {
+                        throw new Error('商品分類資料不完整');
+                    }
 
                     const updatedProducts = data.map(item => {
                         if (!Number.isSafeInteger(item.id) || !Number.isSafeInteger(item.price) || item.price < 0 ||
@@ -1662,6 +1669,11 @@
                     });
 
                     products.splice(0, products.length, ...updatedProducts);
+                    productCategories.splice(0, productCategories.length, ...categories);
+                    if (activeCategory !== 'all' && !productCategories.some(item => item.code === activeCategory)) {
+                        activeCategory = 'all';
+                    }
+                    renderProductCategories();
                     catalogLoaded = true;
                     const previousItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
                     cart = loadCart();
@@ -1673,7 +1685,7 @@
                 } catch (error) {
                     console.error('Catalog loading failed:', error);
                     catalogLoaded = false;
-                    if (status) status.textContent = '無法載入商品或價格，已停用下單。請確認已套用資料庫設定，稍後重新進入商城重試。';
+                    if (status) status.textContent = '無法載入商品、分類或價格，已停用下單。請確認已套用最新版商品資料庫設定，稍後重新進入商城重試。';
                     updateCartUI();
                     renderProducts();
                 }
@@ -1729,15 +1741,49 @@
             });
         }
 
-        function filterProducts(cat) {
-            activeCategory = cat;
+        function updateProductCategoryTabs() {
             document.querySelectorAll('.filter-tab-btn').forEach(btn => {
-                const selected = btn.dataset.category === cat;
+            const selected = btn.dataset.category === activeCategory;
                 btn.setAttribute('aria-pressed', String(selected));
                 btn.className = selected
                     ? 'filter-tab-btn px-4 py-2 rounded-xl bg-brand-950 border border-brand-500/60 text-brand-400 font-bold text-xs cursor-pointer'
                     : 'filter-tab-btn px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-brand-500/50 text-xs cursor-pointer';
             });
+        }
+
+        function renderProductCategories() {
+            const tabs = document.getElementById('filter-tabs');
+            const nav = document.getElementById('shop-nav-categories');
+            tabs.replaceChildren();
+            nav.replaceChildren();
+            for (const item of [{ code: 'all', name: '全部商品' }, ...productCategories]) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.dataset.category = item.code;
+                button.className = 'filter-tab-btn';
+                button.textContent = item.name;
+                button.addEventListener('click', () => filterProducts(item.code));
+                tabs.appendChild(button);
+                if (item.code !== 'all') {
+                    const shortcut = document.createElement('button');
+                    shortcut.type = 'button';
+                    const icon = document.createElement('i');
+                    icon.className = 'fa-solid fa-tag';
+                    icon.setAttribute('aria-hidden', 'true');
+                    shortcut.append(icon, document.createTextNode(item.name));
+                    shortcut.addEventListener('click', () => {
+                        switchTab('mobile-store');
+                        filterProducts(item.code);
+                    });
+                    nav.appendChild(shortcut);
+                }
+            }
+            updateProductCategoryTabs();
+        }
+
+        function filterProducts(cat) {
+            activeCategory = cat;
+            updateProductCategoryTabs();
             searchProducts();
         }
 
@@ -1759,7 +1805,8 @@
             };
             modalImage.src = p.img;
             document.getElementById('modal-title').innerText = p.name;
-            document.getElementById('modal-category').innerText = p.category.toUpperCase();
+            document.getElementById('modal-category').innerText =
+                productCategories.find(item => item.code === p.category)?.name || p.category;
             document.getElementById('modal-price').innerText = `NT$ ${p.price.toLocaleString()}`;
             document.getElementById('modal-desc').innerText = p.desc;
             document.getElementById('modal-add-btn').onclick = function() {
