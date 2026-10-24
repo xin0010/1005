@@ -165,6 +165,50 @@
             outline-offset: 3px;
         }
 
+        body.purchase-notice-open { overflow: hidden; }
+        .purchase-notice-dialog {
+            width: min(48rem, calc(100% - 2rem));
+            max-width: none;
+            max-height: min(85vh, 52rem);
+            max-height: min(85dvh, 52rem);
+            margin: auto;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid rgba(199, 62, 148, .5);
+            border-radius: 1rem;
+            background: var(--surface-card);
+            color: #e2dce0;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, .6);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .purchase-notice-dialog[open] { display: flex; flex-direction: column; }
+        .purchase-notice-dialog::backdrop { background: rgba(0, 0, 0, .78); }
+        .purchase-notice-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+            flex: none; padding: .75rem 1.25rem; border-bottom: 1px solid #554b54;
+        }
+        .purchase-notice-header h2 {
+            margin: 0; padding-left: .75rem; border-left: .25rem solid var(--brand-pink);
+            color: #fff; font-size: 1.25rem; font-weight: 700;
+        }
+        .purchase-notice-close {
+            display: flex; align-items: center; justify-content: center; flex: none;
+            width: 2.75rem; height: 2.75rem; border: 0; border-radius: .5rem;
+            background: #1b1b1b; color: #e2dce0; font-size: 1.5rem; cursor: pointer;
+        }
+        .purchase-notice-close:hover { background: #3c353c; color: #fff; }
+        .purchase-notice-body {
+            min-height: 0; margin: 0; padding: 1.25rem 1.5rem; list-style: none;
+            overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere;
+            font-size: .875rem; line-height: 1.9;
+        }
+        .purchase-notice-body > li + li { margin-top: 1.25rem; }
+        .purchase-notice-footer { flex: none; padding: 1rem 1.25rem; border-top: 1px solid #554b54; }
+        .purchase-notice-dismiss {
+            width: 100%; min-height: 2.75rem; padding: .65rem 1rem;
+            border-radius: .75rem; font: inherit; font-weight: 700; cursor: pointer;
+        }
+
         .floating-social-links {
             position: fixed;
             left: calc(1.5rem + env(safe-area-inset-left, 0px));
@@ -905,6 +949,8 @@
                         <p class="text-xs text-slate-300 leading-relaxed">請直接點擊頁面右下角的 Discord 浮動圖示，加入我們的官方售後群組，開立工單將由技術人員一對一為您解決。</p>
                     </div>
                 </div>
+
+                <button id="purchase-notice-open" type="button" aria-haspopup="dialog" aria-controls="purchase-notice" onclick="openPurchaseNotice()" class="cyber-button mt-8 min-h-11 rounded-xl px-6 py-3 font-bold">購買須知</button>
             </div>
         </section>
 
@@ -1073,6 +1119,30 @@
         </section>
 
     </main>
+
+    <dialog id="purchase-notice" class="purchase-notice-dialog" aria-labelledby="purchase-notice-title">
+        <header class="purchase-notice-header">
+            <h2 id="purchase-notice-title">購買須知</h2>
+            <button id="purchase-notice-close" type="button" class="purchase-notice-close" aria-label="關閉購買須知" onclick="closePurchaseNotice()" autofocus><span aria-hidden="true">×</span></button>
+        </header>
+        <ol class="purchase-notice-body">
+            <li>1. 本賣場(AXG輔助)或本網站(chenshop123.com.tw)所代理、銷售或代購之軟體程式，其任何功能皆可能屬於遊戲軟體本身漏洞或作業系統漏洞進而實現的功能，包括利用系統權限、驅動軟體、操作模擬、類木馬軟體等特殊手法等方式實行，因此被坊間統稱外掛程式；唯使用賣方提供之軟體程式的玩家，應理解其為『人工智慧娛樂性輔助軟體』，所有的操作都在玩家的PC電腦上，不會有修改、入侵或攻擊遊戲伺服器的行為，並不屬於非法行為的侵權軟體。</li>
+            <li>2. 上述軟體可能在遊戲更新、維修、針對性阻擋時，需要費時日處理，更新需耗費時日之狀況，仍適用前項說明。</li>
+            <li>3. 消費者試用及購買時即視為已閱讀並理解、同意本免責聲明與服務利用規約內容，並同意放棄消費者保護法、消費者文教基金會及國家法律等申訴之行為權利。</li>
+            <li>4. 全世界任何外掛軟件但凡有修改遊戲數據或資料，皆有可能違反遊戲公司相關條款規章，若您堅持使用外掛程式，而導致您的帳號損失或有任何法律爭議，請您自行承擔後果及責任。※提醒您若有使用任何外掛軟件請在使用後於24小時內刪除，任何外掛軟件內所實現之功能皆因理解為僅供參考學習計算機使用。</li>
+            <li>5. 本賣場或本網站所代理、銷售之軟體程式，皆為人工智能之輔助軟件，軟件本身默認只讀取電腦內存中的資料，並透過CPU、GPU、RAM計算，實現繪製線圈模擬操作，如按鍵腳本精靈般，其中一些軟件只是透過圖像AI識別實現如按鍵腳本精靈般操作，並未向外掛般修改遊戲數據、入侵或攻擊遊戲伺服器行為，軟件本身並不屬於非法行為的軟體。</li>
+            <li>6. 本賣場或本網站中所稱之外掛並非彼外掛，本賣場或本網站所稱之外掛只是另種外稱，此外掛內容皆屬於「輔助免責聲明與注意事項」第5點內容，軟件本身默認只讀取電腦內存中的資料，並透過CPU、GPU、RAM計算，並計算繪製線圈或模擬操作，如按鍵腳本精靈般，其中一些軟件只是透過圖像AI識別實現如按鍵腳本精靈般操作，並未向外掛般修改遊戲數據、入侵或攻擊遊戲伺服器行為，本身並不屬於非法行為的軟體。</li>
+            <li>7. 本賣場或本網站所代理、銷售之軟體程式，玩家不得利用其功能或便利性，對他人侮辱、暴力、霸凌、詐欺、致生損害等行為，若因此產生糾紛，得不經催告逕行終止合約及服務。</li>
+            <li>8.如賣方網站商品價格有BUG異樣，買方利用BUG購買商品，賣方有權對卡號充值帳號封禁停權處理。</li>
+            <li>9.如遇騙卡、使用後不付錢、利用漏洞購買卡號、詐騙等等行為，一律封卡封端處理。</li>
+            <li>10.本賣場根據消費者保護法第十九條第二項規定，非以有形媒介提供之數位內容或一經提供即為完成之線上服務，不適用七天鑑賞期，及售後不提供退貨服務，不予以退費。</li>
+            <li>11.購買即表示同意承擔帳號被封禁之風險</li>
+            <li>12.會員或消費著與本賣場或本網站代理代購任何商品，規則亦適用於上述。</li>
+        </ol>
+        <footer class="purchase-notice-footer">
+            <button id="purchase-notice-dismiss" type="button" class="cyber-button purchase-notice-dismiss" onclick="closePurchaseNotice()">關閉</button>
+        </footer>
+    </dialog>
 
     <div id="product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductModal()"></div>
@@ -2029,6 +2099,19 @@
             cart = [];
             updateCartUI();
             showToast('購物車已清空。');
+        }
+
+        function openPurchaseNotice() {
+            const dialog = document.getElementById('purchase-notice');
+            if (!dialog || dialog.open || typeof dialog.showModal !== 'function') return;
+            dialog.showModal();
+            dialog.querySelector('.purchase-notice-body').scrollTop = 0;
+            document.body.classList.add('purchase-notice-open');
+        }
+
+        function closePurchaseNotice() {
+            const dialog = document.getElementById('purchase-notice');
+            if (dialog?.open) dialog.close();
         }
 
         function toggleCart(forceOpen) {
@@ -3074,6 +3157,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('purchase-notice').addEventListener('close', () => {
+                document.body.classList.remove('purchase-notice-open');
+            });
+            openPurchaseNotice();
             updateCartUI();
             void loadCatalog();
             void loadShopAnnouncement();
