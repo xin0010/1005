@@ -498,6 +498,43 @@
         .account-session, .account-recovery { padding: 1.5rem; border: 1px solid #484848; border-radius: 1rem; background: #242424; }
         .account-session p { margin: 0 0 .6rem; }
         .account-session-email { overflow-wrap: anywhere; font-weight: 700; color: #fff; }
+        .account-profile-panel {
+            max-width: 62rem; margin: 0 auto 1.5rem; padding: 1.4rem;
+            border: 1px solid #484848; border-radius: 1rem;
+            background: linear-gradient(145deg, #262126, #1f1b20);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, .22);
+        }
+        .account-profile-header { margin-bottom: 1rem; }
+        .account-profile-header h3 { margin: 0 0 .4rem; font-size: 1.25rem; font-weight: 800; color: #fff; }
+        .account-profile-header p { margin: 0; color: #c7bec6; font-size: .8rem; line-height: 1.6; }
+        .account-profile-form { margin: 0; }
+        .account-profile-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .95rem 1.1rem;
+        }
+        .account-profile-field--full { grid-column: 1 / -1; }
+        .account-profile-note { margin: .45rem 0 0; color: #c6c6c6; font-size: .74rem; line-height: 1.5; }
+        .account-password-card {
+            margin-top: 1.1rem; padding: .95rem 1rem 1rem;
+            border: 1px solid #4b434c; border-radius: 1rem;
+            background: #231f24;
+        }
+        .account-password-card legend {
+            padding: 0 .45rem; color: #fbe4f2;
+            font-size: .95rem; font-weight: 800;
+        }
+        .account-save-row {
+            margin-top: 1rem; display: flex; flex-wrap: wrap;
+            gap: .8rem 1rem; align-items: center;
+        }
+        .account-save-row .account-submit { margin-top: 0; width: auto; min-width: 9rem; }
+        .account-save-hint { margin: 0; color: #c7bec6; font-size: .75rem; line-height: 1.5; }
+        .account-inline-status {
+            margin-top: .9rem; padding: .7rem .85rem;
+            border: 1px solid #5f4a61; border-radius: .75rem;
+            background: #2f2530; color: #fbe4f2;
+            font-size: .78rem; line-height: 1.6;
+        }
         #auth-status { padding: 1rem; border-radius: .75rem; font-size: .85rem; line-height: 1.5; }
         .account-recovery { max-width: 26rem; }
         @media (max-width: 767px) {
@@ -505,6 +542,11 @@
             .account-heading { margin-bottom: 2rem; }
             .account-layout { max-width: 30rem; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
             .account-register::before { top: -1.25rem; bottom: auto; left: 0; right: 0; width: auto; height: 1px; }
+            .account-profile-panel { padding: 1rem; }
+            .account-profile-grid { grid-template-columns: minmax(0, 1fr); }
+            .account-password-card { padding: .85rem .85rem .9rem; }
+            .account-save-row { align-items: stretch; }
+            .account-save-row .account-submit { width: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
             .account-submit { transition: none; }
@@ -1042,6 +1084,65 @@
             </div>
             <p id="auth-status" class="hidden" role="status" aria-live="polite"></p>
 
+            <section id="auth-profile-panel" class="account-profile-panel hidden" aria-labelledby="account-profile-title">
+                <div class="account-profile-header">
+                    <h3 id="account-profile-title">帳戶詳細資訊</h3>
+                    <p>更新顯示名稱與信箱，並可在同頁面變更密碼。送出後將重新套用目前會員資訊。</p>
+                </div>
+                <form id="form-account-profile" class="account-form account-profile-form" onsubmit="handleAccountProfileSubmit(event)">
+                    <div class="account-profile-grid">
+                        <div class="account-field">
+                            <label for="account-given-name">名字</label>
+                            <input id="account-given-name" type="text" maxlength="32" autocomplete="given-name" placeholder="例如 小明">
+                        </div>
+                        <div class="account-field">
+                            <label for="account-family-name">姓氏</label>
+                            <input id="account-family-name" type="text" maxlength="32" autocomplete="family-name" placeholder="例如 王">
+                        </div>
+                        <div class="account-field account-profile-field--full">
+                            <label for="account-display-name">顯示名稱 <span class="account-required" aria-hidden="true">*</span></label>
+                            <input id="account-display-name" type="text" required maxlength="32" autocomplete="nickname" placeholder="顯示於網站中的名稱">
+                            <p class="account-profile-note">顯示名稱會用於頁面右上角與控制台的會員稱呼。</p>
+                        </div>
+                        <div class="account-field account-profile-field--full">
+                            <label for="account-email">電子信箱 <span class="account-required" aria-hidden="true">*</span></label>
+                            <input id="account-email" type="email" required maxlength="254" autocomplete="email" spellcheck="false" placeholder="name@example.com">
+                        </div>
+                    </div>
+
+                    <fieldset class="account-password-card">
+                        <legend>變更密碼</legend>
+                        <div class="account-field">
+                            <label for="account-current-password">目前的密碼（不更換可留空）</label>
+                            <div class="account-password">
+                                <input id="account-current-password" type="password" autocomplete="current-password" placeholder="輸入目前密碼">
+                                <button type="button" data-password-toggle="account-current-password" aria-label="顯示目前密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                            </div>
+                        </div>
+                        <div class="account-field">
+                            <label for="account-new-password">新密碼（至少 12 個字元）</label>
+                            <div class="account-password">
+                                <input id="account-new-password" type="password" minlength="12" maxlength="128" autocomplete="new-password" placeholder="至少 12 個字元">
+                                <button type="button" data-password-toggle="account-new-password" aria-label="顯示新密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                            </div>
+                        </div>
+                        <div class="account-field mb-0">
+                            <label for="account-confirm-password">確認新密碼</label>
+                            <div class="account-password">
+                                <input id="account-confirm-password" type="password" minlength="12" maxlength="128" autocomplete="new-password" placeholder="再次輸入新密碼">
+                                <button type="button" data-password-toggle="account-confirm-password" aria-label="顯示確認新密碼" aria-pressed="false" class="account-password-toggle">顯示</button>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="account-save-row">
+                        <button id="account-profile-save" type="submit" class="account-submit" disabled>儲存設定</button>
+                        <p id="account-save-hint" class="account-save-hint" aria-live="polite">尚未偵測到變更。</p>
+                    </div>
+                    <p id="account-profile-status" class="account-inline-status hidden" role="status" aria-live="polite"></p>
+                </form>
+            </section>
+
             <div id="auth-layout" class="account-layout">
                 <div class="account-column account-login">
                     <h3 id="account-login-title">登入</h3>
@@ -1263,6 +1364,8 @@
         let authRecoveryActive = false;
         let currentAuthUser = null;
         let activeAuthTab = 'login';
+        let accountProfileSnapshot = null;
+        let accountProfileSubmitRequestId = 0;
         try {
             if (window.supabase?.createClient) {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -2799,9 +2902,256 @@
             status.classList.remove('hidden');
         }
 
+        function trimAndLimitText(value, maxLength) {
+            const normalized = typeof value === 'string' ? value.trim() : '';
+            return Array.from(normalized).slice(0, maxLength).join('');
+        }
+
+        function normalizeAccountProfileValues(user = currentAuthUser) {
+            const metadata = user?.user_metadata && typeof user.user_metadata === 'object'
+                ? user.user_metadata : {};
+            const givenName = trimAndLimitText(metadata.given_name, 32);
+            const familyName = trimAndLimitText(metadata.family_name, 32);
+            const derivedDisplayName = [metadata.display_name, metadata.full_name, metadata.name]
+                .find(value => typeof value === 'string' && value.trim());
+            const displayName = trimAndLimitText(derivedDisplayName || `${familyName}${givenName}`, 32);
+            const email = trimAndLimitText(user?.email || '', 254).toLowerCase();
+            return { givenName, familyName, displayName, email };
+        }
+
+        function collectAccountProfileFormValues() {
+            return {
+                givenName: trimAndLimitText(document.getElementById('account-given-name')?.value || '', 32),
+                familyName: trimAndLimitText(document.getElementById('account-family-name')?.value || '', 32),
+                displayName: trimAndLimitText(document.getElementById('account-display-name')?.value || '', 32),
+                email: trimAndLimitText(document.getElementById('account-email')?.value || '', 254).toLowerCase()
+            };
+        }
+
+        function clearAccountPasswordFields() {
+            for (const id of ['account-current-password', 'account-new-password', 'account-confirm-password']) {
+                const input = document.getElementById(id);
+                if (!input) continue;
+                input.value = '';
+                input.setCustomValidity('');
+            }
+        }
+
+        function setAccountProfileStatus(message, tone = 'info') {
+            const status = document.getElementById('account-profile-status');
+            if (!status) return;
+            const toneClasses = {
+                info: 'border-brand-500/30 bg-brand-950/30 text-brand-200',
+                success: 'border-emerald-500/30 bg-emerald-950/30 text-emerald-200',
+                error: 'border-red-500/30 bg-red-950/30 text-red-200'
+            };
+            status.className = `account-inline-status ${toneClasses[tone] || toneClasses.info}`;
+            status.textContent = message;
+            status.classList.remove('hidden');
+        }
+
+        function updateAccountProfileValidation() {
+            const currentPassword = document.getElementById('account-current-password');
+            const newPassword = document.getElementById('account-new-password');
+            const confirmPassword = document.getElementById('account-confirm-password');
+            if (!currentPassword || !newPassword || !confirmPassword) return;
+
+            currentPassword.setCustomValidity('');
+            newPassword.setCustomValidity('');
+            confirmPassword.setCustomValidity('');
+
+            const hasAnyPasswordInput = Boolean(currentPassword.value || newPassword.value || confirmPassword.value);
+            if (!hasAnyPasswordInput) return;
+
+            if (!currentPassword.value) {
+                currentPassword.setCustomValidity('若要更新密碼，請輸入目前密碼。');
+            }
+
+            const newPasswordLength = Array.from(newPassword.value).length;
+            if (!newPassword.value) {
+                newPassword.setCustomValidity('若要更新密碼，請輸入新密碼。');
+            } else if (newPasswordLength < 12) {
+                newPassword.setCustomValidity(`新密碼還需 ${12 - newPasswordLength} 個字元。`);
+            }
+
+            if (!confirmPassword.value) {
+                confirmPassword.setCustomValidity('請再次輸入新密碼。');
+            } else if (confirmPassword.value !== newPassword.value) {
+                confirmPassword.setCustomValidity('兩次輸入的新密碼不一致。');
+            }
+        }
+
+        function updateAccountProfileSaveState() {
+            const saveButton = document.getElementById('account-profile-save');
+            const hint = document.getElementById('account-save-hint');
+            if (!saveButton || !hint) return;
+
+            if (!currentAuthUser) {
+                saveButton.disabled = true;
+                hint.textContent = '請先登入會員帳號。';
+                return;
+            }
+
+            const values = collectAccountProfileFormValues();
+            const snapshot = accountProfileSnapshot || normalizeAccountProfileValues();
+            const profileChanged = values.givenName !== snapshot.givenName ||
+                values.familyName !== snapshot.familyName ||
+                values.displayName !== snapshot.displayName ||
+                values.email !== snapshot.email;
+
+            const currentPassword = document.getElementById('account-current-password')?.value || '';
+            const newPassword = document.getElementById('account-new-password')?.value || '';
+            const confirmPassword = document.getElementById('account-confirm-password')?.value || '';
+            const hasPasswordInput = Boolean(currentPassword || newPassword || confirmPassword);
+
+            saveButton.disabled = !(profileChanged || hasPasswordInput);
+            if (hasPasswordInput) {
+                hint.textContent = '將同步更新帳戶資料與密碼（會先驗證目前密碼）。';
+            } else if (profileChanged) {
+                hint.textContent = '已偵測到資料變更，按下「儲存設定」即可更新。';
+            } else {
+                hint.textContent = '尚未偵測到變更。';
+            }
+        }
+
+        function populateAccountProfileForm() {
+            const form = document.getElementById('form-account-profile');
+            const panel = document.getElementById('auth-profile-panel');
+            if (!form || !panel) return;
+
+            if (!currentAuthUser || authRecoveryActive) {
+                accountProfileSnapshot = null;
+                form.reset();
+                clearAccountPasswordFields();
+                document.getElementById('account-profile-status')?.classList.add('hidden');
+                updateAccountProfileSaveState();
+                return;
+            }
+
+            const values = normalizeAccountProfileValues(currentAuthUser);
+            document.getElementById('account-given-name').value = values.givenName;
+            document.getElementById('account-family-name').value = values.familyName;
+            document.getElementById('account-display-name').value = values.displayName || '會員';
+            document.getElementById('account-email').value = values.email;
+            clearAccountPasswordFields();
+            accountProfileSnapshot = {
+                ...values,
+                displayName: values.displayName || '會員'
+            };
+            document.getElementById('account-profile-status')?.classList.add('hidden');
+            updateAccountProfileValidation();
+            updateAccountProfileSaveState();
+        }
+
+        async function handleAccountProfileSubmit(event) {
+            event?.preventDefault();
+            const form = document.getElementById('form-account-profile');
+            if (!form) return;
+            if (!currentAuthUser) {
+                setAccountProfileStatus('請先登入會員帳號。', 'error');
+                return;
+            }
+            if (!supabaseClient) {
+                setAccountProfileStatus('Supabase SDK 尚未載入，請稍後再試。', 'error');
+                return;
+            }
+
+            updateAccountProfileValidation();
+            if (!form.reportValidity()) return;
+
+            const values = collectAccountProfileFormValues();
+            const snapshot = accountProfileSnapshot || normalizeAccountProfileValues(currentAuthUser);
+            const profileChanged = values.givenName !== snapshot.givenName ||
+                values.familyName !== snapshot.familyName ||
+                values.displayName !== snapshot.displayName ||
+                values.email !== snapshot.email;
+
+            const currentPassword = document.getElementById('account-current-password').value;
+            const newPassword = document.getElementById('account-new-password').value;
+            const confirmPassword = document.getElementById('account-confirm-password').value;
+            const hasPasswordInput = Boolean(currentPassword || newPassword || confirmPassword);
+            if (!profileChanged && !hasPasswordInput) {
+                setAccountProfileStatus('沒有可儲存的變更。', 'info');
+                return;
+            }
+
+            const payload = {};
+            if (profileChanged) {
+                const currentMetadata = currentAuthUser.user_metadata && typeof currentAuthUser.user_metadata === 'object'
+                    ? currentAuthUser.user_metadata : {};
+                const mergedDisplayName = values.displayName || `${values.familyName}${values.givenName}` || '會員';
+                const mergedFullName = `${values.familyName}${values.givenName}` || mergedDisplayName;
+                payload.data = {
+                    ...currentMetadata,
+                    given_name: values.givenName || null,
+                    family_name: values.familyName || null,
+                    display_name: mergedDisplayName || null,
+                    full_name: mergedFullName || null,
+                    name: mergedDisplayName || mergedFullName || null
+                };
+                if (values.email && values.email !== snapshot.email) payload.email = values.email;
+            }
+
+            if (hasPasswordInput) {
+                const signInEmail = currentAuthUser.email || snapshot.email;
+                if (!signInEmail) {
+                    setAccountProfileStatus('目前帳號缺少信箱資訊，無法驗證舊密碼。', 'error');
+                    return;
+                }
+                if (typeof supabaseClient.auth?.signInWithPassword !== 'function') {
+                    setAccountProfileStatus('目前服務無法驗證舊密碼，請稍後再試。', 'error');
+                    return;
+                }
+                setAccountProfileStatus('正在驗證目前密碼…');
+                const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+                    email: signInEmail,
+                    password: currentPassword
+                });
+                if (signInError) {
+                    setAccountProfileStatus('目前密碼輸入錯誤，請重新確認。', 'error');
+                    return;
+                }
+                payload.password = newPassword;
+            }
+
+            if (!Object.keys(payload).length) {
+                setAccountProfileStatus('沒有可儲存的變更。', 'info');
+                return;
+            }
+
+            const currentUserId = currentAuthUser.id;
+            const requestId = ++accountProfileSubmitRequestId;
+            setSubmitLoading(form, true, '儲存設定中…');
+            setAccountProfileStatus('正在儲存會員設定…');
+            try {
+                const { data, error } = await supabaseClient.auth.updateUser(payload);
+                if (error) throw error;
+                if (requestId !== accountProfileSubmitRequestId || currentAuthUser?.id !== currentUserId) return;
+
+                currentAuthUser = data?.user || currentAuthUser;
+                renderAuthView();
+                setAccountProfileStatus(
+                    hasPasswordInput
+                        ? '會員資料與密碼已更新完成。'
+                        : '會員資料已更新完成。',
+                    'success'
+                );
+                showToast(hasPasswordInput ? '帳戶與密碼已更新。' : '帳戶資料已更新。');
+            } catch (error) {
+                if (requestId !== accountProfileSubmitRequestId || currentAuthUser?.id !== currentUserId) return;
+                setAccountProfileStatus(getAuthErrorMessage(error), 'error');
+            } finally {
+                if (requestId === accountProfileSubmitRequestId) {
+                    setSubmitLoading(form, false);
+                    updateAccountProfileSaveState();
+                }
+            }
+        }
+
         function renderAuthView() {
             const sessionPanel = document.getElementById('auth-session-panel');
             const sessionEmail = document.getElementById('auth-session-email');
+            const profilePanel = document.getElementById('auth-profile-panel');
             const authLayout = document.getElementById('auth-layout');
             const registerPromo = document.getElementById('auth-register-promo');
             const registerFields = document.getElementById('auth-register-fields');
@@ -2834,6 +3184,7 @@
             }
             document.getElementById('dashboard-member-name').textContent = name;
             sessionPanel.classList.toggle('hidden', !signedIn || authRecoveryActive);
+            profilePanel?.classList.toggle('hidden', !signedIn || authRecoveryActive);
             if (sessionEmail) sessionEmail.textContent = currentAuthUser?.email || '';
             document.getElementById('header-account-label').textContent = signedIn ? '我的帳號' : '登入 / 註冊';
             authLayout.classList.toggle('hidden', !showNormalAuth);
@@ -2843,6 +3194,7 @@
             registerOpen.setAttribute('aria-expanded', String(showRegistration));
             registerForm.classList.toggle('hidden', !showRegistration);
             recoveryForm.classList.toggle('hidden', !authRecoveryActive);
+            populateAccountProfileForm();
 
             const recentOrderPanel = document.getElementById('order-created-panel');
             let recentOrder = null;
@@ -3264,10 +3616,15 @@
                     input.type = shouldShow ? 'text' : 'password';
                     button.textContent = shouldShow ? '隱藏' : '顯示';
                     button.setAttribute('aria-pressed', String(shouldShow));
-                    const isConfirmation = input.id === 'register-password-confirm';
-                    button.setAttribute('aria-label', shouldShow
-                        ? (isConfirmation ? '隱藏確認密碼' : '隱藏密碼')
-                        : (isConfirmation ? '顯示確認密碼' : '顯示密碼'));
+                    const labelById = {
+                        'register-password-confirm': '確認密碼',
+                        'recovery-password-confirm': '確認密碼',
+                        'account-confirm-password': '確認新密碼',
+                        'account-new-password': '新密碼',
+                        'account-current-password': '目前密碼'
+                    };
+                    const label = labelById[input.id] || '密碼';
+                    button.setAttribute('aria-label', shouldShow ? `隱藏${label}` : `顯示${label}`);
                 });
             });
 
@@ -3279,6 +3636,16 @@
 
             ['recovery-password', 'recovery-password-confirm'].forEach(id => {
                 document.getElementById(id)?.addEventListener('input', updateRecoveryPasswordValidation);
+            });
+
+            ['account-given-name', 'account-family-name', 'account-display-name', 'account-email'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', updateAccountProfileSaveState);
+            });
+            ['account-current-password', 'account-new-password', 'account-confirm-password'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', () => {
+                    updateAccountProfileValidation();
+                    updateAccountProfileSaveState();
+                });
             });
 
             const bar = document.getElementById('status-chips-bar');
