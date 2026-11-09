@@ -445,7 +445,7 @@
             max-width: 78rem;
             margin: 0 auto;
         }
-        #view-account .hidden { display: none !important; }
+        #view-account.hidden, #view-account .hidden { display: none !important; }
         .account-member-side-nav {
             position: sticky;
             top: 6.2rem;
@@ -900,6 +900,11 @@
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
                         <input type="search" id="store-search-input" oninput="searchProducts()" aria-label="搜尋商品" placeholder="搜尋關鍵字..." class="w-full pl-9 pr-4 py-3 text-xs">
                     </div>
+                    <select id="store-sort" onchange="searchProducts()" aria-label="商品排序" class="w-full md:w-40 px-4 py-3 text-xs">
+                        <option value="default">預設排序</option>
+                        <option value="price-asc">價格由低到高</option>
+                        <option value="price-desc">價格由高到低</option>
+                    </select>
                 </div>
 
                 <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
@@ -924,6 +929,12 @@
                     <p id="order-created-title" class="mb-2 font-bold">待付款訂單已建立</p>
                     <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-gold-300"></strong></p>
                     <p id="order-created-description" class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
+                    <ol id="order-barcode-instructions" hidden class="mb-4 list-decimal space-y-2 pl-5 text-xs leading-relaxed text-slate-300">
+                        <li>複製訂單編號，前往官方 Discord 開立客服工單，告知客服「我要開立繳費條碼」。</li>
+                        <li>由客服確認訂單應付金額、可用繳費通路與期限，再提供正式繳費條碼；本站不會自動產生條碼。</li>
+                        <li>完成繳費後依客服指示提供收據，核對收款後才更新付款狀態；授權仍由管理員另行發放，請勿重複付款。</li>
+                    </ol>
+                    <button id="order-copy-number" type="button" onclick="copyToClipboard(document.getElementById('order-created-number').textContent, '訂單編號')" class="mb-2 mr-2 inline-flex min-h-11 items-center gap-2 rounded-lg border border-brand-500/40 px-4 py-2 text-brand-200 hover:bg-brand-950/50"><i class="fa-regular fa-copy" aria-hidden="true"></i>複製訂單編號</button>
                     <a id="order-discord-link" href="https://discord.gg/8ccCbma94W" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-indigo-400/50 px-4 py-2 text-indigo-200 hover:bg-indigo-900/40">前往 Discord 洽詢付款</a>
                 </div>
 
@@ -1404,6 +1415,7 @@
                     <fieldset id="cart-payment-methods" class="mb-3 space-y-2 border-0 p-0 text-xs text-slate-200">
                         <legend class="mb-2 font-bold text-brand-300">付款方式</legend>
                         <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord" checked onchange="updateCartUI()"><span>Discord 洽詢付款（建立待付款訂單）</span></label>
+                        <label class="flex min-h-11 items-center gap-2 rounded-lg border border-brand-500/40 bg-brand-950/30 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord_barcode" onchange="updateCartUI()" aria-describedby="cart-checkout-note"><span><i class="fa-solid fa-barcode mr-1" aria-hidden="true"></i>Discord 開立繳費條碼（客服人工開碼）</span></label>
                         <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="balance" onchange="updateCartUI()"><span>會員餘額扣款（足額時立即付款）</span></label>
                     </fieldset>
                     <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。</p>
@@ -1490,7 +1502,8 @@
         }
 
         const ORDER_PAYMENT_REDIRECT_URLS = Object.freeze({
-            discord: 'https://discord.gg/8ccCbma94W'
+            discord: 'https://discord.gg/8ccCbma94W',
+            discord_barcode: 'https://discord.gg/8ccCbma94W'
         });
         const products = [];
         const productCategories = [];
@@ -1860,8 +1873,8 @@
         }
 
         function getCartPaymentMethod() {
-            return document.querySelector('input[name="cart-payment-method"]:checked')?.value === 'balance'
-                ? 'balance' : 'discord';
+            const method = document.querySelector('input[name="cart-payment-method"]:checked')?.value;
+            return method === 'balance' || method === 'discord_barcode' ? method : 'discord';
         }
 
         function getOrderPaymentRedirectUrl(paymentMethod = 'discord') {
@@ -1872,7 +1885,8 @@
         function getCartFingerprint() {
             const items = JSON.stringify(cart.map(item => [item.id, item.quantity]).sort((a, b) => a[0] - b[0]));
             // Preserve the old Discord fingerprint so in-flight orders can still be retried after deployment.
-            return getCartPaymentMethod() === 'balance' ? `${items}:balance` : items;
+            const method = getCartPaymentMethod();
+            return method === 'discord' ? items : `${items}:${method}`;
         }
 
         function newOrderRequestId() {
@@ -2110,6 +2124,9 @@
             const query = document.getElementById('store-search-input').value.trim().toLocaleLowerCase();
             const filtered = products.filter(p => (activeCategory === 'all' || p.category === activeCategory) &&
                 (p.name.toLocaleLowerCase().includes(query) || p.desc.toLocaleLowerCase().includes(query)));
+            const sort = document.getElementById('store-sort').value;
+            if (sort === 'price-asc') filtered.sort((first, second) => first.price - second.price);
+            if (sort === 'price-desc') filtered.sort((first, second) => second.price - first.price);
             renderProducts(filtered);
         }
 
@@ -2180,13 +2197,17 @@
             if (cartToggleButton) cartToggleButton.setAttribute('aria-label', `檢視購物車，共 ${itemCount} 件商品`);
             if (totalEl) totalEl.textContent = `NT$ ${formatter.format(total)}`;
             if (clearButton) clearButton.disabled = cart.length === 0 || isCreatingOrder || orderOutcomeUnknown;
-            const payingWithBalance = getCartPaymentMethod() === 'balance';
+            const paymentMethod = getCartPaymentMethod();
+            const payingWithBalance = paymentMethod === 'balance';
+            const payingWithBarcode = paymentMethod === 'discord_barcode';
             document.querySelectorAll('input[name="cart-payment-method"]').forEach(input => {
                 input.disabled = isCreatingOrder || orderOutcomeUnknown;
             });
             document.getElementById('cart-checkout-note').textContent = payingWithBalance
                 ? '將從目前會員餘額一次扣除訂單全額；不足時不會建立訂單或扣款。付款成功後待管理員核發授權，不需前往 Discord。'
-                : '先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。';
+                : payingWithBarcode
+                    ? '先登入並建立待付款訂單，再前往 Discord 開客服工單，提供訂單編號請客服開立繳費條碼。金額、通路與期限由客服確認；本站不會自動開碼，前往 Discord 不代表已付款，核對收款前不會發放授權。'
+                    : '先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。';
             if (checkoutButton) {
                 checkoutButton.disabled = cart.length === 0 || !catalogLoaded || isCreatingOrder;
                 checkoutButton.classList.toggle('cursor-not-allowed', checkoutButton.disabled);
@@ -2195,10 +2216,12 @@
                 checkoutButton.setAttribute('aria-busy', String(isCreatingOrder));
                 const label = checkoutButton.querySelector('span');
                 const icon = checkoutButton.querySelector('i');
-                if (icon) icon.className = payingWithBalance ? 'fa-solid fa-wallet' : 'fa-brands fa-discord';
+                if (icon) icon.className = payingWithBalance ? 'fa-solid fa-wallet'
+                    : payingWithBarcode ? 'fa-solid fa-barcode' : 'fa-brands fa-discord';
                 if (label) label.textContent = isCreatingOrder ? '正在處理訂單…'
                     : orderOutcomeUnknown ? '重試確認同一筆訂單'
-                        : payingWithBalance ? '使用餘額付款並建立訂單' : '建立訂單並前往 Discord';
+                        : payingWithBalance ? '使用餘額付款並建立訂單'
+                            : payingWithBarcode ? '建立訂單並前往 Discord 開碼' : '建立訂單並前往 Discord';
             }
             if (!container) {
                 if (catalogLoaded) saveCart();
@@ -2371,7 +2394,7 @@
             }, 3000);
         }
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, label = '授權卡號') {
             if (typeof text !== 'string' || !text) return;
 
             const copy = async () => {
@@ -2390,9 +2413,9 @@
                         input.remove();
                         if (!copied) throw new Error('Clipboard copy failed');
                     }
-                    showToast('授權卡號已複製。');
+                    showToast(`${label}已複製。`);
                 } catch {
-                    showToast('複製失敗，請手動選取並複製授權卡號。');
+                    showToast(`複製失敗，請手動選取並複製${label}。`);
                 }
             };
             void copy();
@@ -2428,13 +2451,29 @@
                 : `無法確認訂單或付款結果：${message}。請勿重複付款，重試將使用同一請求。`;
         }
 
-        function showCreatedOrder(orderNumber, paidWithBalance) {
+        function rememberCreatedOrder(orderNumber, paymentMethod) {
+            try {
+                sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${currentAuthUser.id}`, JSON.stringify({
+                    number: orderNumber, paymentMethod, paidWithBalance: paymentMethod === 'balance'
+                }));
+            } catch {
+            }
+            showCreatedOrder(orderNumber, paymentMethod);
+        }
+
+        function showCreatedOrder(orderNumber, paymentMethod = 'discord') {
+            const paidWithBalance = paymentMethod === 'balance';
+            const payingWithBarcode = paymentMethod === 'discord_barcode';
             document.getElementById('order-created-number').textContent = orderNumber;
             document.getElementById('order-created-title').textContent = paidWithBalance ? '餘額付款已完成' : '待付款訂單已建立';
             document.getElementById('order-created-description').textContent = paidWithBalance
                 ? '已從會員餘額扣款，待管理員核發授權後可在本頁查詢卡號；不需再向客服付款。'
-                : '請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。';
-            document.getElementById('order-discord-link').href = getOrderPaymentRedirectUrl('discord');
+                : payingWithBarcode
+                    ? '請提供此訂單編號，至 Discord 請客服開立繳費條碼。目前仍為待付款，開碼或開啟 Discord 都不代表付款完成。'
+                    : '請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。';
+            document.getElementById('order-barcode-instructions').hidden = !payingWithBarcode || paidWithBalance;
+            document.getElementById('order-discord-link').href = getOrderPaymentRedirectUrl(paymentMethod);
+            document.getElementById('order-discord-link').textContent = payingWithBarcode ? '前往 Discord 開立繳費條碼' : '前往 Discord 洽詢付款';
             document.getElementById('order-discord-link').classList.toggle('hidden', paidWithBalance);
             document.getElementById('order-created-panel').classList.remove('hidden');
         }
@@ -2465,7 +2504,8 @@
             }
 
             const userId = currentAuthUser.id;
-            const payingWithBalance = getCartPaymentMethod() === 'balance';
+            const paymentMethod = getCartPaymentMethod();
+            const payingWithBalance = paymentMethod === 'balance';
             let request;
             try {
                 request = getOrCreateOrderRequest(userId);
@@ -2513,16 +2553,10 @@
                     return;
                 }
 
-                try {
-                    sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${userId}`, JSON.stringify({
-                        number: order.order_number, paidWithBalance
-                    }));
-                } catch {
-                }
+                rememberCreatedOrder(order.order_number, paymentMethod);
                 clearOrderRequest(userId, request.key);
                 cart = [];
                 updateCartUI();
-                showCreatedOrder(order.order_number, payingWithBalance);
                 const searchInput = document.getElementById('order-search-input');
                 if (searchInput) searchInput.value = order.order_number;
                 toggleCart(false);
@@ -2534,7 +2568,9 @@
                         void loadMyBalance();
                     }
                 } else {
-                    setOrderQueryStatus(`訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 告知客服訂單編號。`);
+                    setOrderQueryStatus(paymentMethod === 'discord_barcode'
+                        ? `訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 提供訂單編號，請客服開立繳費條碼；核對收款後才會更新付款狀態。`
+                        : `訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 告知客服訂單編號。`);
                     completedOrder = order;
                 }
             } catch (error) {
@@ -2549,10 +2585,12 @@
             }
             if (completedOrder) {
                 try {
-                    redirectToDiscord();
+                    redirectToDiscord(paymentMethod);
                 } catch (error) {
                     console.error('Discord navigation failed:', error);
-                    setOrderQueryStatus('待付款訂單已建立，但瀏覽器未能開啟 Discord。請使用上方連結前往並提供訂單編號。');
+                    setOrderQueryStatus(paymentMethod === 'discord_barcode'
+                        ? '待付款訂單已建立，但瀏覽器未能開啟 Discord。請複製上方訂單編號，使用連結請客服開立繳費條碼；不需重新下單。'
+                        : '待付款訂單已建立，但瀏覽器未能開啟 Discord。請使用上方連結前往並提供訂單編號。');
                 }
             }
         }
@@ -2813,6 +2851,25 @@
                         discordLink.textContent = 'Discord 洽詢付款';
                         discordLink.setAttribute('aria-label', `訂單 ${order.order_number || ''} 前往 Discord 洽詢付款`);
                         actionCell.appendChild(discordLink);
+                        if (order.order_number) {
+                            const barcodeLink = document.createElement('a');
+                            barcodeLink.href = getOrderPaymentRedirectUrl('discord_barcode');
+                            barcodeLink.target = '_blank';
+                            barcodeLink.rel = 'noopener noreferrer';
+                            barcodeLink.className = 'ml-2 inline-block whitespace-nowrap rounded border border-brand-500/40 bg-brand-950/40 px-3 py-1 text-brand-200 hover:bg-brand-900/50';
+                            barcodeLink.textContent = 'Discord 開立繳費條碼';
+                            barcodeLink.setAttribute('aria-label', `訂單 ${order.order_number} 前往 Discord 開立繳費條碼`);
+                            const ownerId = currentAuthUser?.id;
+                            barcodeLink.addEventListener('click', event => {
+                                if (!ownerId || currentAuthUser?.id !== ownerId) {
+                                    event.preventDefault();
+                                    return;
+                                }
+                                rememberCreatedOrder(order.order_number, 'discord_barcode');
+                                setOrderQueryStatus(`請向 Discord 客服提供訂單 ${order.order_number}，確認金額與期限後開立繳費條碼；尚未核對收款前仍為待付款。`);
+                            });
+                            actionCell.appendChild(barcodeLink);
+                        }
                         if (order.order_id && !pendingPaymentActions.has(order.order_id)) {
                             pendingPaymentActions.add(order.order_id);
                             const balanceButton = document.createElement('button');
@@ -2854,13 +2911,7 @@
                     !Number.isSafeInteger(Number(data.balance_after))) {
                     throw new Error('付款結果資料不完整');
                 }
-                try {
-                    sessionStorage.setItem(`${LAST_ORDER_STORAGE_KEY}:${userId}`, JSON.stringify({
-                        number: data.order_number, paidWithBalance: true
-                    }));
-                } catch {
-                }
-                showCreatedOrder(data.order_number, true);
+                rememberCreatedOrder(data.order_number, 'balance');
                 document.getElementById('order-search-input').value = data.order_number;
                 await queryOrders();
                 if (currentAuthUser?.id !== userId) return;
@@ -3253,7 +3304,11 @@
                 return;
             }
             // Token refreshes and password reauthentication must not erase either draft.
-            if (accountProfileSnapshot && !force) return;
+            if (accountProfileSnapshot && !force) {
+                const draft = collectAccountProfileFormValues();
+                if (isAccountProfileSubmitting || Object.keys(accountProfileSnapshot).some(key =>
+                    draft[key] !== accountProfileSnapshot[key])) return;
+            }
 
             const values = normalizeAccountProfileValues(currentAuthUser);
             document.getElementById('account-given-name').value = values.givenName;
@@ -3488,11 +3543,16 @@
                 recentOrder = null;
             }
             if (recentOrderPanel) recentOrderPanel.classList.toggle('hidden', !recentOrder?.number);
-            if (recentOrder?.number) showCreatedOrder(recentOrder.number, recentOrder.paidWithBalance === true);
+            if (recentOrder?.number) {
+                const method = recentOrder.paidWithBalance === true ? 'balance'
+                    : recentOrder.paymentMethod === 'discord_barcode' ? 'discord_barcode' : 'discord';
+                showCreatedOrder(recentOrder.number, method);
+            }
 
             const savedRequest = signedIn ? getSavedOrderRequest(currentAuthUser.id) : null;
             if (savedRequest) {
-                const method = savedRequest.fingerprint.endsWith(':balance') ? 'balance' : 'discord';
+                const method = savedRequest.fingerprint.endsWith(':balance') ? 'balance'
+                    : savedRequest.fingerprint.endsWith(':discord_barcode') ? 'discord_barcode' : 'discord';
                 const radio = document.querySelector(`input[name="cart-payment-method"][value="${method}"]`);
                 if (radio) radio.checked = true;
             }
