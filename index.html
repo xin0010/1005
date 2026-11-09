@@ -911,6 +911,23 @@
             </div>
         </section>
 
+        <section id="view-product" class="hidden w-full py-12 px-4 sm:px-6 lg:px-8 font-mono" aria-labelledby="modal-title">
+            <div class="max-w-6xl mx-auto">
+                <button type="button" onclick="switchTab('mobile-store')" class="min-h-11 mb-6 inline-flex items-center gap-2 text-sm text-slate-300 hover:text-brand-300 bg-transparent border-0 cursor-pointer"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>返回商城</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+                    <img id="modal-img" src="logo-700x700.png" alt="" class="w-full aspect-square object-cover rounded-lg bg-slate-900">
+                    <div class="min-w-0">
+                        <span id="modal-category" class="inline-block text-xs font-bold text-brand-300 mb-3"></span>
+                        <h1 id="modal-title" tabindex="-1" class="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight break-words"></h1>
+                        <div id="modal-price" class="text-2xl font-extrabold text-gold-300 mb-6"></div>
+                        <h2 class="text-sm font-bold text-white mb-3">商品介紹</h2>
+                        <p id="modal-desc" class="text-sm text-slate-300 leading-relaxed mb-6" style="white-space: pre-line; overflow-wrap: anywhere;"></p>
+                        <button id="modal-add-btn" type="button" class="cyber-button min-h-11 w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-sm border-0 cursor-pointer inline-flex items-center justify-center gap-2"><i class="fa-solid fa-cart-plus" aria-hidden="true"></i>加入購物車</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="view-orders" class="w-full py-12 px-4 sm:px-6 lg:px-8 hidden font-mono">
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
@@ -1363,32 +1380,6 @@
         </footer>
     </dialog>
 
-    <div id="product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeProductModal()"></div>
-        <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div class="relative bg-[#262126] border border-brand-500/50 rounded-2xl max-w-2xl w-full p-4 sm:p-8 shadow-2xl font-mono overflow-hidden">
-                <button type="button" onclick="closeProductModal()" aria-label="關閉商品明細" class="absolute top-2 right-2 flex h-11 w-11 items-center justify-center text-slate-400 hover:text-white bg-slate-900/80 rounded-lg border-0 cursor-pointer text-lg"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <img id="modal-img" src="" alt="Product" class="w-full h-40 sm:h-56 object-cover rounded-xl border border-slate-800">
-                    <div>
-                        <span id="modal-category" class="inline-block px-2.5 py-1 rounded bg-brand-950 text-brand-400 text-[10px] font-bold border border-brand-500/40 mb-2">CATEGORY</span>
-                        <h3 id="modal-title" class="text-xl font-bold text-white mb-2 leading-tight">Product Title</h3>
-                        <div id="modal-price" class="text-2xl font-extrabold text-gold-300 mb-4">NT$ 0</div>
-                        <p id="modal-desc" class="text-xs text-slate-300 leading-relaxed mb-6">Description goes here...</p>
-                        
-                        <div class="flex gap-3">
-                            <button id="modal-add-btn" class="cyber-button flex-1 py-3 rounded-xl font-bold text-xs border-0 cursor-pointer flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-cart-plus"></i>
-                                <span>加入購物車</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onclick="toggleCart(false)" aria-hidden="true"></div>
         <div class="absolute inset-y-0 right-0 flex w-full justify-end sm:pl-10">
@@ -1786,7 +1777,7 @@
         function switchTab(tabId) {
             if (tabId === 'dashboard' && (!currentAuthUser || authRecoveryActive)) tabId = 'account';
             toggleAccountMenu(false);
-            const views = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'dashboard', 'account'];
+            const views = ['home', 'mobile-store', 'product', 'orders', 'downloads', 'wallet', 'trouble', 'dashboard', 'account'];
             views.forEach(v => {
                 const el = document.getElementById(`view-${v}`);
                 if (el) el.classList.toggle('hidden', v !== tabId);
@@ -2140,6 +2131,7 @@
                 modalImage.src = 'logo-700x700.png';
             };
             modalImage.src = p.img;
+            modalImage.alt = p.name;
             document.getElementById('modal-title').innerText = p.name;
             document.getElementById('modal-category').innerText =
                 productCategories.find(item => item.code === p.category)?.name || p.category;
@@ -2147,14 +2139,9 @@
             document.getElementById('modal-desc').innerText = p.desc;
             document.getElementById('modal-add-btn').onclick = function() {
                 addToCart(p.id);
-                closeProductModal();
             };
-
-            document.getElementById('product-modal').classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden');
+            switchTab('product');
+            document.getElementById('modal-title').focus();
         }
 
         function addToCart(id) {
@@ -3497,7 +3484,7 @@
             document.getElementById('account-menu-member').hidden = !signedIn;
             document.getElementById('mobile-guest-menu').hidden = signedIn;
             document.getElementById('mobile-member-menu').hidden = !signedIn;
-            const activeView = ['home', 'mobile-store', 'orders', 'downloads', 'wallet', 'trouble', 'dashboard', 'account']
+            const activeView = ['home', 'mobile-store', 'product', 'orders', 'downloads', 'wallet', 'trouble', 'dashboard', 'account']
                 .find(view => !document.getElementById(`view-${view}`).classList.contains('hidden'));
             if (activeView) updateNavigationState(activeView);
             const metadata = currentAuthUser?.user_metadata;
