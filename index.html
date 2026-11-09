@@ -829,7 +829,7 @@
                 </h1>
                 
                 <p class="text-slate-300 max-w-2xl mx-auto font-mono text-sm sm:text-base mb-10 leading-relaxed">
-                    建立訂單後可用會員餘額付款，或至 Discord 洽詢付款。
+                    建立訂單後可用會員餘額付款，或前往付款頁查看轉帳資訊。
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4">
@@ -849,7 +849,7 @@
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-8 font-mono">
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-wide mb-3">AXG SHOP 授權商城</h2>
-                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">登入後可選擇使用會員餘額立即付款，或建立待付款訂單至 Discord 洽詢。</p>
+                    <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">登入後可選擇使用會員餘額立即付款，或建立待付款訂單查看轉帳資訊。</p>
                 </div>
 
                 <p id="catalog-status" role="status" aria-live="polite" class="mb-6 text-center font-mono text-xs text-slate-400">正在載入商品與即時價格…</p>
@@ -928,7 +928,7 @@
                 <div id="order-created-panel" class="hidden mb-6 rounded-2xl border border-brand-500/40 bg-brand-950/30 p-5 text-sm text-brand-200" role="status" aria-live="polite">
                     <p id="order-created-title" class="mb-2 font-bold">待付款訂單已建立</p>
                     <p class="mb-3">訂單編號：<strong id="order-created-number" class="select-all break-all text-gold-300"></strong></p>
-                    <p id="order-created-description" class="mb-3 text-xs leading-relaxed text-slate-300">請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。</p>
+                    <p id="order-created-description" class="mb-3 text-xs leading-relaxed text-slate-300">請前往付款頁確認轉帳資訊，付款後提供訂單編號給客服核對。開啟付款頁不代表付款完成。</p>
                     <ol id="order-barcode-instructions" hidden class="mb-4 list-decimal space-y-2 pl-5 text-xs leading-relaxed text-slate-300">
                         <li>複製訂單編號，前往官方 Discord 開立客服工單，告知客服「我要開立繳費條碼」。</li>
                         <li>由客服確認訂單應付金額、可用繳費通路與期限，再提供正式繳費條碼；本站不會自動產生條碼。</li>
@@ -1073,7 +1073,7 @@
 
                     <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-5 shadow-xl">
                         <div class="font-bold text-brand-400 mb-2">Q2: 建立訂單後如何確認付款與取得卡號？</div>
-                        <p class="text-xs text-slate-300 leading-relaxed">選擇餘額付款後會立即扣款並顯示已付款；若選擇 Discord，請提供訂單編號並由客服確認收款。發卡仍需管理員處理，登入後可在「卡號查詢」查看狀態。</p>
+                                <p class="text-xs text-slate-300 leading-relaxed">選擇餘額付款後會立即扣款並顯示已付款；若選擇 Discord，請提供訂單編號並由客服確認收款。發卡仍需管理員處理，登入後可在「卡號查詢」查看狀態。</p>
                     </div>
 
                     <div class="bg-[#262126] border border-brand-900/60 rounded-2xl p-5 shadow-xl">
@@ -1414,16 +1414,16 @@
                     </div>
                     <fieldset id="cart-payment-methods" class="mb-3 space-y-2 border-0 p-0 text-xs text-slate-200">
                         <legend class="mb-2 font-bold text-brand-300">付款方式</legend>
-                        <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord" checked onchange="updateCartUI()"><span>Discord 洽詢付款（建立待付款訂單）</span></label>
+                        <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord" checked onchange="updateCartUI()"><span>郵局轉帳（建立待付款訂單）</span></label>
                         <label class="flex min-h-11 items-center gap-2 rounded-lg border border-brand-500/40 bg-brand-950/30 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="discord_barcode" onchange="updateCartUI()" aria-describedby="cart-checkout-note"><span><i class="fa-solid fa-barcode mr-1" aria-hidden="true"></i>Discord 開立繳費條碼（客服人工開碼）</span></label>
                         <label class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 cursor-pointer"><input type="radio" name="cart-payment-method" value="balance" onchange="updateCartUI()"><span>會員餘額扣款（足額時立即付款）</span></label>
                     </fieldset>
-                    <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。</p>
+                    <p id="cart-checkout-note" class="mb-3 text-[11px] leading-relaxed text-amber-200">先登入並建立待付款訂單，成功後將前往付款頁。付款後請向客服提供訂單編號，收款須人工核對。</p>
                     <p id="cart-checkout-status" role="status" aria-live="polite" class="hidden mb-3 rounded-lg border border-amber-500/30 bg-amber-950/30 p-3 text-xs text-amber-200"></p>
                     <button id="cart-abandon-request" type="button" onclick="abandonOrderRequest()" class="hidden mb-3 min-h-11 w-full rounded-lg border border-slate-600 p-2 text-xs text-slate-300 hover:border-brand-400">已查詢訂單，放棄本次重試並修改購物車</button>
                     <button id="cart-checkout-button" type="button" onclick="checkout()" disabled class="cyber-button w-full py-4 rounded-xl font-bold text-sm cursor-not-allowed border-0 shadow-lg opacity-50 flex items-center justify-center gap-2">
-                        <i class="fa-brands fa-discord"></i>
-                        <span>建立訂單並前往 Discord</span>
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>建立訂單並前往付款頁</span>
                     </button>
                 </div>
             </div>
@@ -1502,7 +1502,7 @@
         }
 
         const ORDER_PAYMENT_REDIRECT_URLS = Object.freeze({
-            discord: 'https://discord.gg/8ccCbma94W',
+            discord: 'https://pay.chenshop123.com.tw/',
             discord_barcode: 'https://discord.gg/8ccCbma94W'
         });
         const products = [];
@@ -2207,7 +2207,7 @@
                 ? '將從目前會員餘額一次扣除訂單全額；不足時不會建立訂單或扣款。付款成功後待管理員核發授權，不需前往 Discord。'
                 : payingWithBarcode
                     ? '先登入並建立待付款訂單，再前往 Discord 開客服工單，提供訂單編號請客服開立繳費條碼。金額、通路與期限由客服確認；本站不會自動開碼，前往 Discord 不代表已付款，核對收款前不會發放授權。'
-                    : '先登入並建立待付款訂單，成功後將跳轉至 Discord 洽詢付款。Discord 不是金流；未核對付款前不會發放授權。';
+                    : '先登入並建立待付款訂單，成功後將前往付款頁。付款後請向客服提供訂單編號，收款須人工核對；開啟付款頁不代表付款完成。';
             if (checkoutButton) {
                 checkoutButton.disabled = cart.length === 0 || !catalogLoaded || isCreatingOrder;
                 checkoutButton.classList.toggle('cursor-not-allowed', checkoutButton.disabled);
@@ -2217,11 +2217,11 @@
                 const label = checkoutButton.querySelector('span');
                 const icon = checkoutButton.querySelector('i');
                 if (icon) icon.className = payingWithBalance ? 'fa-solid fa-wallet'
-                    : payingWithBarcode ? 'fa-solid fa-barcode' : 'fa-brands fa-discord';
+                    : payingWithBarcode ? 'fa-solid fa-barcode' : 'fa-solid fa-building-columns';
                 if (label) label.textContent = isCreatingOrder ? '正在處理訂單…'
                     : orderOutcomeUnknown ? '重試確認同一筆訂單'
                         : payingWithBalance ? '使用餘額付款並建立訂單'
-                            : payingWithBarcode ? '建立訂單並前往 Discord 開碼' : '建立訂單並前往 Discord';
+                            : payingWithBarcode ? '建立訂單並前往 Discord 開碼' : '建立訂單並前往付款頁';
             }
             if (!container) {
                 if (catalogLoaded) saveCart();
@@ -2470,10 +2470,10 @@
                 ? '已從會員餘額扣款，待管理員核發授權後可在本頁查詢卡號；不需再向客服付款。'
                 : payingWithBarcode
                     ? '請提供此訂單編號，至 Discord 請客服開立繳費條碼。目前仍為待付款，開碼或開啟 Discord 都不代表付款完成。'
-                    : '請在 Discord 聯繫客服時提供此編號。前往 Discord 不會完成付款，也不會自動發放授權。';
+                    : '請前往付款頁確認轉帳資訊，付款後提供訂單編號給客服核對。開啟付款頁不代表付款完成。';
             document.getElementById('order-barcode-instructions').hidden = !payingWithBarcode || paidWithBalance;
             document.getElementById('order-discord-link').href = getOrderPaymentRedirectUrl(paymentMethod);
-            document.getElementById('order-discord-link').textContent = payingWithBarcode ? '前往 Discord 開立繳費條碼' : '前往 Discord 洽詢付款';
+            document.getElementById('order-discord-link').textContent = payingWithBarcode ? '前往 Discord 開立繳費條碼' : '前往付款頁';
             document.getElementById('order-discord-link').classList.toggle('hidden', paidWithBalance);
             document.getElementById('order-created-panel').classList.remove('hidden');
         }
@@ -2570,7 +2570,7 @@
                 } else {
                     setOrderQueryStatus(paymentMethod === 'discord_barcode'
                         ? `訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 提供訂單編號，請客服開立繳費條碼；核對收款後才會更新付款狀態。`
-                        : `訂單 ${order.order_number} 已成立，狀態為待付款。請至 Discord 告知客服訂單編號。`);
+                        : `訂單 ${order.order_number} 已成立，狀態為待付款。請至付款頁確認轉帳資訊，付款後告知客服訂單編號。`);
                     completedOrder = order;
                 }
             } catch (error) {
@@ -2587,10 +2587,10 @@
                 try {
                     redirectToDiscord(paymentMethod);
                 } catch (error) {
-                    console.error('Discord navigation failed:', error);
+                    console.error('Payment navigation failed:', error);
                     setOrderQueryStatus(paymentMethod === 'discord_barcode'
                         ? '待付款訂單已建立，但瀏覽器未能開啟 Discord。請複製上方訂單編號，使用連結請客服開立繳費條碼；不需重新下單。'
-                        : '待付款訂單已建立，但瀏覽器未能開啟 Discord。請使用上方連結前往並提供訂單編號。');
+                        : '待付款訂單已建立，但瀏覽器未能開啟付款頁。請使用上方連結前往，不需重新下單。');
                 }
             }
         }
